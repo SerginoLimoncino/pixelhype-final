@@ -1,5 +1,4 @@
-import PixelGrid from "@/components/PixelGrid";
-
+import PixelGrid from "../components/PixelGrid";
 export default function PixelsPage() {
   return (
     <div>
