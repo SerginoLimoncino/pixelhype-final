@@ -1,4 +1,5 @@
 import React from "react";
+import '../styles/styles.css';  // Importa il file CSS
 
 const PixelGrid = () => {
   const dimensioneDellaGriglia = 300; // larghezza: 300 blocchi
@@ -9,8 +10,8 @@ const PixelGrid = () => {
   ];
 
   return (
-    <div className="relative w-full h-[1000px] bg-white overflow-scroll border">
-      <div className="absolute" style={{ width: `${dimensioneDellaGriglia * 10}px`, height: `${dimensioneDellaGriglia * 10}px`, position: "relative" }}>
+    <div className="relative w-full h-[100px] bg-white overflow-scroll border">
+      <div className="absolute" style={{ width: `${dimensioneDellaGriglia * 10}px`, height: `${dimensioneDellaGriglia * 10}px` }}>
         {mockData.map((blocco) => (
           <a key={blocco.id} className="absolute" href={blocco.collegamento} target="_blank" rel="noopener noreferrer"
             style={{
@@ -23,7 +24,8 @@ const PixelGrid = () => {
               textAlign: 'center',
               lineHeight: '10px',
               color: '#fff',
-            }}>
+            }}
+          >
             {blocco.etichetta}
           </a>
         ))}
@@ -33,4 +35,3 @@ const PixelGrid = () => {
 };
 
 export default PixelGrid;
-
