@@ -10,5 +10,3 @@ export default function PixelsPage() {
     </div>
   );
 }
-
-Rename Pixels.js to pixels.js (case fix for routing)
