@@ -1,61 +1,49 @@
-components/PixelGrid.js
-import React from "react";
+import React from 'react';
 
-const mockData = [
-  {
-    id: 1,
-    x: 5,
-    y: 2,
-    w: 10,
-    h: 10,
-    link: "https://example.com",
-    label: "Progetto 1"
-  },
-  {
-    id: 2,
-    x: 20,
-    y: 5,
-    w: 20,
-    h: 20,
-    link: "https://google.com",
-    label: "Progetto 2"
-  },
-  // Aggiungi altri blocchi qui
+// Dati fittizi per i blocchi
+const datiFittizi = [
+  { id: 1, x: 20, y: 20, h: 20, collegamento: "https://esempio.com", etichetta: "Progetto 1" },
+  { id: 2, x: 30, y: 30, h: 20, collegamento: "https://google.com", etichetta: "Progetto 2" },
+  { id: 3, x: 40, y: 40, h: 20, collegamento: "https://yahoo.com", etichetta: "Progetto 3" },
+  // Puoi aggiungere altri blocchi qui
 ];
 
 const PixelGrid = () => {
-  const gridSize = 300; // larghezza: 300 blocchi
+  const dimensioneDellaGriglia = 300; // Larghezza della griglia (300 blocchi)
+
+  // Visualizzare i dati nella console per il debug
+  console.log(datiFittizi); // Qui puoi vedere i tuoi dati in console
 
   return (
-    <div className="relative w-full h-[1000px] bg-white overflow-scroll border">
+    <div className="relative w-full h-[100vh] bg-white overflow-scroll border">
       <div
         className="absolute"
         style={{
-          width: `${gridSize * 10}px`,
-          height: `${100 * 10}px`,
-          position: "relative",
+          width: `${dimensioneDellaGriglia * 10}px`,
+          height: `${dimensioneDellaGriglia * 10}px`,
+          position: 'relative',
         }}
       >
-        {mockData.map((block) => (
-          <a
-            key={block.id}
-            href={block.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute group"
-            style={{
-              left: `${block.x * 10}px`,
-              top: `${block.y * 10}px`,
-              width: `${block.w * 10}px`,
-              height: `${block.h * 10}px`,
-              backgroundColor: "#b2f5ea",
-              border: "1px solid #38b2ac",
-            }}
-          >
-            <span className="hidden group-hover:flex absolute top-0 left-0 bg-black text-white text-xs p-1 z-10">
-              {block.label}
-            </span>
-          </a>
+        {datiFittizi.map((blocco) => (
+          <div key={blocco.id} className="absolute" style={{ left: `${blocco.x * 10}px`, top: `${blocco.y * 10}px` }}>
+            <a
+              href={blocco.collegamento}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group absolute"
+              style={{
+                width: `${blocco.h * 10}px`,
+                height: `${blocco.h * 10}px`,
+                backgroundColor: '#FF5722',
+                color: '#fff',
+                borderRadius: '8px',
+                textAlign: 'center',
+                lineHeight: `${blocco.h * 10}px`,
+              }}
+            >
+              {blocco.etichetta}
+            </a>
+          </div>
         ))}
       </div>
     </div>
@@ -63,6 +51,3 @@ const PixelGrid = () => {
 };
 
 export default PixelGrid;
-
-// Forza deploy dopo cache purge
-
