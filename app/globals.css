@@ -78,7 +78,7 @@ h2 em { font-style: italic; color: var(--green); }
 .stage canvas.cv { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .ctl { position: absolute; right: 12px; top: 12px; display: grid; gap: 6px; z-index: 2; }
 .ctl button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(217, 191, 140, .5); background: rgba(13, 13, 11, .75); color: var(--gold2); font: 600 18px var(--body); cursor: pointer; }
-.mini { position: absolute; right: 12px; bottom: 12px; width: 104px; height: 104px; border: 1px solid rgba(217, 191, 140, .45); background: #0d0d0b; z-index: 2; cursor: pointer; }
+.mini { display: none; position: absolute; right: 12px; bottom: 12px; width: 104px; height: 104px; border: 1px solid rgba(217, 191, 140, .45); background: #0d0d0b; z-index: 2; cursor: pointer; }
 @media (max-width: 600px) { .mini { width: 78px; height: 78px; } }
 .tip { position: absolute; background: var(--paper); border: 1px solid var(--line); padding: 10px 12px; font-size: 13px; z-index: 3; pointer-events: none; box-shadow: 0 14px 40px rgba(0, 0, 0, .4); max-width: 230px; }
 .tip b { display: block; font-family: var(--display); font-size: 20px; font-weight: 700; line-height: 1.15; }
