@@ -40,14 +40,14 @@ export default function Home() {
               <div className={"ph" + (i === f ? " now" : "")} key={v}>
                 <span className="n">Fase {i + 1}</span>
                 <span className="p">{v} €<small> / pixel</small></span>
-                <span className="x">10x10: {eur(charm(v * 100 * 0.75))}</span>
+                <span className="x">100 pixel: {eur(charm(v * 100 * 0.75))}</span>
               </div>
             ))}
           </div>
           <div className="sec-h" style={{ marginTop: 64 }}>
             <div className="eyebrow">I pacchetti</div>
             <h2>Scegli il tuo <em>spazio</em>.</h2>
-            <p>Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25 pixel e i 10x10 hanno la cornice d'oro e finiscono in evidenza.</p>
+            <p>Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25 e da 100 pixel hanno la cornice d'oro e finiscono in evidenza.</p>
           </div>
           <Pacchetti />
         </div>
@@ -77,7 +77,7 @@ export default function Home() {
         <div className="wrap">
           <div className="sec-h"><div className="eyebrow">Come funziona</div><h2>Tre passi, <em>per sempre</em>.</h2></div>
           <div className="steps">
-            <div className="st"><div className="k">I</div><h3>Scegli lo spazio</h3><p>Da 1 pixel a un blocco 10x10. La posizione viene assegnata a caso nel mosaico e non cambia più.</p></div>
+            <div className="st"><div className="k">I</div><h3>Scegli lo spazio</h3><p>Da 1 a 100 pixel. La posizione viene assegnata a caso nel mosaico e non cambia più.</p></div>
             <div className="st"><div className="k">II</div><h3>Firma la tua opera</h3><p>Carica il tuo logo o la tua immagine, aggiungi il link, guarda l'anteprima.</p></div>
             <div className="st"><div className="k">III</div><h3>Entra nella collezione</h3><p>Paghi in sicurezza e sei online subito. Chiunque ti trova con la ricerca.</p></div>
           </div>

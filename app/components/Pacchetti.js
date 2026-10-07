@@ -16,7 +16,7 @@ export default function Pacchetti() {
               </div>
             </div>
             <span className="nm">{p.nome}</span>
-            <span className="sz">{p.titolo} · {p.w} x {p.h}</span>
+            <span className="sz">{p.titolo}</span>
             <span className="v">{eur(tot)}<small>+ IVA</small></span>
             <span className="pp">{p.sconto ? <><b>-{Math.round(p.sconto * 100)}%</b> · </> : null}{eur(Math.floor(tot / p.n))} a pixel</span>
             <div className="left"><span>{num(p.spazi)} spazi in tutto</span><span className="go">Scegli</span></div>

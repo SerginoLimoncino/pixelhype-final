@@ -176,7 +176,7 @@ export default function Mosaico() {
       if (gx < 0 || gy < 0 || gx >= N || gy >= N) { tip.hidden = true; sel = -1; return; }
       const id = owner[gy * N + gx];
       if (id >= 0) { const b = blocks[id]; sel = id; showTip(`<span>${b.w * b.h} pixel · ${b.w} x ${b.h}${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${b.name}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
-      else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip("<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 pixel a 10x10, con base d'asta", sx, sy); }
+      else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip("<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
       else { sel = -1; showTip(`<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoPixel())}</b>Prendilo prima che salga il prezzo`, sx, sy); }
     };
     const down = (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; hideHelp(); if (pts.size === 2) { const a = [...pts.values()]; pinch = { d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; } };
@@ -223,7 +223,7 @@ export default function Mosaico() {
               <button type="button" className="fc" key={b.id} onClick={() => goTo(b)}>
                 <div className="sw" style={{ background: `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})` }} />
                 <b>{b.name}</b>
-                <span>{b.w * b.h === 100 ? "Il Capolavoro · 10x10" : "La Vetrina · 5x5"}</span>
+                <span>{b.w * b.h === 100 ? "Il Capolavoro · 100 pixel" : "La Vetrina · 25 pixel"}</span>
               </button>
             ))}
           </div>
@@ -286,7 +286,7 @@ function Schermo({ blocchi, onTrova }) {
   const lato = 150, sc = lato / Math.max(b.w, b.h);
   return (
     <div className="wrap onair">
-      <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo al 10x10</span></div>
+      <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo ai 100 pixel</span></div>
       <div className="screen">
         <div className="screen-in" key={giro}>
           <div className="screen-art" style={{ width: b.w * sc, height: b.h * sc, background: `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})`, boxShadow: big(b) ? "0 0 0 3px #d9bf8c" : "0 0 0 1px rgba(217,191,140,.35)" }} />
