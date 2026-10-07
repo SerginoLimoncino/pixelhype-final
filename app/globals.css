@@ -26,6 +26,7 @@ a { color: inherit; }
 .nav { display: none; gap: 28px; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink2); }
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
+.nav a.nav-aste { color: #1f6b4f; }
 @media (min-width: 900px) { .nav { display: flex; } }
 .cta { display: inline-block; border: 0; border-radius: 999px; padding: 13px 22px; background: var(--green); color: #f5f1e6; font: 700 15px var(--body); letter-spacing: .02em; cursor: pointer; white-space: nowrap; text-decoration: none; text-align: center; box-shadow: 0 8px 24px rgba(18, 61, 48, .25); transition: background .2s, transform .2s; }
 .cta:hover { background: var(--green2); transform: translateY(-1px); }

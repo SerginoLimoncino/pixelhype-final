@@ -1,6 +1,10 @@
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import { pixelVendutiPresto } from "../lib/db";
+import { SOGLIA_ASTE } from "../lib/prezzi";
+
+export const revalidate = 30;
 
 const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"], variable: "--font-display" });
 const body = Manrope({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-body" });
@@ -21,7 +25,8 @@ function Marchio({ verde = "#123d30" }) {
   );
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const asteAperte = (await pixelVendutiPresto()) >= SOGLIA_ASTE;
   return (
     <html lang="it" className={`${display.variable} ${body.variable}`}>
       <body>
@@ -34,6 +39,7 @@ export default function RootLayout({ children }) {
             <nav className="nav">
               <Link href="/#galleria">La galleria</Link>
               <Link href="/compra">Prezzi</Link>
+              {asteAperte && <Link href="/#aste" className="nav-aste">Aste</Link>}
               <Link href="/#aste">Il Cuore</Link>
               <Link href="/#come">Come funziona</Link>
             </nav>
