@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
-import { dbAttivo, pixelVenduti, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
+import { dbAttivo, pixelVenduti, disponibili, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
 
 // Creates the Stripe payment page for a pack. The price is always computed here,
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
@@ -17,6 +17,8 @@ export async function POST(req) {
   if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 });
   const href = l.link;
 
+  // A size can be bought while there is a free place for it (100-pixel blocks: also up to their maximum).
+  if (dbAttivo() && !(await disponibili()).ok[p.n]) return Response.json({ errore: `Gli spazi da ${p.titolo} sono esauriti.` }, { status: 400 });
   const prezzo = prezzoPacchetto(p.n, await pixelVenduti());
   let ordine = null;
   if (dbAttivo()) {

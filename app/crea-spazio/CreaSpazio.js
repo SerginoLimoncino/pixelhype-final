@@ -85,9 +85,9 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
       if (d.url) { window.location.href = d.url; return; }
       // Without the Stripe key on Vercel the payment is only a test: nothing is charged.
       if (d.prova) { setTimeout(() => setStato("fatto"), 800); return; }
-      throw new Error(d.errore);
-    } catch {
-      setErrPaga("Il pagamento non è partito. Riprova tra poco.");
+      throw new Error(d.errore || "");
+    } catch (e) {
+      setErrPaga(e.message || "Il pagamento non è partito. Riprova tra poco.");
       setStato("modulo");
     }
   }
