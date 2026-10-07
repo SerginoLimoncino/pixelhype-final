@@ -26,3 +26,9 @@ File completi da copiare nel progetto (stessi percorsi):
 - Pagamenti: Stripe. La chiave segreta va su Vercel → Variabili ambientali con il nome `STRIPE_SECRET_KEY` (mai nel codice). Senza chiave il pagamento resta una prova. Con una chiave `sk_test_` si paga con carte di prova; con `sk_live_` si incassa davvero.
 - `PIXEL_VENDUTI = 0` in `lib/prezzi.js`: quando ci sarà il database il numero arriverà da lì, e il prezzo salirà da solo.
 - Provato con Next.js 15 e React 19.
+
+## Database e pannello
+
+- Il database è Supabase, collegato da Vercel → Storage: le variabili (`POSTGRES_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`…) le mette Vercel da solo. Tabella e cartella delle immagini il sito le crea da solo.
+- Pannello di controllo: `/admin`, con la password `ADMIN_PASSWORD` messa su Vercel → Variabili ambientali.
+- Finché il database è vuoto il mosaico mostra i marchi di esempio; dal primo spazio vero mostra solo quelli veri.
