@@ -173,7 +173,7 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{x.titolo}</b>
                 <span className="pr">{eur(prezzoPacchetto(x.n, venduti))}</span>
-                <small>{x.w} x {x.h}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
+                <small>{x.titolo}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
               </button>
             ))}
           </div>
@@ -235,7 +235,7 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
           <div style={{ padding: 24, display: "grid", gap: 16 }}>
             <span className="step-n">Passo III · Riepilogo</span>
             <div className="sum">
-              <div><span>Spazio</span><span>{p.nome} · {p.w} x {p.h}</span></div>
+              <div><span>Spazio</span><span>{p.nome} · {p.titolo}</span></div>
               <div><span>Brand</span><span>{nome || "—"}</span></div>
               <div><span>Posizione</span><span>a caso, per sempre</span></div>
               <div className="tot"><span>Totale</span><span>{eur(totale)} <small>+ IVA</small></span></div>
