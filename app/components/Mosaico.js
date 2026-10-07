@@ -233,10 +233,11 @@ export default function Mosaico() {
     // The empty mosaic is drawn at once, so the frame never stays black while the spaces load.
     const parti = (model) => { stop(); try { stop = avvia(model); } catch (e) { console.error(e); stop = () => {}; } };
     parti(modelloReale([], 0));
-    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0 }) => {
+    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, errore }) => {
       if (!vivo) return;
+      if (errore) console.error("Spazi non caricati:", errore);
       spazi = spazi.filter((r) => Number.isInteger(r.x) && Number.isInteger(r.y) && r.w > 0 && r.h > 0);
-      const reale = spazi.length > 0 || !DEMO;
+      const reale = spazi.length > 0 || !DEMO || !!errore; // never show example brands when the database fails
       setDemo(!reale);
       parti(reale ? modelloReale(spazi, Number(venduti) || 0) : buildModel(0.25));
     });
