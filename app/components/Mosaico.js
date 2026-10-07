@@ -154,7 +154,7 @@ export default function Mosaico() {
       c.globalAlpha = 0.08 + 0.05 * pulse; c.fillStyle = goldGrad(c, A, A, S, S); c.fillRect(A, A, S, S); c.globalAlpha = 1;
       c.strokeStyle = goldGrad(c, A, A, S, S); c.lineWidth = 3 / view.s; c.strokeRect(A, A, S, S); c.lineWidth = 1 / view.s; c.strokeRect(A + 8, A + 8, S - 16, S - 16);
       if (cs > 5) { c.fillStyle = goldGrad(c, A, A + S * 0.35, S, S * 0.3); c.textAlign = "center"; c.textBaseline = "middle"; c.font = "italic 700 120px " + getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif"; c.fillText("Il Cuore", 50 * CELL, 48 * CELL); c.font = "700 20px sans-serif"; c.fillText("A S T E   P R E M I U M", 50 * CELL, 54 * CELL); }
-      if (cs > 7) { c.strokeStyle = "rgba(241,226,189,.06)"; c.lineWidth = 1 / view.s; c.beginPath(); for (let i = 0; i <= N; i++) { c.moveTo(i * CELL, 0); c.lineTo(i * CELL, N * CELL); c.moveTo(0, i * CELL); c.lineTo(N * CELL, i * CELL); } c.stroke(); }
+      if (cs > 3) { c.strokeStyle = `rgba(241,226,189,${cs > 7 ? 0.14 : 0.08})`; c.lineWidth = 1 / view.s; c.beginPath(); for (let i = 0; i <= N; i++) { c.moveTo(i * CELL, 0); c.lineTo(i * CELL, N * CELL); c.moveTo(0, i * CELL); c.lineTo(N * CELL, i * CELL); } c.stroke(); }
       const sweep = reduce ? -1e9 : ((now / 10) % (N * CELL * 2.6)) - N * CELL * 0.4;
       const serif = getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif";
       blocks.forEach((b, k) => {
@@ -230,11 +230,15 @@ export default function Mosaico() {
     };
     };
     // Real spaces from the database; if there are none yet, the demo with example brands.
-    fetch("/api/spazi").then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0 }) => {
+    // The empty mosaic is drawn at once, so the frame never stays black while the spaces load.
+    const parti = (model) => { stop(); try { stop = avvia(model); } catch (e) { console.error(e); stop = () => {}; } };
+    parti(modelloReale([], 0));
+    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0 }) => {
       if (!vivo) return;
+      spazi = spazi.filter((r) => Number.isInteger(r.x) && Number.isInteger(r.y) && r.w > 0 && r.h > 0);
       const reale = spazi.length > 0 || !DEMO;
       setDemo(!reale);
-      stop = avvia(reale ? modelloReale(spazi, venduti) : buildModel(0.25));
+      parti(reale ? modelloReale(spazi, Number(venduti) || 0) : buildModel(0.25));
     });
     return () => { vivo = false; stop(); };
   }, []);
