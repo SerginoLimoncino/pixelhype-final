@@ -1,13 +1,13 @@
 import Pacchetti from "../components/Pacchetti";
 import { FASI, fase, prezzoPixel, restanoInFase, eur, num } from "../../lib/prezzi";
-import { pixelVenduti } from "../../lib/db";
+import { pixelVendutiPresto } from "../../lib/db";
 
 export const revalidate = 30;
 
 export const metadata = { title: "Prezzi e pacchetti · PixelHype" };
 
 export default async function Compra() {
-  const v = await pixelVenduti().catch(() => 0);
+  const v = await pixelVendutiPresto();
   const f = fase(v);
   return (
     <section className="wrap" style={{ paddingTop: 56, paddingBottom: 84 }}>

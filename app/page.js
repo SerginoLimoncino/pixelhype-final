@@ -2,12 +2,12 @@ import Link from "next/link";
 import Mosaico from "./components/Mosaico";
 import Pacchetti from "./components/Pacchetti";
 import { FASI, LOTTI_CUORE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
-import { pixelVenduti } from "../lib/db";
+import { pixelVendutiPresto } from "../lib/db";
 
 export const revalidate = 30; // prezzo e contatore si aggiornano da soli
 
 export default async function Home() {
-  const v = await pixelVenduti().catch(() => 0);
+  const v = await pixelVendutiPresto();
   const f = fase(v);
   const avanzamento = Math.round(((v - f * 1000) / 1000) * 100);
   return (
