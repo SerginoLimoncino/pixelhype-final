@@ -28,7 +28,7 @@ function buildModel(fill) {
   const o = oc.getContext("2d");
   o.fillStyle = "#000"; o.fillRect(0, 0, N, N); o.fillStyle = "#fff"; o.strokeStyle = "#fff"; o.lineWidth = 3; o.lineJoin = "round";
   o.textAlign = "center"; o.textBaseline = "middle"; o.font = "bold 27px sans-serif";
-  ["PIXEL", "HYPE"].forEach((t, k) => { const yy = k ? 81 : 19; o.fillText(t, 50, yy, 92); o.strokeText(t, 50, yy, 92); });
+  ["THANK", "YOU"].forEach((t, k) => { const yy = k ? 81 : 19; o.fillText(t, 50, yy, 92); o.strokeText(t, 50, yy, 92); });
   o.fillRect(8, 33, 84, 2); o.fillRect(8, 65, 84, 2);
   const d = o.getImageData(0, 0, N, N).data;
   for (let i = 0; i < N * N; i++) tgt[i] = d[i * 4] / 255;
