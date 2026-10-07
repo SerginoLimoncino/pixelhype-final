@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PACCHETTI, eur } from "../../lib/prezzi";
+import Ritaglio, { leggiImmagine } from "../components/Ritaglio";
 
 const STATI = { online: "Online", da_controllare: "Da controllare", in_attesa: "In attesa di pagamento", nascosto: "Nascosto" };
 
@@ -30,7 +31,8 @@ export default function Admin() {
   const [msg, setMsg] = useState("");
   const [lavoro, setLavoro] = useState(false);
   const [filtro, setFiltro] = useState("tutti");
-  const [r, setR] = useState({ pack: 1, nome: "", link: "", file: null });
+  const [r, setR] = useState({ pack: 1, nome: "", link: "", img: null });
+  const tagliata = useRef(null); // returns the image cropped as in the preview
 
   async function chiama(azione, dati = {}, pass = pw) {
     setLavoro(true); setMsg("");
@@ -59,12 +61,11 @@ export default function Admin() {
   async function regala(e) {
     e.preventDefault();
     const p = PACCHETTI[r.pack];
-    if (!r.file) return setMsg("Scegli un'immagine.");
-    const immagine = await ritaglia(r.file, p.w, p.h).catch((x) => { setMsg(String(x)); return null; });
-    if (!immagine) return;
+    if (!r.img) return setMsg("Scegli un'immagine.");
+    const immagine = tagliata.current();
     if (await chiama("regala", { pack: r.pack, nome: r.nome, link: r.link, immagine })) {
       setMsg(`Fatto: "${r.nome}" è online nel mosaico.`);
-      setR({ pack: r.pack, nome: "", link: "", file: null });
+      setR({ pack: r.pack, nome: "", link: "", img: null });
       e.target.reset();
     }
   }
@@ -117,9 +118,10 @@ export default function Admin() {
           </label>
           <label className="f">Nome<input value={r.nome} onChange={(e) => setR({ ...r, nome: e.target.value })} placeholder="Es. Bar Centrale" /></label>
           <label className="f">Link<input value={r.link} onChange={(e) => setR({ ...r, link: e.target.value })} placeholder="www.barcentrale.it" /></label>
-          <label className="f">Immagine<input type="file" accept="image/*" onChange={(e) => setR({ ...r, file: e.target.files?.[0] || null })} /></label>
+          <label className="f">Immagine<input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) leggiImmagine(f).then((img) => setR((v) => ({ ...v, img }))).catch((x) => setMsg(String(x))); }} /></label>
         </div>
-        <button className="cta" disabled={lavoro || !r.nome || !r.link || !r.file}>{lavoro ? "Un attimo…" : "Regala e metti online"}</button>
+        {r.img && <div style={{ maxWidth: 420 }}><Ritaglio img={r.img} w={PACCHETTI[r.pack].w} h={PACCHETTI[r.pack].h} fatto={(f) => (tagliata.current = f)} /></div>}
+        <button className="cta" disabled={lavoro || !r.nome || !r.link || !r.img}>{lavoro ? "Un attimo…" : "Regala e metti online"}</button>
       </form>
 
       {msg && <p className="adm-msg">{msg}</p>}
@@ -138,7 +140,7 @@ export default function Admin() {
             <div className="adm-img" style={{ aspectRatio: `${s.w} / ${s.h}`, backgroundImage: s.img ? `url("${s.img}")` : "none" }} />
             <div className="adm-info">
               <b>{s.nome}</b>
-              <a href={s.link} target="_blank" rel="noopener noreferrer">{s.link}</a>
+              <span className="adm-link" title="Per sicurezza il link non si apre con un clic">{s.link}</span>
               <span>{s.w * s.h} pixel · {s.omaggio ? "Omaggio" : eur(s.prezzo)} · {STATI[s.stato] || s.stato}{s.x !== null ? ` · riga ${s.y + 1}, col. ${s.x + 1}` : ""}</span>
               {s.email && <span>{s.email}</span>}
             </div>

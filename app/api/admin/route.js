@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { timingSafeEqual } from "crypto";
 import { PACCHETTI } from "../../../lib/prezzi";
-import { normalizzaLink } from "../../../lib/controllo";
+import { controllaLink } from "../../../lib/controlloLink";
 import { dbAttivo, tuttiGliSpazi, aggiorna, cancella, nuovoOrdine, salvaImmagine, assegnaPosizione } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -36,14 +36,17 @@ export async function POST(req) {
       case "modifica": {
         const campi = {};
         if (b.nome) campi.nome = String(b.nome).slice(0, 80);
-        if (b.link) { const l = normalizzaLink(b.link); if (!l) return Response.json({ errore: "Link non valido." }, { status: 400 }); campi.link = l; }
+        if (b.link) { const l = await controllaLink(b.link); if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 }); campi.link = l.link; }
         if (b.immagine) campi.img = await salvaImmagine(`${b.id}-${Date.now()}.${b.immagine.startsWith("data:image/webp") ? "webp" : "jpg"}`, b.immagine);
         if (Object.keys(campi).length) await aggiorna(b.id, campi);
         break;
       }
       case "regala": {
-        const p = PACCHETTI[b.pack], link = normalizzaLink(b.link);
-        if (!p || !b.nome || !link || !b.immagine) return Response.json({ errore: "Compila pacchetto, nome, link e immagine." }, { status: 400 });
+        const p = PACCHETTI[b.pack];
+        if (!p || !b.nome || !b.link || !b.immagine) return Response.json({ errore: "Compila pacchetto, nome, link e immagine." }, { status: 400 });
+        const l = await controllaLink(b.link);
+        if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 });
+        const link = l.link;
         const id = await nuovoOrdine({ pack: p.n, nome: String(b.nome).slice(0, 80), link, prezzo: 0, omaggio: true });
         const img = await salvaImmagine(`${id}-${Date.now()}.${b.immagine.startsWith("data:image/webp") ? "webp" : "jpg"}`, b.immagine);
         await aggiorna(id, { img });

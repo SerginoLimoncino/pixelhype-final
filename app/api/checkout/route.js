@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto } from "../../../lib/prezzi";
-import { normalizzaLink, linkVietato } from "../../../lib/controllo";
+import { controllaLink } from "../../../lib/controlloLink";
 import { dbAttivo, pixelVenduti, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
 
 // Creates the Stripe payment page for a pack. The price is always computed here,
@@ -12,9 +12,10 @@ export async function POST(req) {
 
   const { pack, nome, link, email, dubbio, immagine } = await req.json().catch(() => ({}));
   const p = PACCHETTI[pack];
-  const href = normalizzaLink(link);
-  if (!p || !nome || !href || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
-  if (linkVietato(href)) return Response.json({ errore: "Link non accettato." }, { status: 400 });
+  if (!p || !nome || !link || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
+  const l = await controllaLink(link); // checked again here so nobody can skip the check
+  if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 });
+  const href = l.link;
 
   const prezzo = prezzoPacchetto(p.n, await pixelVenduti());
   let ordine = null;

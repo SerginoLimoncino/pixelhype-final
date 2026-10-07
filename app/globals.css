@@ -262,3 +262,4 @@ h2 em { font-style: italic; color: var(--green); }
 @media (min-width: 900px) { .adm-act { grid-column: auto; justify-content: flex-end; max-width: 420px; } }
 .adm-file { cursor: pointer; }
 .ghost.danger { color: #8a3f2c; border-color: #d8b2a6; }
+.adm-link { word-break: break-all; color: var(--ink2); user-select: all; }
