@@ -1,19 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoPixel, eur } from "../../lib/prezzi";
 
 // Finché Stripe non è collegato il pagamento è solo una prova: nessun addebito.
 const PAGAMENTI_ATTIVI = false;
-const MAX_MB = 5;
+const MAX_MB = 10; // file più grandi vengono rifiutati
+const MAX_LATO = 1600; // lato massimo dopo il ridimensionamento automatico
+const MIN_LATO = 100; // immagini più piccole sarebbero sgranate
+const PX_FINALE = 100; // pixel reali per ogni pixel del mosaico nell'immagine finale
+
+// Reads the file, rejects images that are too big or too small, and shrinks the rest.
+function preparaImmagine(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) return reject("Il file deve essere un'immagine (JPG, PNG o WebP).");
+    if (file.size > MAX_MB * 1024 * 1024) return reject(`L'immagine è troppo grande: massimo ${MAX_MB} MB.`);
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      const w = im.naturalWidth, h = im.naturalHeight;
+      if (w * h > 40e6) return reject("L'immagine ha troppi pixel (oltre 40 megapixel). Usane una più piccola.");
+      if (Math.min(w, h) < MIN_LATO) return reject(`L'immagine è troppo piccola: almeno ${MIN_LATO} pixel per lato.`);
+      const k = Math.min(1, MAX_LATO / Math.max(w, h));
+      const c = document.createElement("canvas");
+      c.width = Math.round(w * k); c.height = Math.round(h * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      resolve({ src: c.toDataURL("image/webp", 0.9), w: c.width, h: c.height, el: c });
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); reject("Non riesco a leggere questa immagine."); };
+    im.src = url;
+  });
+}
 
 export default function CreaSpazio({ iniziale }) {
   const [pack, setPack] = useState(iniziale);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [link, setLink] = useState("");
-  const [img, setImg] = useState(null);
+  const [img, setImg] = useState(null); // { src, w, h }
+  const [zoom, setZoom] = useState(1);
+  const [off, setOff] = useState({ x: 0, y: 0 });
+  const drag = useRef(null);
   const [fit, setFit] = useState("cover");
   const [ok, setOk] = useState(false);
   const [errore, setErrore] = useState("");
@@ -29,16 +58,16 @@ export default function CreaSpazio({ iniziale }) {
     const file = e.target.files?.[0];
     setErrore("");
     if (!file) return;
-    if (!file.type.startsWith("image/")) { setErrore("Il file deve essere un'immagine (JPG, PNG o WebP)."); return; }
-    if (file.size > MAX_MB * 1024 * 1024) { setErrore(`L'immagine supera ${MAX_MB} MB.`); return; }
-    const r = new FileReader();
-    r.onload = () => setImg(r.result);
-    r.readAsDataURL(file);
+    preparaImmagine(file)
+      .then((res) => { setImg(res); setZoom(1); setOff({ x: 0, y: 0 }); })
+      .catch((msg) => { setImg(null); setErrore(String(msg)); e.target.value = ""; });
   }
 
   function paga() {
     if (!pronto) return;
     setStato("invio");
+    const finale = immagineFinale(); // questa è l'immagine che verrà caricata e controllata
+    console.info("Immagine finale pronta:", Math.round((finale.length * 3) / 4 / 1024), "KB");
     // Qui, con Stripe: crea l'ordine in attesa, apri il checkout, e il webhook
     // assegna i pixel quando il pagamento è confermato.
     setTimeout(() => setStato("fatto"), 1200);
@@ -46,6 +75,40 @@ export default function CreaSpazio({ iniziale }) {
 
   // Preview size: the block keeps its shape and fits in about 320px.
   const cell = Math.min(64, Math.floor(320 / p.w));
+  const PW = p.w * cell, PH = p.h * cell;
+  // Image size inside the preview: "cover" fills the block, "contain" shows it whole; zoom enlarges it.
+  const base = img ? (fit === "cover" ? Math.max(PW / img.w, PH / img.h) : Math.min(PW / img.w, PH / img.h)) : 1;
+  const dw = img ? img.w * base * zoom : 0, dh = img ? img.h * base * zoom : 0;
+  const lim = (o) => ({
+    x: dw > PW ? Math.max(-(dw - PW) / 2, Math.min((dw - PW) / 2, o.x)) : 0,
+    y: dh > PH ? Math.max(-(dh - PH) / 2, Math.min((dh - PH) / 2, o.y)) : 0,
+  });
+  const o = lim(off);
+
+  // Pack, fit or zoom changes can leave the image off-centre: keep it inside the block.
+  useEffect(() => { setOff((v) => lim(v)); }, [pack, fit, zoom]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function inizioTrascina(e) {
+    if (!img) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, y: e.clientY, o };
+  }
+  function trascina(e) {
+    if (!drag.current) return;
+    const d = drag.current;
+    setOff(lim({ x: d.o.x + e.clientX - d.x, y: d.o.y + e.clientY - d.y }));
+  }
+  function fineTrascina() { drag.current = null; }
+
+  // The final cropped image, exactly as it will appear in the mosaic.
+  function immagineFinale() {
+    const c = document.createElement("canvas");
+    c.width = p.w * PX_FINALE; c.height = p.h * PX_FINALE;
+    const g = c.getContext("2d"), r = c.width / PW;
+    g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
+    return c.toDataURL("image/webp", 0.9);
+  }
 
   if (stato === "fatto") {
     return (
@@ -98,7 +161,7 @@ export default function CreaSpazio({ iniziale }) {
             </label>
             <label className="f">La tua immagine
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={caricaImmagine} />
-              <span className="hint">JPG, PNG o WebP, massimo {MAX_MB} MB. Una sola immagine per tutto il blocco.</span>
+              <span className="hint">JPG, PNG o WebP, massimo {MAX_MB} MB. Se è molto grande la rimpiccioliamo noi. Una sola immagine per tutto il blocco.</span>
               {errore && <span className="hint" style={{ color: "#8a3f2c" }}>{errore}</span>}
             </label>
             <label className="f">Adattamento immagine
@@ -117,13 +180,27 @@ export default function CreaSpazio({ iniziale }) {
       <div className="sticky">
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pv-wrap">
-            <div className="pv" style={{ width: p.w * cell, height: p.h * cell }}>
-              {img ? <img src={img} alt="Anteprima del tuo spazio" style={{ objectFit: fit }} /> : <div className="empty">La tua immagine</div>}
+            <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
+              {img ? <img src={img.src} alt="Anteprima del tuo spazio" draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">La tua immagine</div>}
               <div className="gr" style={{ gridTemplateColumns: `repeat(${p.w},1fr)`, gridTemplateRows: `repeat(${p.h},1fr)` }}>
                 {Array.from({ length: p.n }, (_, i) => <div key={i} />)}
               </div>
             </div>
           </div>
+          {img && (
+            <div className="editor">
+              <span className="step-n">Ritaglia</span>
+              <p className="muted">Trascina l'immagine per spostarla e usa lo zoom per ingrandirla.</p>
+              <label className="zoom">
+                <span>Zoom</span>
+                <input type="range" min="1" max="4" step="0.05" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label="Zoom immagine" />
+              </label>
+              <div className="ed-row">
+                <button type="button" className="ghost sm" onClick={() => { setZoom(1); setOff({ x: 0, y: 0 }); }}>Centra</button>
+                <button type="button" className="ghost sm" onClick={() => setFit(fit === "cover" ? "contain" : "cover")}>{fit === "cover" ? "Mostra intera" : "Riempi lo spazio"}</button>
+              </div>
+            </div>
+          )}
           <div style={{ padding: 24, display: "grid", gap: 16 }}>
             <span className="step-n">Passo III · Riepilogo</span>
             <div className="sum">
