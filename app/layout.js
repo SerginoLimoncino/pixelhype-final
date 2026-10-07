@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
               <Marchio verde="#1d5a47" />
               <span>Pixel<i>Hype</i></span>
             </span>
-            <span>getpixelhype.com · Ogni immagine viene controllata prima di andare online · Prezzi + IVA</span>
+            <span>getpixelhype.com · Contatti: <a href="mailto:info@getpixelhype.com">info@getpixelhype.com</a> · Ogni immagine viene controllata prima di andare online · Prezzi + IVA</span>
           </div>
         </footer>
       </body>

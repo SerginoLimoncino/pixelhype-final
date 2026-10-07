@@ -263,3 +263,4 @@ h2 em { font-style: italic; color: var(--green); }
 .adm-file { cursor: pointer; }
 .ghost.danger { color: #8a3f2c; border-color: #d8b2a6; }
 .adm-link { word-break: break-all; color: var(--ink2); user-select: all; }
+.site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
