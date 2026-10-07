@@ -21,7 +21,8 @@ a { color: inherit; }
 .hd { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 68px; }
 .logo { font-family: var(--display); font-size: 31px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; text-decoration: none; }
 .logo i { font-weight: 600; }
-.logo b { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--goldgrad); margin-left: 3px; vertical-align: middle; }
+.logo { display: inline-flex; align-items: center; gap: 12px; }
+.logo .marchio { flex: none; }
 .nav { display: none; gap: 28px; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink2); }
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
