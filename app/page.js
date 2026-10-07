@@ -69,7 +69,7 @@ export default async function Home() {
               <div className="lot" key={l.misura}>
                 <span className="q">{l.spazi} {l.spazi > 1 ? "spazi" : "spazio"}</span>
                 <span className="s">{l.misura}</span>
-                <span className="b">Base d'asta <strong>{eur(l.base)}</strong></span>
+                <span className="b">Base svelata all'apertura</span>
               </div>
             ))}
           </div>
