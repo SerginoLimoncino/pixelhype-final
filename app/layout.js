@@ -39,7 +39,7 @@ export default async function RootLayout({ children }) {
             <nav className="nav">
               <Link href="/#galleria">La galleria</Link>
               <Link href="/compra">Prezzi</Link>
-              {asteAperte && <Link href="/#aste" className="nav-aste">Aste</Link>}
+              {asteAperte && <Link href="/aste" className="nav-aste">Aste</Link>}
               <Link href="/#aste">Il Cuore</Link>
               <Link href="/#come">Come funziona</Link>
             </nav>

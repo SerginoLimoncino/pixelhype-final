@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { timingSafeEqual } from "crypto";
 import { PACCHETTI } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
+import { listaAste } from "../../../lib/aste";
 import { dbAttivo, tuttiGliSpazi, aggiorna, cancella, nuovoOrdine, salvaImmagine, assegnaPosizione } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export async function POST(req) {
   try {
     switch (b.azione) {
       case "lista":
-        return Response.json({ spazi: await tuttiGliSpazi() });
+        return Response.json({ spazi: await tuttiGliSpazi(), aste: await listaAste().catch(() => null) });
       case "approva":
         await aggiorna(b.id, { stato: "online" });
         break;

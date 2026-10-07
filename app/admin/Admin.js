@@ -28,6 +28,7 @@ export default function Admin() {
   const [pw, setPw] = useState("");
   const [entrato, setEntrato] = useState(false);
   const [spazi, setSpazi] = useState([]);
+  const [aste, setAste] = useState(null);
   const [msg, setMsg] = useState("");
   const [lavoro, setLavoro] = useState(false);
   const [filtro, setFiltro] = useState("tutti");
@@ -41,6 +42,7 @@ export default function Admin() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.errore || "Errore");
       if (d.spazi) setSpazi(d.spazi);
+      if (d.aste !== undefined) setAste(d.aste);
       return true;
     } catch (e) {
       setMsg(e.message); return false;
@@ -105,6 +107,20 @@ export default function Admin() {
         <div><b>{eur(incasso)}</b><span>incassato (+ IVA)</span></div>
         <div><b>{conta("da_controllare")}</b><span>da controllare</span></div>
         <div><b>{conta("in_attesa")}</b><span>in attesa di pagamento</span></div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 24 }}>
+        <h3>Aste</h3>
+        {!aste || (aste.aperte.length === 0 && aste.prossime === 0 && aste.chiuse === 0) ? (
+          <p className="muted">Partono da sole dopo i primi 1.000 pixel venduti. Non devi fare niente.</p>
+        ) : (
+          <>
+            <p className="muted">{aste.aperte.length} in corso · {aste.prossime} in arrivo · {aste.chiuse} vinte e pagate. Tutto automatico.</p>
+            {aste.aperte.map((a) => (
+              <p key={a.id} className="muted">{a.zona === "cuore" ? "Cuore" : "Fuori"} · {a.pack} pixel · {a.migliore ? `offerta più alta ${eur(a.migliore)}` : `base ${eur(a.base)}, nessuna offerta`} · finisce {new Date(a.fine).toLocaleString("it-IT")}</p>
+            ))}
+          </>
+        )}
       </div>
 
       <form className="card adm-gift" onSubmit={regala}>

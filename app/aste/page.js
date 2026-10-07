@@ -1,0 +1,56 @@
+import Link from "next/link";
+import { dbAttivo, pixelVendutiPresto } from "../../lib/db";
+import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/aste";
+import { PACCHETTI, SOGLIA_ASTE, eur, num, quando } from "../../lib/prezzi";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Aste · PixelHype" };
+
+// The auctions page. Hidden (only a short note) until the first 1,000 pixel are sold.
+export default async function Aste() {
+  const venduti = await pixelVendutiPresto();
+  if (!dbAttivo() || !asteAperte(venduti)) {
+    return (
+      <section className="wrap blk">
+        <div className="sec-h">
+          <div className="eyebrow">Aste</div>
+          <h2>Le aste non sono <em>ancora aperte</em>.</h2>
+          <p>Si aprono da sole dopo i primi {num(SOGLIA_ASTE)} pixel venduti. Ora siamo a {num(venduti)}.</p>
+        </div>
+        <Link href="/compra" className="cta">Intanto prendi il tuo spazio</Link>
+      </section>
+    );
+  }
+  await aggiornaAstePresto();
+  const { aperte, prossime } = await listaAste().catch(() => ({ aperte: [], prossime: 0 }));
+  const gruppo = (zona) => aperte.filter((a) => a.zona === zona);
+
+  return (
+    <section className="blk heart">
+      <div className="wrap">
+        <div className="sec-h">
+          <div className="eyebrow">Aste in corso</div>
+          <h2>Il centro si conquista <em>all'asta</em>.</h2>
+          <p>Ogni asta dura 7 giorni e vince l'offerta più alta. Offrire non costa nulla: la carta viene addebitata solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
+        </div>
+        {[["cuore", "Nel Cuore"], ["fuori", "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
+          <div key={zona} style={{ marginBottom: 32 }}>
+            <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
+            {gruppo(zona).length === 0 ? <p className="note">Nessuna asta aperta in questo momento.</p> : (
+              <div className="lots">
+                {gruppo(zona).map((a) => (
+                  <Link href={`/aste/${a.id}`} className="lot" key={a.id} style={{ textDecoration: "none" }}>
+                    <span className="q">{PACCHETTI[a.pack].nome}</span>
+                    <span className="s">{PACCHETTI[a.pack].titolo}</span>
+                    <span className="b">{a.migliore ? `Offerta più alta ${eur(a.migliore)}` : `Base ${eur(a.base)}`}</span>
+                    <span className="b">Offri da {eur(minimo(a, a.migliore))} · finisce il {quando(a.fine)}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

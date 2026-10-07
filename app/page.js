@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Mosaico from "./components/Mosaico";
 import Pacchetti from "./components/Pacchetti";
-import { FASI, LOTTI_CUORE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
+import { FASI, LOTTI_CUORE, SOGLIA_ASTE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
 import { pixelVendutiPresto } from "../lib/db";
 
 export const revalidate = 30; // prezzo e contatore si aggiornano da soli
@@ -73,6 +73,11 @@ export default async function Home() {
               </div>
             ))}
           </div>
+          {v >= SOGLIA_ASTE ? (
+            <p className="note"><Link href="/aste" className="cta sm">Vedi le aste in corso</Link></p>
+          ) : (
+            <p className="note">Le prime aste si aprono a <b>{num(SOGLIA_ASTE)} pixel venduti</b>. Ora siamo a {num(v)}.</p>
+          )}
           <p className="note">Tre piccoli posti fortunati nel Cuore escono a caso a chi compra nella griglia normale.</p>
         </div>
       </section>
