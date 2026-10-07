@@ -1,0 +1,46 @@
+import { Cormorant_Garamond, Manrope } from "next/font/google";
+import Link from "next/link";
+import "./globals.css";
+
+const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"], variable: "--font-display" });
+const body = Manrope({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-body" });
+
+export const metadata = {
+  title: "PixelHype · Un'opera d'arte fatta di marchi",
+  description: "10.000 pixel, per sempre. Prendi il tuo spazio nel mosaico: immagine, link e posizione restano tuoi.",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="it" className={`${display.variable} ${body.variable}`}>
+      <body>
+        <header className="site-header">
+          <div className="wrap hd">
+            <Link href="/" className="logo">
+              Pixel<i>Hype</i>
+              <b />
+            </Link>
+            <nav className="nav">
+              <Link href="/#galleria">La galleria</Link>
+              <Link href="/compra">Prezzi</Link>
+              <Link href="/#aste">Il Cuore</Link>
+              <Link href="/#come">Come funziona</Link>
+            </nav>
+            <Link href="/compra" className="cta sm">
+              Prendi il tuo spazio
+            </Link>
+          </div>
+        </header>
+        <main>{children}</main>
+        <footer className="site-footer">
+          <div className="wrap ft">
+            <span className="logo">
+              Pixel<i>Hype</i>
+            </span>
+            <span>getpixelhype.com · Ogni immagine viene controllata prima di andare online · Prezzi + IVA</span>
+          </div>
+        </footer>
+      </body>
+    </html>
+  );
+}
