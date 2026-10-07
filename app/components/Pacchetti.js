@@ -2,11 +2,11 @@ import Link from "next/link";
 import { PACCHETTI, prezzoPacchetto, eur, num } from "../../lib/prezzi";
 
 // The six packs as cards. Each card opens /crea-spazio?pack=X.
-export default function Pacchetti() {
+export default function Pacchetti({ venduti = 0 }) {
   return (
     <div className="packs-t">
       {Object.values(PACCHETTI).map((p) => {
-        const tot = prezzoPacchetto(p.n);
+        const tot = prezzoPacchetto(p.n, venduti);
         return (
           <Link href={`/crea-spazio?pack=${p.n}`} className={"pt" + (p.n === 100 ? " star" : "")} key={p.n}>
             {p.n === 100 && <span className="badge">Il più grande</span>}

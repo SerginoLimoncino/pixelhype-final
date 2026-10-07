@@ -71,6 +71,21 @@ function buildModel(fill) {
   return { owner, blocks, tgtAvg, fill, get free() { return free; } };
 }
 
+// The real mosaic: spaces sold or given, read from the database.
+function modelloReale(spazi, venduti) {
+  const owner = new Int32Array(N * N).fill(-1);
+  const blocks = spazi.map((r, id) => {
+    const b = { id, x: r.x, y: r.y, w: r.w, h: r.h, name: r.nome, link: r.link, img: r.img, pal: PAL[id % PAL.length], born: -1e9, lucky: inHeart(r.x, r.y, r.w, r.h), light: false, icon: id % 4 };
+    if (r.img) { b.imgEl = new Image(); b.imgEl.src = r.img; }
+    for (let j = b.y; j < b.y + b.h; j++) for (let i = b.x; i < b.x + b.w; i++) owner[j * N + i] = id;
+    return b;
+  });
+  return { owner, blocks, tgtAvg: () => 0.5, fill: venduti / SELL, free: Math.max(0, SELL - venduti) };
+}
+const esc = (t) => String(t).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+const caricata = (b) => b.imgEl && b.imgEl.complete && b.imgEl.naturalWidth > 0;
+const sfondo = (b) => (b.img ? `center / cover no-repeat url("${b.img}")` : `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})`);
+
 export default function Mosaico() {
   const stageRef = useRef(null), cvRef = useRef(null), miniRef = useRef(null), tipRef = useRef(null), helpRef = useRef(null);
   const api = useRef({});
@@ -79,9 +94,11 @@ export default function Mosaico() {
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);
   const [freeCount, setFreeCount] = useState(SELL);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
-    const model = buildModel(DEMO ? 0.25 : 0);
+    let vivo = true, stop = () => {};
+    const avvia = (model) => {
     const { owner, blocks, tgtAvg } = model;
     setFreeCount(model.free);
     setTutti(blocks);
@@ -145,9 +162,11 @@ export default function Mosaico() {
         const g = c.createLinearGradient(x, y, x + w, y + h);
         if (b.light) { g.addColorStop(0, "#faf8f4"); g.addColorStop(1, "#e4dccb"); } else { g.addColorStop(0, b.pal[1]); g.addColorStop(1, b.pal[0]); }
         c.fillStyle = g; c.fillRect(x + 1, y + 1, w - 2, h - 2);
+        const conImg = caricata(b);
+        if (conImg) c.drawImage(b.imgEl, x + 1, y + 1, w - 2, h - 2);
         if (veil > 0) { const tv = tgtAvg(b.x, b.y, b.w, b.h); c.fillStyle = tv > 0.5 ? `rgba(241,226,189,${veil * tv})` : `rgba(13,13,11,${veil * (1 - tv)})`; c.fillRect(x + 1, y + 1, w - 2, h - 2); }
         const dd = x + y - sweep; if (dd > -140 && dd < 140) { c.fillStyle = `rgba(241,226,189,${0.16 * (1 - Math.abs(dd) / 140)})`; c.fillRect(x + 1, y + 1, w - 2, h - 2); }
-        if (cs > 9 || (big(b) && cs > 4)) {
+        if (!conImg && (cs > 9 || (big(b) && cs > 4))) {
           const r = Math.min(w, h) / 2, tc = b.light ? "rgba(18,18,16,.88)" : "rgba(246,240,226,.95)";
           if (b.w === b.h && b.w >= 5) { icon(c, b, cx, y + h * 0.4, r * 0.55); c.fillStyle = tc; const fz = Math.min(h * 0.13, w / (b.name.length * 0.48 + 1)); c.font = `italic 700 ${fz}px ${serif}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(b.name, cx, y + h * 0.8); }
           else if (b.w >= 2 && b.h >= 2 && cs > 14) { icon(c, b, x + Math.min(w, h) * 0.5, cy, r * 0.6); c.fillStyle = tc; const fs = Math.min(h * 0.3, w / (b.name.length * 0.5 + 2.4), 44); if (fs * s > 7) { c.font = `italic 700 ${fs}px ${serif}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText(b.name, x + Math.min(w, h) * 0.95, cy); } }
@@ -175,7 +194,8 @@ export default function Mosaico() {
       const gx = Math.floor((view.x + sx) / view.s / CELL), gy = Math.floor((view.y + sy) / view.s / CELL);
       if (gx < 0 || gy < 0 || gx >= N || gy >= N) { tip.hidden = true; sel = -1; return; }
       const id = owner[gy * N + gx];
-      if (id >= 0) { const b = blocks[id]; sel = id; showTip(`<span>${b.w * b.h} pixel · ${b.w} x ${b.h}${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${b.name}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
+      if (id >= 0 && id === sel && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
+      if (id >= 0) { const b = blocks[id]; sel = id; showTip(`<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
       else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip("<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
       else { sel = -1; showTip(`<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoPixel())}</b>Prendilo prima che salga il prezzo`, sx, sy); }
     };
@@ -208,6 +228,15 @@ export default function Mosaico() {
       cv.removeEventListener("pointerdown", down); cv.removeEventListener("pointermove", move); cv.removeEventListener("pointerup", up); cv.removeEventListener("pointercancel", cancel);
       cv.removeEventListener("wheel", wheel); mini.removeEventListener("click", miniClick); window.removeEventListener("resize", resize);
     };
+    };
+    // Real spaces from the database; if there are none yet, the demo with example brands.
+    fetch("/api/spazi").then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0 }) => {
+      if (!vivo) return;
+      const reale = spazi.length > 0 || !DEMO;
+      setDemo(!reale);
+      stop = avvia(reale ? modelloReale(spazi, venduti) : buildModel(0.25));
+    });
+    return () => { vivo = false; stop(); };
   }, []);
 
   const onSearch = (v) => { setQ(v); const t = v.trim().toLowerCase(); setRes(t ? api.current.search(t) : null); };
@@ -221,7 +250,7 @@ export default function Mosaico() {
           <div className="feat-row">
             {feat.map((b) => (
               <button type="button" className="fc" key={b.id} onClick={() => goTo(b)}>
-                <div className="sw" style={{ background: `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})` }} />
+                <div className="sw" style={{ background: sfondo(b) }} />
                 <b>{b.name}</b>
                 <span>{b.w * b.h === 100 ? "Il Capolavoro · 100 pixel" : "La Vetrina · 25 pixel"}</span>
               </button>
@@ -258,7 +287,7 @@ export default function Mosaico() {
         </div></div>
         <div className="label">
           <div className="cartel"><b>PixelHype, 2026</b>Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, {num(freeCount)} pixel ancora disponibili.</div>
-          {DEMO && <div className="demo-note">Anteprima con marchi di esempio</div>}
+          {demo && <div className="demo-note">Anteprima con marchi di esempio</div>}
         </div>
       </div>
     </>
@@ -289,7 +318,7 @@ function Schermo({ blocchi, onTrova }) {
       <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo ai 100 pixel</span></div>
       <div className="screen">
         <div className="screen-in" key={giro}>
-          <div className="screen-art" style={{ width: b.w * sc, height: b.h * sc, background: `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})`, boxShadow: big(b) ? "0 0 0 3px #d9bf8c" : "0 0 0 1px rgba(217,191,140,.35)" }} />
+          <div className="screen-art" style={{ width: b.w * sc, height: b.h * sc, background: sfondo(b), boxShadow: big(b) ? "0 0 0 3px #d9bf8c" : "0 0 0 1px rgba(217,191,140,.35)" }} />
           <div className="screen-txt">
             <span className="screen-size">{NOMI_PACCHETTO[area] || area + " pixel"} · {area} pixel</span>
             <b>{b.name}</b>

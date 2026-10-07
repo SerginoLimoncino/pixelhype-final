@@ -1,5 +1,8 @@
 import CreaSpazio from "./CreaSpazio";
 import { PACCHETTI } from "../../lib/prezzi";
+import { pixelVenduti } from "../../lib/db";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Crea il tuo spazio · PixelHype" };
 
@@ -7,5 +10,6 @@ export const metadata = { title: "Crea il tuo spazio · PixelHype" };
 export default async function Page({ searchParams }) {
   const sp = await searchParams;
   const pack = PACCHETTI[sp?.pack] ? Number(sp.pack) : 4;
-  return <CreaSpazio iniziale={pack} />;
+  const venduti = await pixelVenduti().catch(() => 0);
+  return <CreaSpazio iniziale={pack} venduti={venduti} />;
 }

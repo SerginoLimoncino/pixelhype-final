@@ -234,3 +234,31 @@ h2 em { font-style: italic; color: var(--green); }
 .site-footer .logo { color: #f0eadb; font-size: 27px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* Pannello di controllo */
+.adm-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+@media (min-width: 720px) { .adm-stats { grid-template-columns: repeat(4, 1fr); } }
+.adm-stats div { background: var(--paper); border: 1px solid var(--line); padding: 16px; display: grid; gap: 4px; }
+.adm-stats b { font-family: var(--display); font-size: 30px; }
+.adm-stats span { font-size: 13px; font-weight: 600; color: var(--ink2); }
+.adm-gift { display: grid; gap: 12px; margin-bottom: 20px; }
+.adm-gift h3 { margin: 0; font-family: var(--display); font-size: 26px; }
+.adm-row { display: grid; gap: 12px; }
+@media (min-width: 820px) { .adm-row { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+.adm-row select { width: 100%; font: inherit; padding: 12px; border: 1px solid var(--line); background: #fff; }
+.adm-msg { background: var(--green3); border-left: 3px solid var(--green); padding: 12px 14px; font-weight: 600; }
+.adm-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 14px; }
+.adm-filters .on { background: var(--ink); color: #fff; }
+.adm-list { display: grid; gap: 10px; }
+.adm-item { display: grid; grid-template-columns: 72px 1fr; gap: 14px; background: var(--paper); border: 1px solid var(--line); padding: 14px; align-items: center; }
+@media (min-width: 900px) { .adm-item { grid-template-columns: 72px 1fr auto; } }
+.adm-item.st-da_controllare { border-color: #c9a04a; box-shadow: inset 4px 0 0 #c9a04a; }
+.adm-item.st-nascosto, .adm-item.st-in_attesa { opacity: .7; }
+.adm-img { width: 72px; max-height: 72px; background: #1d1c18 center / cover no-repeat; }
+.adm-info { display: grid; gap: 3px; min-width: 0; }
+.adm-info b { font-size: 17px; }
+.adm-info a, .adm-info span { font-size: 13px; color: var(--ink2); overflow-wrap: anywhere; }
+.adm-act { display: flex; flex-wrap: wrap; gap: 6px; grid-column: 1 / -1; }
+@media (min-width: 900px) { .adm-act { grid-column: auto; justify-content: flex-end; max-width: 420px; } }
+.adm-file { cursor: pointer; }
+.ghost.danger { color: #8a3f2c; border-color: #d8b2a6; }

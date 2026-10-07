@@ -1,11 +1,15 @@
 import Link from "next/link";
 import Mosaico from "./components/Mosaico";
 import Pacchetti from "./components/Pacchetti";
-import { FASI, LOTTI_CUORE, PIXEL_VENDUTI, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
+import { FASI, LOTTI_CUORE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
+import { pixelVenduti } from "../lib/db";
 
-export default function Home() {
-  const f = fase();
-  const avanzamento = Math.round(((PIXEL_VENDUTI - f * 1000) / 1000) * 100);
+export const revalidate = 30; // prezzo e contatore si aggiornano da soli
+
+export default async function Home() {
+  const v = await pixelVenduti().catch(() => 0);
+  const f = fase(v);
+  const avanzamento = Math.round(((v - f * 1000) / 1000) * 100);
   return (
     <>
       <section className="wrap hero">
@@ -16,9 +20,9 @@ export default function Home() {
         </div>
         <div className="phasebox">
           <div className="pb-top"><span>Fase {f + 1} di {FASI.length}</span><span>prezzo a pixel</span></div>
-          <div className="pb-price">{eur(prezzoPixel())}<small>+ IVA</small></div>
+          <div className="pb-price">{eur(prezzoPixel(v))}<small>+ IVA</small></div>
           <div className="bar"><i style={{ width: Math.max(2, avanzamento) + "%" }} /></div>
-          <p className="pb-note">Restano <b>{num(restanoInFase())} pixel</b> a questo prezzo. Poi si passa a <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "le aste finali"}</b>.</p>
+          <p className="pb-note">Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa a <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "le aste finali"}</b>.</p>
           <div className="pb-row">
             <Link href="/compra" className="cta">Prendi il tuo spazio</Link>
             <a href="#galleria" className="ghost">Esplora l'opera</a>
@@ -49,7 +53,7 @@ export default function Home() {
             <h2>Scegli il tuo <em>spazio</em>.</h2>
             <p>Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25 e da 100 pixel hanno la cornice d'oro e finiscono in evidenza.</p>
           </div>
-          <Pacchetti />
+          <Pacchetti venduti={v} />
         </div>
       </section>
 

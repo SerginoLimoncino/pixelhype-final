@@ -33,7 +33,7 @@ function preparaImmagine(file) {
   });
 }
 
-export default function CreaSpazio({ iniziale }) {
+export default function CreaSpazio({ iniziale, venduti = 0 }) {
   const [pack, setPack] = useState(iniziale);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +49,7 @@ export default function CreaSpazio({ iniziale }) {
   const [errPaga, setErrPaga] = useState("");
 
   const p = PACCHETTI[pack];
-  const totale = prezzoPacchetto(pack);
+  const totale = prezzoPacchetto(pack, venduti);
   const linkValido = !!normalizzaLink(link);
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const pronto = nome.trim() && emailValida && linkValido && img && ok;
@@ -68,8 +68,6 @@ export default function CreaSpazio({ iniziale }) {
     setStato("invio");
     setErrPaga("");
     const finale = immagineFinale(); // questa è l'immagine che verrà caricata e controllata
-    console.info("Immagine finale pronta:", Math.round((finale.length * 3) / 4 / 1024), "KB");
-    // TODO with the database: save the order and the image before opening Stripe.
     try {
       // Automatic check of link and image before paying.
       const c = await fetch("/api/controlla", {
@@ -81,7 +79,7 @@ export default function CreaSpazio({ iniziale }) {
       const r = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio }),
+        body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio, immagine: finale }),
       });
       const d = await r.json();
       if (d.url) { window.location.href = d.url; return; }
@@ -128,7 +126,8 @@ export default function CreaSpazio({ iniziale }) {
     const g = c.getContext("2d"), r = c.width / PW;
     g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
-    return c.toDataURL("image/webp", 0.9);
+    const webp = c.toDataURL("image/webp", 0.9);
+    return webp.startsWith("data:image/webp") ? webp : c.toDataURL("image/jpeg", 0.9); // Safari non fa webp
   }
 
   // A small copy of the final image (max 512 px) for the automatic check.
@@ -162,7 +161,7 @@ export default function CreaSpazio({ iniziale }) {
     <section className="wrap buy">
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
-          <div className="eyebrow">Fase {fase() + 1} di {FASI.length} · {eur(prezzoPixel())} a pixel</div>
+          <div className="eyebrow">Fase {fase(venduti) + 1} di {FASI.length} · {eur(prezzoPixel(venduti))} a pixel</div>
           <h2>Crea il tuo <em>spazio</em>.</h2>
         </div>
 
@@ -173,7 +172,7 @@ export default function CreaSpazio({ iniziale }) {
             {Object.values(PACCHETTI).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{x.titolo}</b>
-                <span className="pr">{eur(prezzoPacchetto(x.n))}</span>
+                <span className="pr">{eur(prezzoPacchetto(x.n, venduti))}</span>
                 <small>{x.w} x {x.h}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
               </button>
             ))}
