@@ -13,6 +13,8 @@ const PAL = [["#123d30", "#1d5a47"], ["#1f5c5a", "#2f7a72"], ["#4a2233", "#6b324
 const SHAPES = [[1, 1], [2, 1], [2, 2], [5, 2], [5, 5], [10, 10]], WEIGHTS = [31, 23, 21, 15, 7, 2];
 const CAP = { 25: 40, 100: 10 };
 const big = (b) => b.w * b.h >= 25;
+const NOMI_PACCHETTO = { 1: "Il Pixel", 2: "Il Doppio", 4: "Il Quadro", 10: "La Striscia", 25: "La Vetrina", 100: "Il Capolavoro" };
+const SECONDI_SCHERMO = 10; // ogni quanti secondi cambia il marchio sullo schermo
 const inHeart = (x, y, w, h) => x + w > 35 && x < 65 && y + h > 35 && y < 65;
 
 // Builds the grid model: who owns each cell, the blocks, and the hidden-logo brightness map.
@@ -73,6 +75,7 @@ export default function Mosaico() {
   const stageRef = useRef(null), cvRef = useRef(null), miniRef = useRef(null), tipRef = useRef(null), helpRef = useRef(null);
   const api = useRef({});
   const [feat, setFeat] = useState([]);
+  const [tutti, setTutti] = useState([]);
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);
   const [freeCount, setFreeCount] = useState(SELL);
@@ -81,6 +84,7 @@ export default function Mosaico() {
     const model = buildModel(DEMO ? 0.25 : 0);
     const { owner, blocks, tgtAvg } = model;
     setFreeCount(model.free);
+    setTutti(blocks);
     setFeat(blocks.filter(big).sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 12));
     const stage = stageRef.current, cv = cvRef.current, mini = miniRef.current, tip = tipRef.current;
     const ctx = cv.getContext("2d"), mctx = mini.getContext("2d");
@@ -225,6 +229,7 @@ export default function Mosaico() {
           </div>
         </div>
       )}
+      <Schermo blocchi={tutti} onTrova={goTo} />
       <div className="wrap gallery" id="galleria">
         <div className="toolbar">
           <div className="search">
@@ -257,5 +262,43 @@ export default function Mosaico() {
         </div>
       </div>
     </>
+  );
+}
+
+// "In onda": every few seconds a random brand from the mosaic, of any size, shown big.
+function Schermo({ blocchi, onTrova }) {
+  const [b, setB] = useState(null);
+  const [giro, setGiro] = useState(0);
+  useEffect(() => {
+    if (!blocchi.length) return;
+    let ultimo = -1;
+    const cambia = () => {
+      let i = Math.floor(Math.random() * blocchi.length);
+      if (i === ultimo && blocchi.length > 1) i = (i + 1) % blocchi.length;
+      ultimo = i; setB(blocchi[i]); setGiro((g) => g + 1);
+    };
+    cambia();
+    const t = setInterval(cambia, SECONDI_SCHERMO * 1000);
+    return () => clearInterval(t);
+  }, [blocchi]);
+  if (!b) return null;
+  const area = b.w * b.h;
+  const lato = 150, sc = lato / Math.max(b.w, b.h);
+  return (
+    <div className="wrap onair">
+      <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo al 10x10</span></div>
+      <div className="screen">
+        <div className="screen-in" key={giro}>
+          <div className="screen-art" style={{ width: b.w * sc, height: b.h * sc, background: `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})`, boxShadow: big(b) ? "0 0 0 3px #d9bf8c" : "0 0 0 1px rgba(217,191,140,.35)" }} />
+          <div className="screen-txt">
+            <span className="screen-size">{NOMI_PACCHETTO[area] || area + " pixel"} · {area} pixel</span>
+            <b>{b.name}</b>
+            <span className="screen-pos">riga {b.y + 1} · colonna {b.x + 1}</span>
+            <button type="button" className="ghost sm" onClick={() => onTrova(b)}>Trovalo nel mosaico</button>
+          </div>
+        </div>
+        <i className="screen-bar" key={"bar" + giro} style={{ animationDuration: SECONDI_SCHERMO + "s" }} />
+      </div>
+    </div>
   );
 }
