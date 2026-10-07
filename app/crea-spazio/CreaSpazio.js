@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoPixel, eur } from "../../lib/prezzi";
 
-// Finché Stripe non è collegato il pagamento è solo una prova: nessun addebito.
-const PAGAMENTI_ATTIVI = false;
 const MAX_MB = 10; // file più grandi vengono rifiutati
 const MAX_LATO = 1600; // lato massimo dopo il ridimensionamento automatico
 const MIN_LATO = 100; // immagini più piccole sarebbero sgranate
@@ -47,6 +45,7 @@ export default function CreaSpazio({ iniziale }) {
   const [ok, setOk] = useState(false);
   const [errore, setErrore] = useState("");
   const [stato, setStato] = useState("modulo"); // modulo | invio | fatto
+  const [errPaga, setErrPaga] = useState("");
 
   const p = PACCHETTI[pack];
   const totale = prezzoPacchetto(pack);
@@ -63,14 +62,28 @@ export default function CreaSpazio({ iniziale }) {
       .catch((msg) => { setImg(null); setErrore(String(msg)); e.target.value = ""; });
   }
 
-  function paga() {
+  async function paga() {
     if (!pronto) return;
     setStato("invio");
+    setErrPaga("");
     const finale = immagineFinale(); // questa è l'immagine che verrà caricata e controllata
     console.info("Immagine finale pronta:", Math.round((finale.length * 3) / 4 / 1024), "KB");
-    // Qui, con Stripe: crea l'ordine in attesa, apri il checkout, e il webhook
-    // assegna i pixel quando il pagamento è confermato.
-    setTimeout(() => setStato("fatto"), 1200);
+    // TODO with the database: save the order and the image before opening Stripe.
+    try {
+      const r = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pack, nome, link, email }),
+      });
+      const d = await r.json();
+      if (d.url) { window.location.href = d.url; return; }
+      // Without the Stripe key on Vercel the payment is only a test: nothing is charged.
+      if (d.prova) { setTimeout(() => setStato("fatto"), 800); return; }
+      throw new Error(d.errore);
+    } catch {
+      setErrPaga("Il pagamento non è partito. Riprova tra poco.");
+      setStato("modulo");
+    }
   }
 
   // Preview size: the block keeps its shape and fits in about 320px.
@@ -114,7 +127,7 @@ export default function CreaSpazio({ iniziale }) {
     return (
       <section className="wrap buy" style={{ gridTemplateColumns: "1fr", maxWidth: 720 }}>
         <div className="card" style={{ display: "grid", gap: 16 }}>
-          <span className="step-n">{PAGAMENTI_ATTIVI ? "Pagamento riuscito" : "Prova completata · nessun addebito"}</span>
+          <span className="step-n">Prova completata · nessun addebito</span>
           <p className="ok-big">Sei nell'opera. Per sempre.</p>
           <p className="muted">Il tuo spazio "{p.nome}" ({p.titolo}) per <b>{nome}</b> verrà messo nel mosaico in una posizione scelta a caso, dopo il controllo dell'immagine. Riceverai la ricevuta a {email}.</p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -217,7 +230,8 @@ export default function CreaSpazio({ iniziale }) {
               {stato === "invio" ? "Un attimo…" : `Paga ${eur(totale)}`}
             </button>
             <div className="pay-methods"><span>Carta</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
-            {!PAGAMENTI_ATTIVI && <p className="muted">Pagamento di prova: per ora non viene addebitato nulla.</p>}
+            {errPaga && <p className="hint" style={{ color: "#8a3f2c" }}>{errPaga}</p>}
+            <p className="muted">Paghi in modo sicuro con Stripe. I dati della carta non passano mai da PixelHype.</p>
           </div>
         </div>
       </div>
