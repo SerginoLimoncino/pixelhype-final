@@ -23,6 +23,6 @@ File completi da copiare nel progetto (stessi percorsi):
 ## Da sapere
 
 - `DEMO = true` in `app/components/Mosaico.js` mostra marchi di esempio. Al lancio va messo `false`.
-- `PAGAMENTI_ATTIVI = false` in `app/crea-spazio/CreaSpazio.js`: il pagamento è una prova, nessun addebito. Diventa vero quando colleghiamo Stripe.
+- Pagamenti: Stripe. La chiave segreta va su Vercel → Variabili ambientali con il nome `STRIPE_SECRET_KEY` (mai nel codice). Senza chiave il pagamento resta una prova. Con una chiave `sk_test_` si paga con carte di prova; con `sk_live_` si incassa davvero.
 - `PIXEL_VENDUTI = 0` in `lib/prezzi.js`: quando ci sarà il database il numero arriverà da lì, e il prezzo salirà da solo.
 - Provato con Next.js 15 e React 19.
