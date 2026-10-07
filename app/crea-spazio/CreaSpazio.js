@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoPixel, eur } from "../../lib/prezzi";
+import { normalizzaLink } from "../../lib/controllo";
 
 const MAX_MB = 10; // file più grandi vengono rifiutati
 const MAX_LATO = 1600; // lato massimo dopo il ridimensionamento automatico
@@ -49,7 +50,7 @@ export default function CreaSpazio({ iniziale }) {
 
   const p = PACCHETTI[pack];
   const totale = prezzoPacchetto(pack);
-  const linkValido = /^https?:\/\/[^\s.]+\.[^\s]+$/i.test(link.trim());
+  const linkValido = !!normalizzaLink(link);
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const pronto = nome.trim() && emailValida && linkValido && img && ok;
 
@@ -70,10 +71,17 @@ export default function CreaSpazio({ iniziale }) {
     console.info("Immagine finale pronta:", Math.round((finale.length * 3) / 4 / 1024), "KB");
     // TODO with the database: save the order and the image before opening Stripe.
     try {
+      // Automatic check of link and image before paying.
+      const c = await fetch("/api/controlla", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ link, immagine: immagineControllo() }),
+      }).then((x) => x.json());
+      if (!c.ok) { setErrPaga(c.motivo); setStato("modulo"); return; }
       const r = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack, nome, link, email }),
+        body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio }),
       });
       const d = await r.json();
       if (d.url) { window.location.href = d.url; return; }
@@ -123,6 +131,17 @@ export default function CreaSpazio({ iniziale }) {
     return c.toDataURL("image/webp", 0.9);
   }
 
+  // A small copy of the final image (max 512 px) for the automatic check.
+  function immagineControllo() {
+    const W = p.w * PX_FINALE, H = p.h * PX_FINALE, k = Math.min(1, 512 / Math.max(W, H));
+    const c = document.createElement("canvas");
+    c.width = Math.round(W * k); c.height = Math.round(H * k);
+    const g = c.getContext("2d"), r = c.width / PW;
+    g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
+    return c.toDataURL("image/jpeg", 0.85);
+  }
+
   if (stato === "fatto") {
     return (
       <section className="wrap buy" style={{ gridTemplateColumns: "1fr", maxWidth: 720 }}>
@@ -169,8 +188,8 @@ export default function CreaSpazio({ iniziale }) {
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Es. Bar Centrale" maxLength={40} />
             </label>
             <label className="f">Il tuo link
-              <input type="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://" />
-              {link && !linkValido && <span className="hint">Scrivi l'indirizzo completo, per esempio https://iltuosito.it</span>}
+              <input type="text" inputMode="url" autoCapitalize="none" value={link} onChange={(e) => setLink(e.target.value)} placeholder="www.iltuosito.it" />
+              {link && !linkValido && <span className="hint">Scrivi l'indirizzo del sito, per esempio www.iltuosito.it</span>}
             </label>
             <label className="f">La tua immagine
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={caricaImmagine} />
@@ -227,7 +246,7 @@ export default function CreaSpazio({ iniziale }) {
               <span>Confermo che l'immagine è mia o ho il diritto di usarla, e accetto che venga controllata prima di andare online.</span>
             </label>
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
-              {stato === "invio" ? "Un attimo…" : `Paga ${eur(totale)}`}
+              {stato === "invio" ? "Controllo in corso…" : `Paga ${eur(totale)}`}
             </button>
             <div className="pay-methods"><span>Carta</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
             {errPaga && <p className="hint" style={{ color: "#8a3f2c" }}>{errPaga}</p>}

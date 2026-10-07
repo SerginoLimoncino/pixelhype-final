@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto } from "../../../lib/prezzi";
+import { normalizzaLink, linkVietato } from "../../../lib/controllo";
 
 // Creates the Stripe payment page for a pack. The price is always computed here,
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
@@ -7,9 +8,11 @@ export async function POST(req) {
   const chiave = process.env.STRIPE_SECRET_KEY;
   if (!chiave) return Response.json({ prova: true });
 
-  const { pack, nome, link, email } = await req.json().catch(() => ({}));
+  const { pack, nome, link, email, dubbio } = await req.json().catch(() => ({}));
   const p = PACCHETTI[pack];
-  if (!p || !nome || !link || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
+  const href = normalizzaLink(link);
+  if (!p || !nome || !href || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
+  if (linkVietato(href)) return Response.json({ errore: "Link non accettato." }, { status: 400 });
 
   const stripe = new Stripe(chiave);
   const sito = new URL(req.url).origin;
@@ -24,7 +27,7 @@ export async function POST(req) {
         product_data: { name: `PixelHype · ${p.nome} (${p.titolo})`, description: `Spazio per ${nome}` },
       },
     }],
-    metadata: { pack: String(p.n), nome: String(nome).slice(0, 200), link: String(link).slice(0, 400) },
+    metadata: { pack: String(p.n), nome: String(nome).slice(0, 200), link: href.slice(0, 400), da_controllare: dubbio ? "si" : "no" },
     success_url: `${sito}/crea-spazio/grazie?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${sito}/crea-spazio?pack=${p.n}`,
   });
