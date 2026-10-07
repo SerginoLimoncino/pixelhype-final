@@ -118,7 +118,7 @@ export default function Mosaico() {
       dpr = window.devicePixelRatio || 1;
       const r = stage.getBoundingClientRect(); W = r.width; H = r.height;
       cv.width = W * dpr; cv.height = H * dpr; mini.width = mini.clientWidth * dpr; mini.height = mini.clientHeight * dpr;
-      if (!view.init) { view.s = Math.min(1.1, Math.max(0.5, W / 1150)); view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
+      if (!view.init) { view.s = (0.62 * Math.min(W, H)) / (30 * CELL); /* Il Cuore intero, con griglia intorno */ view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
       clamp();
     };
     const zoomAt = (f, sx, sy) => {
