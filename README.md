@@ -32,3 +32,11 @@ File completi da copiare nel progetto (stessi percorsi):
 - Il database è Supabase, collegato da Vercel → Storage: le variabili (`POSTGRES_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`…) le mette Vercel da solo. Tabella e cartella delle immagini il sito le crea da solo.
 - Pannello di controllo: `/admin`, con la password `ADMIN_PASSWORD` messa su Vercel → Variabili ambientali.
 - Finché il database è vuoto il mosaico mostra i marchi di esempio; dal primo spazio vero mostra solo quelli veri.
+
+## Controlli automatici (gratuiti, senza carta)
+
+Variabili su Vercel (Production + Preview):
+- `SIGHTENGINE_USER` e `SIGHTENGINE_SECRET`: controllo delle immagini (nudità, violenza, simboli d'odio). Piano gratuito Sightengine.
+- `URLHAUS_KEY`: lista ufficiale dei link con virus (abuse.ch, gratuita).
+
+Senza queste chiavi il sito funziona lo stesso: salta solo quel controllo.
