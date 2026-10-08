@@ -291,3 +291,8 @@ h2 em { font-style: italic; color: var(--green); }
   .lots { grid-template-columns: 1fr 1fr; gap: 10px; }
   .lot { padding: 14px 12px; } .lot .s { font-size: 26px; } .lot .b { font-size: 12px; }
 }
+
+/* Aste del Cuore: cornice d'oro. Aste finite: spente. */
+.lot.oro { border: 2px solid transparent; background: linear-gradient(var(--black), var(--black)) padding-box, var(--goldgrad) border-box; box-shadow: 0 0 22px -8px rgba(217, 191, 140, .55); }
+.lot.finita { opacity: .6; }
+.lot.finita .q { color: var(--gold2); }

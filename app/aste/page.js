@@ -22,7 +22,7 @@ export default async function Aste() {
     );
   }
   await aggiornaAstePresto();
-  const { aperte, prossime } = await listaAste().catch(() => ({ aperte: [], prossime: 0 }));
+  const { aperte, prossime, finite } = await listaAste().catch(() => ({ aperte: [], prossime: 0, finite: [] }));
   const gruppo = (zona) => aperte.filter((a) => a.zona === zona);
 
   return (
@@ -39,7 +39,7 @@ export default async function Aste() {
             {gruppo(zona).length === 0 ? <p className="note">Nessuna asta aperta in questo momento.</p> : (
               <div className="lots">
                 {gruppo(zona).map((a) => (
-                  <Link href={`/aste/${a.id}`} className="lot" key={a.id} style={{ textDecoration: "none" }}>
+                  <Link href={`/aste/${a.id}`} className={zona === "cuore" ? "lot oro" : "lot"} key={a.id} style={{ textDecoration: "none" }}>
                     <span className="q">{PACCHETTI[a.pack].nome}</span>
                     <span className="s">{PACCHETTI[a.pack].titolo}</span>
                     <span className="b">{a.migliore ? `Offerta più alta ${eur(a.migliore)}` : `Base ${eur(a.base)}`}</span>
@@ -50,6 +50,20 @@ export default async function Aste() {
             )}
           </div>
         ))}
+        {finite.length > 0 && (
+          <div>
+            <h3 style={{ marginBottom: 12 }}>Aste finite</h3>
+            <div className="lots">
+              {finite.map((a) => (
+                <div className={a.zona === "cuore" ? "lot oro finita" : "lot finita"} key={a.id}>
+                  <span className="q">Asta finita</span>
+                  <span className="s">{PACCHETTI[a.pack].titolo}</span>
+                  <span className="b">{a.zona === "cuore" ? "Nel Cuore" : "Fuori dal Cuore"}{a.vinta ? ` · chiusa a ${eur(a.vinta)}` : ""}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
