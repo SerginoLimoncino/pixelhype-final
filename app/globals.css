@@ -46,8 +46,8 @@ h2 em { font-style: italic; color: var(--green); }
 .lead { font-size: 18px; color: var(--ink2); max-width: 540px; margin: 22px 0 0; }
 
 /* hero */
-.hero { padding: 56px 0 28px; display: grid; gap: 28px; }
-@media (min-width: 960px) { .hero { grid-template-columns: 1.1fr .9fr; align-items: end; padding: 84px 0 36px; } }
+.hero { padding-top: 56px; padding-bottom: 28px; display: grid; gap: 28px; }
+@media (min-width: 960px) { .hero { grid-template-columns: 1.1fr .9fr; align-items: end; padding-top: 84px; padding-bottom: 36px; } }
 .phasebox { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 22px 22px 18px; box-shadow: 0 30px 60px -40px rgba(30, 25, 10, .35); position: relative; }
 .phasebox::before { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(184, 146, 90, .4); pointer-events: none; }
 .pb-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--ink2); }
@@ -60,7 +60,7 @@ h2 em { font-style: italic; color: var(--green); }
 .pb-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; position: relative; }
 
 /* gallery / mosaic */
-.gallery { padding: 24px 0 72px; }
+.gallery { padding-top: 24px; padding-bottom: 72px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
 .search { position: relative; width: min(340px, 100%); }
 .search input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237d5f31' stroke-width='1.8'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E") no-repeat 15px center; color: var(--ink); font: 600 14px var(--body); outline: none; }
@@ -186,7 +186,7 @@ h2 em { font-style: italic; color: var(--green); }
 .fc span { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold2); }
 
 /* buy page */
-.buy { padding: 48px 0 84px; display: grid; gap: 28px; }
+.buy { padding-top: 48px; padding-bottom: 84px; display: grid; gap: 28px; }
 @media (min-width: 980px) { .buy { grid-template-columns: 1.15fr .85fr; align-items: start; } }
 .card { background: var(--paper); border: 1px solid var(--line); padding: 24px; position: relative; }
 .card h3 { font-family: var(--display); font-weight: 700; font-size: 28px; margin: 0 0 14px; }
@@ -267,3 +267,27 @@ h2 em { font-style: italic; color: var(--green); }
 .site-footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 
 .pt.esaurito { opacity: .55; }
+
+/* phone */
+.menu-btn { display: none; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: var(--paper); cursor: pointer; padding: 0; flex: none; place-content: center; gap: 4px; }
+.menu-btn span { display: block; width: 18px; height: 2px; background: var(--ink); margin: 0 auto; }
+.menu-tel { position: absolute; top: 100%; left: 0; right: 0; background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 20px 30px -20px rgba(0, 0, 0, .3); display: grid; padding: 6px 16px 14px; }
+.menu-tel a { padding: 14px 4px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; color: var(--ink); }
+.menu-tel a:last-child { border-bottom: 0; }
+.menu-tel a.nav-aste { color: #1f6b4f; }
+.solo-tel { display: none; }
+@media (max-width: 899px) {
+  .menu-btn { display: grid; }
+  .hd > .cta { margin-left: auto; }
+}
+@media (max-width: 600px) {
+  .hd { gap: 10px; height: 62px; }
+  .logo { font-size: 25px; gap: 9px; }
+  .solo-pc { display: none; } .solo-tel { display: inline; }
+  .pt .shape { height: 52px; margin-top: 0; margin-bottom: 8px; }
+  .pt .g i { width: 4px; height: 4px; }
+  .phases .ph:last-child:nth-child(odd) { grid-column: span 2; }
+  .ph .p { font-size: 34px; }
+  .lots { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lot { padding: 14px 12px; } .lot .s { font-size: 26px; } .lot .b { font-size: 12px; }
+}

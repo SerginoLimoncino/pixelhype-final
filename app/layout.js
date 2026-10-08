@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { pixelVendutiPresto } from "../lib/db";
 import { SOGLIA_ASTE } from "../lib/prezzi";
+import MenuTelefono from "./components/MenuTelefono";
 
 export const revalidate = 30;
 
@@ -44,8 +45,9 @@ export default async function RootLayout({ children }) {
               <Link href="/#come">Come funziona</Link>
             </nav>
             <Link href="/compra" className="cta sm">
-              Prendi il tuo spazio
+              <span className="solo-pc">Prendi il tuo spazio</span><span className="solo-tel">Compra</span>
             </Link>
+            <MenuTelefono asteAperte={asteAperte} />
           </div>
         </header>
         <main>{children}</main>
