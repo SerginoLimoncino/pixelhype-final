@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoPixel, eur } from "../../lib/prezzi";
+import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoCuore, prezzoPixel, eur } from "../../lib/prezzi";
 import { normalizzaLink } from "../../lib/controllo";
 
 const MAX_MB = 10; // file più grandi vengono rifiutati
@@ -33,7 +33,7 @@ function preparaImmagine(file) {
   });
 }
 
-export default function CreaSpazio({ iniziale, venduti = 0 }) {
+export default function CreaSpazio({ iniziale, venduti = 0, cuore = false }) {
   const [pack, setPack] = useState(iniziale);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +49,8 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
   const [errPaga, setErrPaga] = useState("");
 
   const p = PACCHETTI[pack];
-  const totale = prezzoPacchetto(pack, venduti);
+  const prezzoDi = (n) => (cuore ? prezzoCuore(n, venduti) : prezzoPacchetto(n, venduti));
+  const totale = prezzoDi(pack);
   const linkValido = !!normalizzaLink(link);
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const pronto = nome.trim() && emailValida && linkValido && img && ok;
@@ -79,7 +80,7 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
       const r = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio, immagine: finale }),
+        body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio, immagine: finale, cuore }),
       });
       const d = await r.json();
       if (d.url) { window.location.href = d.url; return; }
@@ -161,18 +162,18 @@ export default function CreaSpazio({ iniziale, venduti = 0 }) {
     <section className="wrap buy">
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
-          <div className="eyebrow">Fase {fase(venduti) + 1} di {FASI.length} · {eur(prezzoPixel(venduti))} a pixel</div>
-          <h2>Crea il tuo <em>spazio</em>.</h2>
+          <div className="eyebrow">{cuore ? "Gran finale · ultimi pixel del Cuore, cornice d'oro" : `Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti))} a pixel`}</div>
+          <h2>{cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
         </div>
 
         <div className="card">
           <span className="step-n">Passo I</span>
           <h3>Scegli il pacchetto</h3>
           <div className="pkpick">
-            {Object.values(PACCHETTI).map((x) => (
+            {Object.values(PACCHETTI).filter((x) => !cuore || x.n <= 2).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{x.titolo}</b>
-                <span className="pr">{eur(prezzoPacchetto(x.n, venduti))}</span>
+                <span className="pr">{eur(prezzoDi(x.n))}</span>
                 <small>{x.titolo}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
               </button>
             ))}

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { dbAttivo, pixelVendutiPresto } from "../../lib/db";
+import { dbAttivo, pixelVendutiPresto, cuoreLiberi } from "../../lib/db";
 import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/aste";
 import Timer from "../components/Timer";
-import { PACCHETTI, SOGLIA_ASTE, eur, num, quando } from "../../lib/prezzi";
+import { PACCHETTI, SOGLIA_ASTE, FINALE, prezzoCuore, eur, num, quando } from "../../lib/prezzi";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Aste · PixelHype" };
@@ -25,6 +25,7 @@ export default async function Aste() {
   await aggiornaAstePresto();
   const { aperte, prossime, finite } = await listaAste().catch(() => ({ aperte: [], prossime: 0, finite: [] }));
   const gruppo = (zona) => aperte.filter((a) => a.zona === zona);
+  const piccoli = venduti >= FINALE ? await cuoreLiberi().catch(() => null) : null;
 
   return (
     <section className="blk heart">
@@ -34,6 +35,20 @@ export default async function Aste() {
           <h2>Il centro si conquista <em>all'asta</em>.</h2>
           <p>Ogni asta dura 7 giorni e vince l'offerta più alta. Offrire non costa nulla: la carta viene addebitata solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
         </div>
+        {piccoli && (piccoli[1] > 0 || piccoli[2] > 0) && (
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ marginBottom: 12 }}>Gran finale · ultimi pixel del Cuore a prezzo fisso</h3>
+            <div className="lots">
+              {[1, 2].filter((n) => piccoli[n] > 0).map((n) => (
+                <Link href={`/crea-spazio?pack=${n}&cuore=1`} className="lot oro" key={n} style={{ textDecoration: "none" }}>
+                  <span className="q">Senza asta · cornice d'oro</span>
+                  <span className="s">{PACCHETTI[n].titolo}</span>
+                  <span className="b">{eur(prezzoCuore(n, venduti))} · restano {num(piccoli[n])}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
         {[["cuore", "Nel Cuore"], ["fuori", "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
