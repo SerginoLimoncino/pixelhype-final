@@ -87,7 +87,7 @@ const caricata = (b) => b.imgEl && b.imgEl.complete && b.imgEl.naturalWidth > 0;
 const sfondo = (b) => (b.img ? `center / cover no-repeat url("${b.img}")` : `linear-gradient(135deg,${b.light ? "#faf8f4,#e4dccb" : b.pal[1] + "," + b.pal[0]})`);
 
 export default function Mosaico() {
-  const stageRef = useRef(null), cvRef = useRef(null), miniRef = useRef(null), tipRef = useRef(null), helpRef = useRef(null), fasceRef = useRef(null);
+  const stageRef = useRef(null), cvRef = useRef(null), miniRef = useRef(null), tipRef = useRef(null), helpRef = useRef(null);
   const api = useRef({});
   const [feat, setFeat] = useState([]);
   const [tutti, setTutti] = useState([]);
@@ -110,7 +110,7 @@ export default function Mosaico() {
     let dpr = 1, W = 0, H = 0, sel = -1, raf = 0;
 
     const clamp = () => {
-      const ws = N * CELL * view.s, m = 0; // the grid always fills the frame: no empty bands around it
+      const ws = N * CELL * view.s, m = 60;
       view.x = ws < W ? (ws - W) / 2 : Math.max(-m, Math.min(ws - W + m, view.x));
       view.y = ws < H ? (ws - H) / 2 : Math.max(-m, Math.min(ws - H + m, view.y));
     };
@@ -118,11 +118,11 @@ export default function Mosaico() {
       dpr = window.devicePixelRatio || 1;
       const r = stage.getBoundingClientRect(); W = r.width; H = r.height;
       cv.width = W * dpr; cv.height = H * dpr; mini.width = mini.clientWidth * dpr; mini.height = mini.clientHeight * dpr;
-      if (!view.init) { view.s = Math.min(W, H) / (N * CELL); /* the whole artwork, every pixel, then zoom in */ view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
+      if (!view.init) { view.s = (0.62 * Math.min(W, H)) / (30 * CELL); /* Il Cuore intero, con griglia intorno */ view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
       clamp();
     };
     const zoomAt = (f, sx, sy) => {
-      const ns = Math.max(Math.min(W, H) / (N * CELL), Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
+      const ns = Math.max(0.12, Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
       view.s = ns; view.x = wx * ns - sx; view.y = wy * ns - sy; clamp();
     };
     const flyTo = (wx, wy) => {
@@ -144,8 +144,6 @@ export default function Mosaico() {
     };
 
     function draw(now) {
-      // The empty bands around the whole artwork (tall phone screens) carry the counter and a hint; they fade when zooming in.
-      if (fasceRef.current) { const band = (H - N * CELL * view.s) / 2; fasceRef.current.style.opacity = band > 36 ? 1 : 0; fasceRef.current.style.setProperty("--band", Math.max(0, band) + "px"); }
       const c = ctx, s = view.s * dpr, cs = CELL * s;
       c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = "#14130f"; c.fillRect(0, 0, cv.width, cv.height);
       c.setTransform(s, 0, 0, s, -view.x * dpr, -view.y * dpr);
@@ -224,7 +222,7 @@ export default function Mosaico() {
     api.current = {
       zoomIn: () => zoomAt(1.3, W / 2, H / 2),
       zoomOut: () => zoomAt(1 / 1.3, W / 2, H / 2),
-      reveal: () => { const t0 = performance.now(), s0 = view.s, s1 = Math.min(W, H) / (N * CELL); const st = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); zoomAt((s0 + (s1 - s0) * e) / view.s, W / 2, H / 2); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); hideHelp(); },
+      reveal: () => { const t0 = performance.now(), s0 = view.s, s1 = (Math.min(W, H) / (N * CELL)) * 0.95; const st = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); zoomAt((s0 + (s1 - s0) * e) / view.s, W / 2, H / 2); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); hideHelp(); },
       goTo: (b) => { sel = b.id; if (view.s < 0.6) zoomAt(0.7 / view.s, W / 2, H / 2); flyTo((b.x + b.w / 2) * CELL, (b.y + b.h / 2) * CELL); hideHelp(); },
       search: (t) => blocks.filter((b) => b.name.toLowerCase().includes(t)).sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 8),
     };
@@ -291,10 +289,6 @@ export default function Mosaico() {
               <button type="button" aria-label="Avvicina" onClick={() => api.current.zoomIn()}>+</button>
               <button type="button" aria-label="Allontana" onClick={() => api.current.zoomOut()}>−</button>
               <button type="button" aria-label="Guarda l'opera intera" title="Guarda l'opera intera" onClick={() => api.current.reveal()}>✦</button>
-            </div>
-            <div className="fasce" ref={fasceRef} aria-hidden="true">
-              <div className="fascia su"><b>{num(SELL - freeCount)}</b> pixel presi · <b>{num(freeCount)}</b> ancora liberi</div>
-              <div className="fascia giu">Tocca + o pizzica per avvicinarti</div>
             </div>
             <canvas className="mini" ref={miniRef} aria-label="Mini-mappa: tocca per spostarti" />
             <div className="tip" ref={tipRef} hidden />
