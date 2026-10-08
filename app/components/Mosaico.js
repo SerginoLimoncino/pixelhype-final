@@ -110,7 +110,7 @@ export default function Mosaico() {
     let dpr = 1, W = 0, H = 0, sel = -1, raf = 0;
 
     const clamp = () => {
-      const ws = N * CELL * view.s, m = 60;
+      const ws = N * CELL * view.s, m = 0; // the grid always fills the frame: no empty bands around it
       view.x = ws < W ? (ws - W) / 2 : Math.max(-m, Math.min(ws - W + m, view.x));
       view.y = ws < H ? (ws - H) / 2 : Math.max(-m, Math.min(ws - H + m, view.y));
     };
@@ -118,11 +118,11 @@ export default function Mosaico() {
       dpr = window.devicePixelRatio || 1;
       const r = stage.getBoundingClientRect(); W = r.width; H = r.height;
       cv.width = W * dpr; cv.height = H * dpr; mini.width = mini.clientWidth * dpr; mini.height = mini.clientHeight * dpr;
-      if (!view.init) { view.s = (0.62 * Math.min(W, H)) / (30 * CELL); /* Il Cuore intero, con griglia intorno */ view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
+      if (!view.init) { view.s = Math.max(W, H) / (N * CELL); /* the whole artwork, every pixel, then zoom in */ view.x = (N * CELL * view.s - W) / 2; view.y = (N * CELL * view.s - H) / 2; view.init = true; }
       clamp();
     };
     const zoomAt = (f, sx, sy) => {
-      const ns = Math.max(0.12, Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
+      const ns = Math.max(Math.max(W, H) / (N * CELL), Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
       view.s = ns; view.x = wx * ns - sx; view.y = wy * ns - sy; clamp();
     };
     const flyTo = (wx, wy) => {
@@ -218,7 +218,7 @@ export default function Mosaico() {
     api.current = {
       zoomIn: () => zoomAt(1.3, W / 2, H / 2),
       zoomOut: () => zoomAt(1 / 1.3, W / 2, H / 2),
-      reveal: () => { const t0 = performance.now(), s0 = view.s, s1 = (Math.min(W, H) / (N * CELL)) * 0.95; const st = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); zoomAt((s0 + (s1 - s0) * e) / view.s, W / 2, H / 2); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); hideHelp(); },
+      reveal: () => { const t0 = performance.now(), s0 = view.s, s1 = Math.max(W, H) / (N * CELL); const st = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); zoomAt((s0 + (s1 - s0) * e) / view.s, W / 2, H / 2); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); hideHelp(); },
       goTo: (b) => { sel = b.id; if (view.s < 0.6) zoomAt(0.7 / view.s, W / 2, H / 2); flyTo((b.x + b.w / 2) * CELL, (b.y + b.h / 2) * CELL); hideHelp(); },
       search: (t) => blocks.filter((b) => b.name.toLowerCase().includes(t)).sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 8),
     };
