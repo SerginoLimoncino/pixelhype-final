@@ -170,7 +170,7 @@ h2 em { font-style: italic; color: var(--green); }
 .fc b { display: block; font-family: var(--display); font-style: italic; font-weight: 700; font-size: 23px; line-height: 1.1; }
 .onair { padding-top: 8px; padding-bottom: 28px; }
 .onair-h { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
-.screen { position: relative; background: var(--velvet); color: #f3eee2; min-height: 240px; display: grid; place-items: center; padding: 28px 20px 34px; overflow: hidden; }
+.screen { position: relative; background: radial-gradient(ellipse at 50% 30%, #1d5a47 0%, #123d30 55%, #0b2a20 100%); color: #f3eee2; min-height: 240px; display: grid; place-items: center; padding: 28px 20px 34px; overflow: hidden; }
 .screen::after { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(217, 191, 140, .45); pointer-events: none; }
 .screen-in { display: flex; align-items: center; justify-content: center; gap: 36px; flex-wrap: wrap; text-align: left; animation: onair-in .7s ease both; }
 .screen-art { flex: none; }
