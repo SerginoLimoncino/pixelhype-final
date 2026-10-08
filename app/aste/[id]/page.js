@@ -4,6 +4,7 @@ import { dbAttivo, pixelVendutiPresto } from "../../../lib/db";
 import { asteAperte, aggiornaAstePresto, unaAsta, minimo } from "../../../lib/aste";
 import { PACCHETTI, eur, quando } from "../../../lib/prezzi";
 import Offerta from "./Offerta";
+import Timer from "../../components/Timer";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Asta · PixelHype" };
@@ -26,6 +27,7 @@ export default async function UnaAsta({ params }) {
           <div><span>Base d'asta</span><span>{eur(a.base)}</span></div>
           <div><span>Offerta più alta</span><span>{a.migliore ? eur(a.migliore) : "nessuna"}</span></div>
           <div><span>Offerte</span><span>{a.offerte}</span></div>
+          {aperta && <div><span>Tempo rimasto</span><span><Timer fine={a.fine} /></span></div>}
           <div><span>{aperta ? "Finisce il" : "Finita il"}</span><span>{quando(a.fine)}</span></div>
           <div><span>Posizione</span><span>{a.zona === "cuore" ? `nel Cuore, riga ${a.y + 1}, colonna ${a.x + 1}` : "a caso nel mosaico, per sempre"}</span></div>
         </div>

@@ -296,3 +296,6 @@ h2 em { font-style: italic; color: var(--green); }
 .lot.oro { border: 2px solid transparent; background: linear-gradient(var(--black), var(--black)) padding-box, var(--goldgrad) border-box; box-shadow: 0 0 22px -8px rgba(217, 191, 140, .55); }
 .lot.finita { opacity: .6; }
 .lot.finita .q { color: var(--gold2); }
+.timer { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--gold2); }
+.card .timer { color: var(--green); }
+.timer.ultima { color: #c0392b; }

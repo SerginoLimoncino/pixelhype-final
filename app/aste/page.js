@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { dbAttivo, pixelVendutiPresto } from "../../lib/db";
 import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/aste";
+import Timer from "../components/Timer";
 import { PACCHETTI, SOGLIA_ASTE, eur, num, quando } from "../../lib/prezzi";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +44,8 @@ export default async function Aste() {
                     <span className="q">{PACCHETTI[a.pack].nome}</span>
                     <span className="s">{PACCHETTI[a.pack].titolo}</span>
                     <span className="b">{a.migliore ? `Offerta più alta ${eur(a.migliore)}` : `Base ${eur(a.base)}`}</span>
-                    <span className="b">Offri da {eur(minimo(a, a.migliore))} · finisce il {quando(a.fine)}</span>
+                    <span className="b">Offri da {eur(minimo(a, a.migliore))}</span>
+                    <span className="b">Finisce tra <Timer fine={a.fine} /></span>
                   </Link>
                 ))}
               </div>
