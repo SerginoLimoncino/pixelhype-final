@@ -15,8 +15,8 @@ export default async function Aste() {
       <section className="wrap blk">
         <div className="sec-h">
           <div className="eyebrow">Aste</div>
-          <h2>Le aste non sono <em>ancora aperte</em>.</h2>
-          <p>Si aprono da sole dopo i primi {num(SOGLIA_ASTE)} pixel venduti. Ora siamo a {num(venduti)}.</p>
+          <h2>Il Cuore ti <em>aspetta</em>.</h2>
+          <p>Le aste del Cuore partono a {num(SOGLIA_ASTE)} pixel venduti: mancano {num(Math.max(0, SOGLIA_ASTE - venduti))} pixel. Ci saranno spazi di tutte le misure, anche da 1 pixel.</p>
         </div>
         <Link href="/compra" className="cta">Intanto prendi il tuo spazio</Link>
       </section>

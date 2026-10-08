@@ -76,7 +76,7 @@ export default async function Home() {
           {v >= SOGLIA_ASTE ? (
             <p className="note"><Link href="/aste" className="cta sm">Vedi le aste in corso</Link></p>
           ) : (
-            <p className="note">Le prime aste si aprono a <b>{num(SOGLIA_ASTE)} pixel venduti</b>. Ora siamo a {num(v)}.</p>
+            <p className="note">Le aste del Cuore partono a <b>{num(SOGLIA_ASTE)} pixel venduti</b>: mancano {num(Math.max(0, SOGLIA_ASTE - v))} pixel.</p>
           )}
           <p className="note">Tre piccoli posti fortunati nel Cuore escono a caso a chi compra nella griglia normale.</p>
         </div>
