@@ -154,8 +154,10 @@ export default function Mosaico() {
       const pulse = reduce ? 0.5 : (Math.sin(now / 1400) + 1) / 2, A = 35 * CELL, S = 30 * CELL;
       c.fillStyle = "#0d0d0b"; c.fillRect(A, A, S, S);
       c.globalAlpha = 0.08 + 0.05 * pulse; c.fillStyle = goldGrad(c, A, A, S, S); c.fillRect(A, A, S, S); c.globalAlpha = 1;
-      c.strokeStyle = goldGrad(c, A, A, S, S); c.lineWidth = 3 / view.s; c.strokeRect(A, A, S, S); c.lineWidth = 1 / view.s; c.strokeRect(A + 8, A + 8, S - 16, S - 16);
-      if (cs > 5) { c.fillStyle = goldGrad(c, A, A + S * 0.35, S, S * 0.3); c.textAlign = "center"; c.textBaseline = "middle"; c.font = "italic 700 120px " + getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif"; c.fillText("Il Cuore", 50 * CELL, 48 * CELL); c.font = "700 20px sans-serif"; c.fillText("A S T E   P R E M I U M", 50 * CELL, 54 * CELL); }
+      // How much of the Cuore is already taken: the title fades and the inner line goes as spaces arrive.
+      const pieno = blocks.reduce((t, b) => t + (b.lucky ? b.w * b.h : 0), 0) / 900, titolo = Math.max(0, 1 - pieno * 4);
+      if (pieno === 0) { c.strokeStyle = goldGrad(c, A, A, S, S); c.lineWidth = 1 / view.s; c.strokeRect(A + 8, A + 8, S - 16, S - 16); }
+      if (cs > 5 && titolo > 0) { c.globalAlpha = titolo; c.fillStyle = goldGrad(c, A, A + S * 0.35, S, S * 0.3); c.textAlign = "center"; c.textBaseline = "middle"; c.font = "italic 700 120px " + getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif"; c.fillText("Il Cuore", 50 * CELL, 48 * CELL); c.font = "700 20px sans-serif"; c.fillText("A S T E   P R E M I U M", 50 * CELL, 54 * CELL); c.globalAlpha = 1; }
       if (cs > 3) { c.strokeStyle = `rgba(241,226,189,${cs > 7 ? 0.14 : 0.08})`; c.lineWidth = 1 / view.s; c.beginPath(); for (let i = 0; i <= N; i++) { c.moveTo(i * CELL, 0); c.lineTo(i * CELL, N * CELL); c.moveTo(0, i * CELL); c.lineTo(N * CELL, i * CELL); } c.stroke(); }
       const sweep = reduce ? -1e9 : ((now / 10) % (N * CELL * 2.6)) - N * CELL * 0.4;
       const serif = getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif";
@@ -179,6 +181,8 @@ export default function Mosaico() {
         if (big(b)) { c.strokeStyle = goldGrad(c, x, y, w, h); c.lineWidth = Math.max(2.5, 2 / view.s); c.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); }
         if (k === sel) { c.strokeStyle = "#f1e2bd"; c.lineWidth = 3 / view.s; c.strokeRect(x, y, w, h); }
       });
+      // The Cuore's gold frame is drawn last, on the border line, so it is always visible and never covers an image.
+      c.strokeStyle = goldGrad(c, A, A, S, S); c.lineWidth = 3 / view.s; c.strokeRect(A, A, S, S);
       // mini-map
       const m = mctx, kk = mini.width / (N * CELL);
       m.setTransform(1, 0, 0, 1, 0, 0); m.fillStyle = "#1d1c18"; m.fillRect(0, 0, mini.width, mini.height);
