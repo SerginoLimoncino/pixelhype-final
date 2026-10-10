@@ -34,7 +34,7 @@ export default async function Aste() {
         <div className="sec-h">
           <div className="eyebrow">Aste in corso</div>
           <h2>Il centro si conquista <em>all'asta</em>.</h2>
-          <p>{venduti >= FINALE ? "Gran finale: gli ultimi 20 pezzi, 10 nel Cuore e 10 intorno, con la base del 35% più bassa. Ogni asta dura 3 giorni e vince l'offerta più alta." : "Ogni asta dura 7 giorni e vince l'offerta più alta."} Tocca un'asta per vedere sulla mappa il posto esatto che conquisti. Offrire non costa nulla: la carta viene addebitata solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
+          <p>{venduti >= FINALE ? "Gran finale: gli ultimi 20 pezzi, 10 nel Cuore e 10 sparsi nel mosaico, con la base del 35% più bassa. Ogni asta dura 3 giorni e vince l'offerta più alta." : "Ogni asta dura 7 giorni e vince l'offerta più alta."} Tocca un'asta per vedere sulla mappa il posto esatto che conquisti. Offrire non costa nulla: la carta viene addebitata solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
         </div>
         {piccoli && Object.values(piccoli).some((n) => n > 0) && (
           <div style={{ marginBottom: 32 }}>
@@ -50,7 +50,7 @@ export default async function Aste() {
             </div>
           </div>
         )}
-        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE ? "Fuori dal Cuore, intorno al Cuore" : "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
+        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE ? "Fuori dal Cuore" : "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
             {gruppo(zona).length === 0 ? <p className="note">Nessuna asta aperta in questo momento.</p> : (
