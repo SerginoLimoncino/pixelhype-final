@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto, prezzoCuore, FINALE } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
-import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
+import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, PACK_CUORE_FISSO, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
 
 // Creates the Stripe payment page for a pack. The price is always computed here,
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
@@ -18,8 +18,8 @@ export async function POST(req) {
   const href = l.link;
 
   // A size can be bought while there is a free place for it (100-pixel blocks: also up to their maximum).
-  // Grand finale: the last 1 and 2-pixel spaces of the Cuore, at a fixed price.
-  const cuore = !!nelCuore && (p.n === 1 || p.n === 2);
+  // Grand finale: the Cuore spaces that are not in an auction, at a fixed price.
+  const cuore = !!nelCuore && PACK_CUORE_FISSO.includes(p.n);
   const venduti = await pixelVenduti();
   if (cuore) {
     if (!dbAttivo() || venduti < FINALE || !(await cuoreLiberi())[p.n]) return Response.json({ errore: `Non ci sono più spazi da ${p.titolo} nel Cuore.` }, { status: 400 });
