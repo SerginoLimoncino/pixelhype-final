@@ -33,7 +33,7 @@ function preparaImmagine(file) {
   });
 }
 
-export default function CreaSpazio({ iniziale, venduti = 0, cuore = false }) {
+export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = false }) {
   const [pack, setPack] = useState(iniziale);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +49,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, cuore = false }) {
   const [errPaga, setErrPaga] = useState("");
 
   const p = PACCHETTI[pack];
-  const prezzoDi = (n) => (cuore ? prezzoCuore(n, venduti) : prezzoPacchetto(n, venduti));
+  const prezzoDi = (n) => (cuore ? prezzoCuore(n, venduti, calo) : prezzoPacchetto(n, venduti, calo));
   const totale = prezzoDi(pack);
   const linkValido = !!normalizzaLink(link);
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -162,7 +162,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, cuore = false }) {
     <section className="wrap buy">
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
-          <div className="eyebrow">{cuore ? "Gran finale · ultimi pixel del Cuore, cornice d'oro" : `Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti))} a pixel`}</div>
+          <div className="eyebrow">{cuore ? "Gran finale · ultimi pixel del Cuore, cornice d'oro" : `Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} a pixel`}</div>
           <h2>{cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
         </div>
 

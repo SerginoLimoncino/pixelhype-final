@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto, prezzoCuore, FINALE } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
-import { dbAttivo, pixelVenduti, disponibili, cuoreLiberi, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
+import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
 
 // Creates the Stripe payment page for a pack. The price is always computed here,
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
@@ -24,7 +24,8 @@ export async function POST(req) {
   if (cuore) {
     if (!dbAttivo() || venduti < FINALE || !(await cuoreLiberi())[p.n]) return Response.json({ errore: `Non ci sono più spazi da ${p.titolo} nel Cuore.` }, { status: 400 });
   } else if (dbAttivo() && !(await disponibili()).ok[p.n]) return Response.json({ errore: `Gli spazi da ${p.titolo} sono esauriti.` }, { status: 400 });
-  const prezzo = cuore ? prezzoCuore(p.n, venduti) : prezzoPacchetto(p.n, venduti);
+  const calo = await caloPrezzo(venduti);
+  const prezzo = cuore ? prezzoCuore(p.n, venduti, calo) : prezzoPacchetto(p.n, venduti, calo);
   let ordine = null;
   if (dbAttivo()) {
     if (!immagine) return Response.json({ errore: "Immagine mancante." }, { status: 400 });

@@ -3,12 +3,12 @@ import { PACCHETTI, prezzoPacchetto, eur, num } from "../../lib/prezzi";
 import { disponibiliPresto } from "../../lib/db";
 
 // The six packs as cards. Each card opens /crea-spazio?pack=X. A size that is sold out shows "Esaurito".
-export default async function Pacchetti({ venduti = 0 }) {
+export default async function Pacchetti({ venduti = 0, calo = 0 }) {
   const d = await disponibiliPresto();
   return (
     <div className="packs-t">
       {Object.values(PACCHETTI).map((p) => {
-        const tot = prezzoPacchetto(p.n, venduti);
+        const tot = prezzoPacchetto(p.n, venduti, calo);
         const restano = d ? d.ok[p.n] : true;
         const presi = d ? d.presi[p.n] || 0 : 0;
         const fineFase = !restano && p.max && presi < p.max; // only this phase's share is gone

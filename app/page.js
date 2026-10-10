@@ -2,12 +2,12 @@ import Link from "next/link";
 import Mosaico from "./components/Mosaico";
 import Pacchetti from "./components/Pacchetti";
 import { FASI, LOTTI_CUORE, SOGLIA_ASTE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
-import { pixelVendutiPresto } from "../lib/db";
+import { pixelVendutiPresto, caloPresto } from "../lib/db";
 
 export const revalidate = 30; // prezzo e contatore si aggiornano da soli
 
 export default async function Home() {
-  const v = await pixelVendutiPresto();
+  const v = await pixelVendutiPresto(), calo = await caloPresto(v);
   const f = fase(v);
   const avanzamento = Math.round(((v - f * 1000) / 1000) * 100);
   return (
@@ -20,7 +20,7 @@ export default async function Home() {
         </div>
         <div className="phasebox">
           <div className="pb-top"><span>Fase {f + 1} di {FASI.length}</span><span>prezzo a pixel</span></div>
-          <div className="pb-price">{eur(prezzoPixel(v))}<small>+ IVA</small></div>
+          <div className="pb-price">{eur(prezzoPixel(v, calo))}<small>+ IVA</small></div>
           <div className="bar"><i style={{ width: Math.max(2, avanzamento) + "%" }} /></div>
           <p className="pb-note">Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa a <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "le aste finali"}</b>.</p>
           <div className="pb-row">
@@ -40,8 +40,8 @@ export default async function Home() {
             <p>Nove fasi da 1.000 pixel. Finita una fase, il prezzo sale per sempre. Il prezzo che vedi quando paghi è quello che paghi.</p>
           </div>
           <div className="phases">
-            {FASI.map((v, i) => (
-              <div className={"ph" + (i === f ? " now" : "")} key={v}>
+            {FASI.map((p, i) => (i === f ? prezzoPixel(v, calo) : p)).map((v, i) => (
+              <div className={"ph" + (i === f ? " now" : "")} key={i}>
                 <span className="n">Fase {i + 1}</span>
                 <span className="p">{v} €<small> / pixel</small></span>
                 <span className="x">100 pixel: {eur(charm(v * 100 * 0.75))}</span>
@@ -53,7 +53,7 @@ export default async function Home() {
             <h2>Scegli il tuo <em>spazio</em>.</h2>
             <p>Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25 e da 100 pixel hanno la cornice d'oro e finiscono in evidenza.</p>
           </div>
-          <Pacchetti venduti={v} />
+          <Pacchetti venduti={v} calo={calo} />
         </div>
       </section>
 

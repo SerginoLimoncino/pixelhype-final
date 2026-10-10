@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { prezzoPixel, eur, num } from "../../lib/prezzi";
 
+let prezzoOra = prezzoPixel(); // price per pixel now, from /api/spazi
+
 // DEMO = true riempie il mosaico con marchi di esempio, per vedere come sarà.
 // Al lancio metti false: il mosaico mostrerà solo gli spazi venduti davvero.
 const DEMO = true;
@@ -201,7 +203,7 @@ export default function Mosaico() {
       if (id >= 0 && id === sel && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
       if (id >= 0) { const b = blocks[id]; sel = id; showTip(`<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
       else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip("<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
-      else { sel = -1; showTip(`<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoPixel())}</b>Prendilo prima che salga il prezzo`, sx, sy); }
+      else { sel = -1; showTip(`<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra)}</b>Prendilo prima che salga il prezzo`, sx, sy); }
     };
     const down = (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; hideHelp(); if (pts.size === 2) { const a = [...pts.values()]; pinch = { d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; } };
     const move = (e) => {
@@ -237,8 +239,9 @@ export default function Mosaico() {
     // The empty mosaic is drawn at once, so the frame never stays black while the spaces load.
     const parti = (model) => { stop(); try { stop = avvia(model); } catch (e) { console.error(e); stop = () => {}; } };
     parti(modelloReale([], 0));
-    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, errore }) => {
+    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, prezzo, errore }) => {
       if (!vivo) return;
+      if (prezzo) prezzoOra = prezzo;
       if (errore) console.error("Spazi non caricati:", errore);
       spazi = spazi.filter((r) => Number.isInteger(r.x) && Number.isInteger(r.y) && r.w > 0 && r.h > 0);
       const reale = spazi.length > 0 || !DEMO || !!errore; // never show example brands when the database fails

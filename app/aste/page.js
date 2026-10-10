@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { dbAttivo, pixelVendutiPresto, cuoreLiberi } from "../../lib/db";
+import { dbAttivo, pixelVendutiPresto, caloPresto, cuoreLiberi } from "../../lib/db";
 import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/aste";
 import Timer from "../components/Timer";
 import { PACCHETTI, SOGLIA_ASTE, FINALE, prezzoCuore, eur, num, quando } from "../../lib/prezzi";
@@ -26,6 +26,7 @@ export default async function Aste() {
   const { aperte, prossime, finite } = await listaAste().catch(() => ({ aperte: [], prossime: 0, finite: [] }));
   const gruppo = (zona) => aperte.filter((a) => a.zona === zona);
   const piccoli = venduti >= FINALE ? await cuoreLiberi().catch(() => null) : null;
+  const calo = piccoli ? await caloPresto(venduti) : 0;
 
   return (
     <section className="blk heart">
@@ -43,7 +44,7 @@ export default async function Aste() {
                 <Link href={`/crea-spazio?pack=${n}&cuore=1`} className="lot oro" key={n} style={{ textDecoration: "none" }}>
                   <span className="q">Senza asta · cornice d'oro</span>
                   <span className="s">{PACCHETTI[n].titolo}</span>
-                  <span className="b">{eur(prezzoCuore(n, venduti))} · restano {num(piccoli[n])}</span>
+                  <span className="b">{eur(prezzoCuore(n, venduti, calo))} · restano {num(piccoli[n])}</span>
                 </Link>
               ))}
             </div>
