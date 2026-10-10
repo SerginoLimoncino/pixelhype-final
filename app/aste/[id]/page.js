@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { dbAttivo, pixelVendutiPresto } from "../../../lib/db";
+import { dbAttivo, pixelVendutiPresto, posizioni } from "../../../lib/db";
 import { asteAperte, aggiornaAstePresto, unaAsta, minimo } from "../../../lib/aste";
 import { PACCHETTI, eur, quando } from "../../../lib/prezzi";
 import Offerta from "./Offerta";
 import Timer from "../../components/Timer";
+import Posizione from "./Posizione";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Asta · PixelHype" };
@@ -17,6 +18,7 @@ export default async function UnaAsta({ params }) {
   if (!a || a.stato === "attesa") notFound();
   const p = PACCHETTI[a.pack];
   const aperta = a.stato === "aperta" && new Date(a.fine) > new Date();
+  const presi = aperta && a.x !== null ? await posizioni().catch(() => []) : [];
 
   return (
     <section className="wrap buy">
@@ -29,8 +31,9 @@ export default async function UnaAsta({ params }) {
           <div><span>Offerte</span><span>{a.offerte}</span></div>
           {aperta && <div><span>Tempo rimasto</span><span><Timer fine={a.fine} /></span></div>}
           <div><span>{aperta ? "Finisce il" : "Finita il"}</span><span>{quando(a.fine)}</span></div>
-          <div><span>Posizione</span><span>{a.zona === "cuore" ? `nel Cuore, riga ${a.y + 1}, colonna ${a.x + 1}` : "a caso nel mosaico, per sempre"}</span></div>
+          <div><span>Posizione</span><span>{a.x === null ? "a caso nel mosaico, per sempre" : `${a.zona === "cuore" ? "nel Cuore, " : ""}riga ${a.y + 1}, colonna ${a.x + 1}`}</span></div>
         </div>
+        {aperta && a.x !== null && <Posizione x={a.x} y={a.y} w={p.w} h={p.h} presi={presi} />}
         <p className="muted">Offrire non costa nulla: salvi la carta con Stripe e ti viene addebitata solo se vinci. Se un'offerta arriva negli ultimi 5 minuti, l'asta si allunga di 5 minuti. Prezzi + IVA.</p>
         <Link href="/aste" className="ghost">Tutte le aste</Link>
       </div>

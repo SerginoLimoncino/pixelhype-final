@@ -299,3 +299,11 @@ h2 em { font-style: italic; color: var(--green); }
 .timer { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--gold2); }
 .card .timer { color: var(--green); }
 .timer.ultima { color: #c0392b; }
+
+/* Auction page: small map with the place of the space in gold. */
+.posizione { margin: 4px 0 0; }
+.posizione svg { width: 100%; max-width: 320px; display: block; border: 1px solid rgba(110, 83, 44, .5); }
+.posizione .alone { animation: alone 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes alone { 0%, 100% { opacity: .9; transform: scale(1); } 50% { opacity: .2; transform: scale(1.6); } }
+@media (prefers-reduced-motion: reduce) { .posizione .alone { animation: none; } }
+.posizione figcaption { font-size: 13px; color: var(--muted, #6b6455); margin-top: 6px; }
