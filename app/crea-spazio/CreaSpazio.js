@@ -261,7 +261,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pv-wrap">
             <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH, ...(img && { background: img.bordo }) }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
-              {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("La tua immagine", "Your image")}</div>}
+              {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{prenota ? T("Immagine e link li carichi quando compri", "You upload image and link when you buy") : T("La tua immagine", "Your image")}</div>}
               <div className="gr" style={{ gridTemplateColumns: `repeat(${p.w},1fr)`, gridTemplateRows: `repeat(${p.h},1fr)` }}>
                 {Array.from({ length: p.n }, (_, i) => <div key={i} />)}
               </div>
