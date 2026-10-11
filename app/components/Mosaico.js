@@ -97,6 +97,7 @@ export default function Mosaico() {
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);
   const [freeCount, setFreeCount] = useState(SELL);
+  const [prenotati, setPrenotati] = useState(null); // booking mode: { spazi, pixel }
   const [demo, setDemo] = useState(false);
   const { en, T } = useLingua();
   EN = en;
@@ -244,7 +245,8 @@ export default function Mosaico() {
     // The empty mosaic is drawn at once, so the frame never stays black while the spaces load.
     const parti = (model) => { stop(); try { stop = avvia(model); } catch (e) { console.error(e); stop = () => {}; } };
     parti(modelloReale([], 0));
-    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, prezzo, errore }) => {
+    fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, prezzo, errore, prenotati: pr }) => {
+      if (pr) setPrenotati(pr);
       if (!vivo) return;
       if (prezzo) prezzoOra = prezzo;
       if (errore) console.error("Spazi non caricati:", errore);
@@ -304,6 +306,13 @@ export default function Mosaico() {
         </div></div>
         <div className="label">
           <div className="cartel"><b>PixelHype, 2026</b>{en ? `Collective web artwork, 10,000 pixels. Every space is signed by its owner. Open collection, ${num(freeCount)} pixels still available.` : `Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, ${num(freeCount)} pixel ancora disponibili.`}</div>
+          {prenotati && (
+            <div className="cartel conta">
+              {prenotati.spazi > 0
+                ? <><b>{num(prenotati.spazi)} {prenotati.spazi === 1 ? T("spazio prenotato", "space booked") : T("spazi prenotati", "spaces booked")}</b>{en ? `${num(prenotati.pixel)} pixels already reserved by those who arrived first. Bookings are open.` : `${num(prenotati.pixel)} pixel già riservati da chi è arrivato per primo. Prenotazioni aperte.`}</>
+                : <><b>{T("Prenotazioni aperte", "Bookings open")}</b>{T("Sii tra i primi a riservare il tuo spazio nell'opera.", "Be among the first to reserve your space in the artwork.")}</>}
+            </div>
+          )}
           {demo && <div className="demo-note">{T("Anteprima con marchi di esempio", "Preview with sample brands")}</div>}
         </div>
       </div>

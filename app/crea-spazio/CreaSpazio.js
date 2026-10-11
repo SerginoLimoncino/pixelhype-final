@@ -218,6 +218,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               </button>
             ))}
           </div>
+          {prenota && pack >= 50 && <p className="hint" style={{ marginTop: 12 }}>{T("Pochi spazi di questa misura all'apertura: la prenotazione ti dà la precedenza, non la garanzia. Vince chi conferma per primo.", "Few spaces of this size at launch: booking gives you priority, not a guarantee. Whoever confirms first wins.")}</p>}
         </div>
 
         <div className="card">
