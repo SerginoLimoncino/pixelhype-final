@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PACCHETTI, FASI, fase, inVenditaOra, prezzoPacchetto, prezzoCuore, prezzoPixel, nomePack, misura, eur } from "../../lib/prezzi";
 import { useLingua } from "../components/Lingua";
 import { normalizzaLink } from "../../lib/controllo";
+import { coloreBordo } from "../components/Ritaglio";
 
 const MAX_MB = 10; // file più grandi vengono rifiutati
 const MAX_LATO = 1600; // lato massimo dopo il ridimensionamento automatico
@@ -32,23 +33,6 @@ function preparaImmagine(file, T) {
     im.onerror = () => { URL.revokeObjectURL(url); reject(T("Non riesco a leggere questa immagine.", "This image cannot be read.")); };
     im.src = url;
   });
-}
-
-// The average colour along the image's edges: the empty bands of "show whole" get this colour,
-// so a logo on a white or coloured background blends in instead of leaving stripes.
-function coloreBordo(src) {
-  const N = 32, c = document.createElement("canvas");
-  c.width = N; c.height = N;
-  const g = c.getContext("2d");
-  g.drawImage(src, 0, 0, N, N);
-  const d = g.getImageData(0, 0, N, N).data;
-  let r = 0, gr = 0, b = 0, k = 0;
-  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    if (x > 0 && x < N - 1 && y > 0 && y < N - 1) continue;
-    const i = (y * N + x) * 4, a = d[i + 3] / 255; // transparent edges count as ivory
-    r += d[i] * a + 250 * (1 - a); gr += d[i + 1] * a + 248 * (1 - a); b += d[i + 2] * a + 244 * (1 - a); k++;
-  }
-  return `rgb(${Math.round(r / k)},${Math.round(gr / k)},${Math.round(b / k)})`;
 }
 
 export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = false }) {
@@ -113,7 +97,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   }
 
   // Preview size: the block keeps its shape and fits in about 320px.
-  const cell = Math.min(64, Math.floor(320 / p.w));
+  const cell = Math.min(160, Math.floor(320 / p.w));
   const PW = p.w * cell, PH = p.h * cell;
   // Image size inside the preview: "cover" fills the block, "contain" shows it whole; zoom enlarges it.
   const base = img ? (fit === "cover" ? Math.max(PW / img.w, PH / img.h) : Math.min(PW / img.w, PH / img.h)) : 1;

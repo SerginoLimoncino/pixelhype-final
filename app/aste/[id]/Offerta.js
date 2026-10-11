@@ -81,6 +81,7 @@ export default function Offerta({ asta, w, h, min }) {
           </label>
           <label className="f">{T("La tua immagine", "Your image")}
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={carica} />
+            <span className="hint"><b>{T("Formato consigliato", "Recommended size")}: {w * 100} × {h * 100} px</b> {T("(o più grande, con la stessa forma). Così l'immagine riempie lo spazio senza bande.", "(or larger, same shape). This way the image fills the space with no bands.")}</span>
           </label>
           <label className="f">{T("La tua email (per la ricevuta)", "Your email (for the receipt)")}
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} />

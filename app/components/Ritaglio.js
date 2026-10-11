@@ -5,6 +5,23 @@ import { useLingua } from "./Lingua";
 
 const PX_FINALE = 100; // pixel reali per ogni pixel del mosaico nell'immagine finale
 
+// The average colour along the image's edges: the empty bands of "show whole" get this colour,
+// so a logo on a white or coloured background blends in instead of leaving stripes.
+export function coloreBordo(src) {
+  const N = 32, c = document.createElement("canvas");
+  c.width = N; c.height = N;
+  const g = c.getContext("2d");
+  g.drawImage(src, 0, 0, N, N);
+  const d = g.getImageData(0, 0, N, N).data;
+  let r = 0, gr = 0, b = 0, k = 0;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (x > 0 && x < N - 1 && y > 0 && y < N - 1) continue;
+    const i = (y * N + x) * 4, a = d[i + 3] / 255; // transparent edges count as ivory
+    r += d[i] * a + 250 * (1 - a); gr += d[i + 1] * a + 248 * (1 - a); b += d[i + 2] * a + 244 * (1 - a); k++;
+  }
+  return `rgb(${Math.round(r / k)},${Math.round(gr / k)},${Math.round(b / k)})`;
+}
+
 // Reads an image file and shrinks it to at most 1600px per side.
 export function leggiImmagine(file) {
   return new Promise((resolve, reject) => {
@@ -15,7 +32,7 @@ export function leggiImmagine(file) {
       const c = document.createElement("canvas");
       c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
       c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-      resolve({ src: c.toDataURL("image/png"), w: c.width, h: c.height, el: c });
+      resolve({ src: c.toDataURL("image/png"), w: c.width, h: c.height, el: c, bordo: coloreBordo(c) });
     };
     im.onerror = () => { URL.revokeObjectURL(url); reject("Non riesco a leggere questa immagine."); };
     im.src = url;
@@ -30,7 +47,7 @@ export default function Ritaglio({ img, w, h, fatto }) {
   const [fit, setFit] = useState("cover");
   const drag = useRef(null);
 
-  const cell = Math.min(64, Math.floor(320 / w));
+  const cell = Math.min(160, Math.floor(320 / w));
   const PW = w * cell, PH = h * cell;
   const base = img ? (fit === "cover" ? Math.max(PW / img.w, PH / img.h) : Math.min(PW / img.w, PH / img.h)) : 1;
   const dw = img ? img.w * base * zoom : 0, dh = img ? img.h * base * zoom : 0;
@@ -47,7 +64,7 @@ export default function Ritaglio({ img, w, h, fatto }) {
       const c = document.createElement("canvas");
       c.width = w * PX_FINALE; c.height = h * PX_FINALE;
       const g = c.getContext("2d"), r = c.width / PW;
-      g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
+      g.fillStyle = img.bordo || "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
       g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
       const webp = c.toDataURL("image/webp", 0.9);
       return webp.startsWith("data:image/webp") ? webp : c.toDataURL("image/jpeg", 0.9);
@@ -68,7 +85,7 @@ export default function Ritaglio({ img, w, h, fatto }) {
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
       <div className="pv-wrap">
-        <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH }} onPointerDown={inizio} onPointerMove={muovi} onPointerUp={() => (drag.current = null)} onPointerCancel={() => (drag.current = null)}>
+        <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH, ...(img && { background: img.bordo }) }} onPointerDown={inizio} onPointerMove={muovi} onPointerUp={() => (drag.current = null)} onPointerCancel={() => (drag.current = null)}>
           {img ? <img src={img.src} alt={T("Anteprima", "Preview")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("L'immagine", "The image")}</div>}
           <div className="gr" style={{ gridTemplateColumns: `repeat(${w},1fr)`, gridTemplateRows: `repeat(${h},1fr)` }}>
             {Array.from({ length: w * h }, (_, i) => <div key={i} />)}
