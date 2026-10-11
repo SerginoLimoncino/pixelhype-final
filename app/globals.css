@@ -326,3 +326,4 @@ h2 em { font-style: italic; color: var(--green); }
 @media (min-width: 900px) { .hd > .lingua { display: inline-flex; } }
 .menu-tel .lingua { justify-self: start; margin-top: 12px; }
 .menu-tel .lingua button { padding: 10px 16px; font-size: 13px; }
+.linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--green); text-decoration: underline; cursor: pointer; }

@@ -4,6 +4,7 @@ import { confermaOfferta } from "../../../lib/aste";
 import { eur } from "../../../lib/prezzi";
 import { traduttore } from "../../../lib/lingua";
 import { inglese } from "../../../lib/messaggi";
+import Ricorda from "./Ricorda";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -31,7 +32,8 @@ export default async function Grazie({ searchParams }) {
           <>
             <span className="step-n">{T("Offerta registrata", "Bid saved")} · {eur(esito.o.importo)}</span>
             <p className="ok-big">{T("Sei in gara.", "You are in the race.")}</p>
-            <p className="muted">{en ? `If your bid is the highest at the end, we charge you ${eur(esito.o.importo)} + VAT and your space goes online by itself. If someone bids more, you pay nothing. Come back to the auction page to see how it goes.` : `Se alla fine la tua offerta è la più alta, ti addebitiamo ${eur(esito.o.importo)} + IVA e il tuo spazio va online da solo. Se qualcuno offre di più, non paghi nulla. Torna sulla pagina dell'asta per vedere come va.`}</p>
+            {esito.o.chiave && <Ricorda asta={esito.o.asta} chiave={esito.o.chiave} />}
+            <p className="muted">{en ? `If your bid is the highest at the end, we charge you ${eur(esito.o.importo)} + VAT and your space goes online by itself. If someone bids more, you pay nothing. Come back to the auction page to see how it goes: from this device you can raise with one click, without typing your details again.` : `Se alla fine la tua offerta è la più alta, ti addebitiamo ${eur(esito.o.importo)} + IVA e il tuo spazio va online da solo. Se qualcuno offre di più, non paghi nulla. Torna sulla pagina dell'asta per vedere come va: da questo dispositivo potrai rilanciare con un clic, senza rimettere i dati.`}</p>
           </>
         ) : (
           <>

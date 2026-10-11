@@ -25,7 +25,7 @@ async function rispondi(req) {
   await sql()`update offerte set img = ${img} where id = ${id}`;
 
   const chiave = process.env.STRIPE_SECRET_KEY;
-  if (!chiave) { const r = await confermaOfferta(id, {}); return Response.json(r.ok ? { prova: true } : { errore: r.motivo }); }
+  if (!chiave) { const r = await confermaOfferta(id, {}); return Response.json(r.ok ? { prova: true, chiave: r.o.chiave } : { errore: r.motivo }); }
 
   const stripe = new Stripe(chiave);
   const cliente = await stripe.customers.create({ email, name: String(nome).slice(0, 80) });

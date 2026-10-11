@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Ritaglio, { leggiImmagine } from "../../components/Ritaglio";
 import { normalizzaLink } from "../../../lib/controllo";
@@ -19,6 +19,33 @@ export default function Offerta({ asta, w, h, min }) {
   const [stato, setStato] = useState("modulo"); // modulo | invio | fatto
   const tagliata = useRef(null);
   const { en, T } = useLingua();
+
+  // A bidder who already saved a card here is recognised by the key kept in this browser: one-click raise or withdraw.
+  const LS = `pixelhype-asta-${asta}`;
+  const [chiave, setChiave] = useState(null);
+  const [mia, setMia] = useState(null);
+  const [rilancio, setRilancio] = useState("");
+  const [conferma, setConferma] = useState(null); // null | "rilancia" | "ritira"
+  const [altro, setAltro] = useState(false); // bid with another brand: show the full form
+  const [lavoro, setLavoro] = useState(false);
+  const leggiLS = () => { try { return localStorage.getItem(LS); } catch { return null; } };
+  const scriviLS = (v) => { try { v ? localStorage.setItem(LS, v) : localStorage.removeItem(LS); } catch {} };
+  const chiedi = (corpo) => fetch("/api/aste/mia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ asta, chiave, ...corpo }) }).then((x) => x.json());
+  useEffect(() => {
+    const k = leggiLS();
+    if (!k) return;
+    setChiave(k);
+    fetch("/api/aste/mia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ asta, chiave: k }) })
+      .then((x) => x.json()).then((d) => { if (d.mia) { setMia(d.mia); setRilancio(String(d.mia.min)); } else scriviLS(null); }).catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  async function confermato() {
+    setLavoro(true); setErrore("");
+    const d = await chiedi(conferma === "rilancia" ? { azione: "rilancia", importo: Math.floor(Number(rilancio)) } : { azione: "ritira" }).catch(() => ({ errore: T("Qualcosa non ha funzionato. Riprova tra poco.", "Something went wrong. Please try again shortly.") }));
+    setLavoro(false); setConferma(null);
+    if (d.errore) { setErrore(d.errore); return; }
+    if (d.ritirata) { scriviLS(null); setMia(null); window.location.reload(); return; }
+    window.location.reload();
+  }
 
   const euro = Math.floor(Number(importo));
   const pronto = euro >= min && nome.trim() && (!link.trim() || normalizzaLink(link)) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && img && ok;
@@ -54,7 +81,7 @@ export default function Offerta({ asta, w, h, min }) {
       if (!c.ok) { setErrore(c.motivo); setStato("modulo"); return; }
       const d = await fetch("/api/aste/offerta", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ asta, importo: euro, nome, link, email, dubbio: c.dubbio, immagine }) }).then((x) => x.json());
       if (d.url) { window.location.href = d.url; return; }
-      if (d.prova) { setStato("fatto"); return; }
+      if (d.prova) { if (d.chiave) scriviLS(d.chiave); setStato("fatto"); return; }
       setErrore(d.errore || T("Non è stato possibile registrare l'offerta.", "The bid could not be saved.")); setStato("modulo");
     } catch {
       setErrore(T("Non è stato possibile registrare l'offerta. Riprova tra poco.", "The bid could not be saved. Please try again shortly.")); setStato("modulo");
@@ -62,6 +89,50 @@ export default function Offerta({ asta, w, h, min }) {
   }
 
   if (stato === "fatto") return <div className="card"><p className="ok-big">{T("Offerta registrata.", "Bid saved.")}</p><p className="muted">{T("Prova senza pagamento: nessun addebito.", "Test without payment: nothing charged.")}</p></div>;
+
+  if (mia && mia.aperta && !altro) {
+    const r = Math.floor(Number(rilancio));
+    return (
+      <div className="card" style={{ display: "grid", gap: 14 }}>
+        <span className="step-n">{T("Sei in gara", "You are in the race")}</span>
+        <p className="muted">{T("Offri come", "Bidding as")} <b>{mia.nome}</b>. {T("La tua offerta", "Your bid")}: <b>{eur(mia.importo)}</b>.</p>
+        <p className="ok-big" style={{ fontSize: 26 }}>{mia.inTesta ? T("✓ Sei in testa.", "✓ You are in the lead.") : `${T("Qualcuno ha offerto di più", "Someone bid more")}: ${eur(mia.migliore)}.`}</p>
+        {conferma ? (
+          <div className="card" style={{ display: "grid", gap: 12, background: "var(--paper)" }}>
+            {conferma === "rilancia" ? (
+              <>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  {mia.img && <img src={mia.img} alt="" style={{ width: 64, height: 64, objectFit: "cover", border: "1px solid var(--line)" }} />}
+                  <div><b>{mia.nome}</b><br /><span className="muted">{mia.link || T("nessun link", "no link")}</span></div>
+                </div>
+                <p>{en ? <>Do you confirm a bid of <b>{eur(r)} + VAT</b> for this space, with this image and this link? If you win, it is charged to the payment method you saved.</> : <>Confermi di offrire <b>{eur(r)} + IVA</b> per questo spazio, con questa immagine e questo link? Se vinci, viene addebitata sul metodo di pagamento che hai salvato.</>}</p>
+              </>
+            ) : (
+              <p>{T("Vuoi davvero ritirarti? Le tue offerte in questa asta vengono annullate e non ti verrà addebitato nulla.", "Do you really want to withdraw? Your bids in this auction are cancelled and nothing will be charged.")}</p>
+            )}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button type="button" className="cta" disabled={lavoro} onClick={confermato}>{lavoro ? T("Un attimo…", "One moment…") : T("Conferma", "Confirm")}</button>
+              <button type="button" className="ghost" disabled={lavoro} onClick={() => setConferma(null)}>{T("Annulla", "Cancel")}</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <label className="f">{T("Nuova offerta (€, + IVA)", "New bid (€, + VAT)")}
+              <input type="number" inputMode="numeric" min={mia.min} step="1" value={rilancio} onChange={(e) => setRilancio(e.target.value)} />
+              <span className="hint">{T("Minimo", "Minimum")} {eur(mia.min)}</span>
+            </label>
+            <button type="button" className="cta" disabled={!(r >= mia.min)} onClick={() => setConferma("rilancia")}>{T("Rilancia a", "Raise to")} {r >= mia.min ? eur(r) : ""}</button>
+            {mia.inTesta
+              ? <p className="hint">{T("Chi è in testa non può ritirarsi.", "The bidder in the lead cannot withdraw.")}</p>
+              : <button type="button" className="ghost" onClick={() => setConferma("ritira")}>{T("Ritirati dall'asta", "Withdraw from the auction")}</button>}
+          </>
+        )}
+        {errore && <p className="hint" style={{ color: "#8a3f2c" }}>{errore}</p>}
+        <p className="muted">{T("Nessun dato da reinserire: usiamo il metodo di pagamento che hai già salvato.", "Nothing to type again: we use the payment method you already saved.")}{" "}
+          <button type="button" className="linklike" onClick={() => setAltro(true)}>{T("Offri con un altro marchio", "Bid with another brand")}</button></p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
