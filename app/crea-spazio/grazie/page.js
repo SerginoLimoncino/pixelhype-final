@@ -21,18 +21,17 @@ export default async function Grazie({ searchParams }) {
   }
   const pagato = s?.payment_status === "paid";
   const p = pagato ? PACCHETTI[s.metadata?.pack] : null;
-  const dubbio = s?.metadata?.da_controllare === "si";
 
   let spazio = null;
   if (pagato && dbAttivo() && s.metadata?.ordine) {
     // Never keep the buyer waiting: after 8 seconds the page shows anyway, and the space is placed within minutes
     // by the next visit to the mosaic (lib/aste.js, sistemaOrdini).
     const attesa = new Promise((ok) => setTimeout(() => ok(null), 8000));
-    spazio = await Promise.race([assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null), attesa]);
+    spazio = await Promise.race([assegnaPosizione(Number(s.metadata.ordine), "online").catch(() => null), attesa]);
     // Not placed in time: keep trying in the background once the page has been sent (up to 3 tries).
     if (!spazio) after(async () => {
       for (let i = 0; i < 3; i++) {
-        if (await assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null)) return;
+        if (await assegnaPosizione(Number(s.metadata.ordine), "online").catch(() => null)) return;
         await new Promise((ok) => setTimeout(ok, 5000));
       }
     });

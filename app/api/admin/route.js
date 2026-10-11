@@ -2,7 +2,8 @@ import Stripe from "stripe";
 import { timingSafeEqual } from "crypto";
 import { PACCHETTI } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
-import { listaAste } from "../../../lib/aste";
+import { listaAste, aggiornaAste } from "../../../lib/aste";
+import { sql } from "../../../lib/db";
 import { dbAttivo, tuttiGliSpazi, aggiorna, cancella, nuovoOrdine, salvaImmagine, assegnaPosizione } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,13 @@ export async function POST(req) {
         await assegnaPosizione(id, "online");
         break;
       }
+      case "chiudiAsta": {
+        // Test only: ends an auction now, so the charge to the winner can be checked. Refused with real payments.
+        if (!String(process.env.STRIPE_SECRET_KEY || "").startsWith("sk_test")) return Response.json({ errore: "Solo in modalità prova." }, { status: 400 });
+        await sql()`update aste set fine = now() - interval '1 second' where id = ${Number(b.id)} and stato = 'aperta'`;
+        await aggiornaAste();
+        return Response.json({ ok: true, spazi: await tuttiGliSpazi(), aste: await listaAste().catch(() => null) });
+      }
       case "verifica": {
         // A paid order whose buyer closed the page before coming back: check with Stripe and place it.
         const tutti = await tuttiGliSpazi();
@@ -61,7 +69,7 @@ export async function POST(req) {
         if (!o?.stripe_session || !process.env.STRIPE_SECRET_KEY) return Response.json({ errore: "Nessun pagamento collegato." }, { status: 400 });
         const s = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.retrieve(o.stripe_session);
         if (s.payment_status !== "paid") return Response.json({ errore: "Questo ordine non risulta pagato." }, { status: 400 });
-        await assegnaPosizione(o.id, s.metadata?.da_controllare === "si" ? "da_controllare" : "online");
+        await assegnaPosizione(o.id, "online");
         break;
       }
       default:

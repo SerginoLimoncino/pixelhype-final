@@ -24,7 +24,7 @@ function ritaglia(file, w, h) {
   });
 }
 
-export default function Admin() {
+export default function Admin({ prova = false }) {
   const [pw, setPw] = useState("");
   const [entrato, setEntrato] = useState(false);
   const [spazi, setSpazi] = useState([]);
@@ -117,7 +117,8 @@ export default function Admin() {
           <>
             <p className="muted">{aste.aperte.length} in corso · {aste.prossime} in arrivo · {aste.chiuse} vinte e pagate. Tutto automatico.</p>
             {aste.aperte.map((a) => (
-              <p key={a.id} className="muted">{a.zona === "cuore" ? "Cuore" : "Fuori"} · {a.pack} pixel · {a.migliore ? `offerta più alta ${eur(a.migliore)}` : `base ${eur(a.base)}, nessuna offerta`} · finisce {new Date(a.fine).toLocaleString("it-IT")}</p>
+              <p key={a.id} className="muted">{a.zona === "cuore" ? "Cuore" : "Fuori"} · {a.pack} pixel · {a.migliore ? `offerta più alta ${eur(a.migliore)}` : `base ${eur(a.base)}, nessuna offerta`} · finisce {new Date(a.fine).toLocaleString("it-IT")}{" "}
+                {prova && <button type="button" className="ghost sm" disabled={lavoro} onClick={() => confirm("Far finire subito questa asta? Il vincitore viene addebitato (pagamento di prova).") && chiama("chiudiAsta", { id: a.id })}>Fai finire ora (prova)</button>}</p>
             ))}
           </>
         )}
