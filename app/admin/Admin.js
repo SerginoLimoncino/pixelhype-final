@@ -57,6 +57,8 @@ export default function Admin({ prova = false, prenota = false }) {
     if (salvata) { setPw(salvata); chiama("lista", {}, salvata).then((ok) => setEntrato(ok)); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => { if (entrato && prenota) chiama("prenotazioni"); }, [entrato]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function entra(e) {
     e.preventDefault();
     if (await chiama("lista")) { setEntrato(true); try { sessionStorage.setItem("ph-admin", pw); } catch {} }
@@ -95,8 +97,6 @@ export default function Admin({ prova = false, prenota = false }) {
     );
   }
 
-  useEffect(() => { if (entrato && prenota) chiama("prenotazioni"); }, [entrato]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const conta = (st) => spazi.filter((s) => s.stato === st).length;
   const pixel = spazi.filter((s) => s.x !== null).reduce((a, s) => a + s.w * s.h, 0);
   const incasso = spazi.filter((s) => s.x !== null).reduce((a, s) => a + s.prezzo, 0);
@@ -132,7 +132,7 @@ export default function Admin({ prova = false, prenota = false }) {
       <div className="card" style={{ marginBottom: 24 }}>
         <h3>Aste</h3>
         {!aste || (aste.aperte.length === 0 && aste.prossime === 0 && aste.chiuse === 0) ? (
-          <p className="muted">Partono da sole dopo i primi 1.000 pixel venduti. Non devi fare niente.</p>
+          <p className="muted">{prenota ? "Chiuse finché il sito raccoglie prenotazioni. Partono da sole quando apri la vendita." : "Partono da sole dopo i primi 1.000 pixel venduti. Non devi fare niente."}</p>
         ) : (
           <>
             <p className="muted">{aste.aperte.length} in corso · {aste.prossime} in arrivo · {aste.chiuse} vinte e pagate. Tutto automatico.</p>
@@ -145,7 +145,7 @@ export default function Admin({ prova = false, prenota = false }) {
       </div>
 
       {prova && (
-        <div className="card">
+        <div className="card" style={{ marginBottom: 24 }}>
           <h3>Prima del lancio</h3>
           <p className="muted">Cancella tutti gli spazi, le aste e le offerte di prova. Si usa una volta sola, prima di aprire il sito.</p>
           <button type="button" className="ghost" disabled={lavoro} onClick={() => prompt("Verranno cancellati TUTTI gli spazi, le aste e le offerte. Scrivi SVUOTA per confermare.") === "SVUOTA" && chiama("svuota", { parola: "SVUOTA" })}>Cancella tutte le prove</button>

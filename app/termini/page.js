@@ -15,8 +15,8 @@ export default async function Termini() {
     <Legale titolo="Termini e condizioni" aggiornato={AGGIORNATO}>
       <h2>1. Chi siamo</h2>
       <p>
-        Il sito getpixelhype.com (&quot;PixelHype&quot;) è gestito da {dato(TITOLARE.nome)}, con sede in {dato(TITOLARE.indirizzo)},
-        partita IVA / codice fiscale {dato(TITOLARE.piva)}{TITOLARE.pec ? `, PEC ${TITOLARE.pec}` : ""}. Contatti: <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
+        Il sito getpixelhype.com (&quot;PixelHype&quot;) è gestito da {dato(TITOLARE.nome)}, con sede in {dato(TITOLARE.indirizzo)}
+        {TITOLARE.piva ? `, partita IVA / codice fiscale ${TITOLARE.piva}` : ""}{TITOLARE.pec ? `, PEC ${TITOLARE.pec}` : ""}. Contatti: <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
       </p>
 
       <h2>2. Cosa vende PixelHype</h2>
@@ -108,8 +108,8 @@ function English() {
     <Legale titolo="Terms and conditions" aggiornato={AGGIORNATO_EN}>
       <h2>1. Who we are</h2>
       <p>
-        The website getpixelhype.com (&quot;PixelHype&quot;) is run by {dato(TITOLARE.nome, true)}, based in {dato(TITOLARE.indirizzo, true)},
-        VAT number / tax code {dato(TITOLARE.piva, true)}{TITOLARE.pec ? `, PEC ${TITOLARE.pec}` : ""}. Contact: <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
+        The website getpixelhype.com (&quot;PixelHype&quot;) is run by {dato(TITOLARE.nome, true)}, based in {dato(TITOLARE.indirizzo, true)}
+        {TITOLARE.piva ? `, VAT number / tax code ${TITOLARE.piva}` : ""}{TITOLARE.pec ? `, PEC ${TITOLARE.pec}` : ""}. Contact: <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
       </p>
 
       <h2>2. What PixelHype sells</h2>

@@ -17,7 +17,7 @@ export default async function Privacy() {
 
       <h2>1. Titolare del trattamento</h2>
       <p>
-        {dato(TITOLARE.nome)}, {dato(TITOLARE.indirizzo)}, partita IVA / codice fiscale {dato(TITOLARE.piva)}. Per qualsiasi richiesta sui tuoi dati
+        {dato(TITOLARE.nome)}, {dato(TITOLARE.indirizzo)}{TITOLARE.piva ? `, partita IVA / codice fiscale ${TITOLARE.piva}` : ""}. Per qualsiasi richiesta sui tuoi dati
         scrivi a <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
       </p>
 
@@ -97,7 +97,7 @@ function English() {
 
       <h2>1. Data controller</h2>
       <p>
-        {dato(TITOLARE.nome, true)}, {dato(TITOLARE.indirizzo, true)}, VAT number / tax code {dato(TITOLARE.piva, true)}. For any request about your data
+        {dato(TITOLARE.nome, true)}, {dato(TITOLARE.indirizzo, true)}{TITOLARE.piva ? `, VAT number / tax code ${TITOLARE.piva}` : ""}. For any request about your data
         write to <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
       </p>
 
