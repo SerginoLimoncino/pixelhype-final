@@ -34,7 +34,7 @@ export default async function UnaAsta({ params }) {
           <div><span>Posizione</span><span>{a.x === null ? "a caso nel mosaico, per sempre" : `${a.zona === "cuore" ? "nel Cuore, " : ""}riga ${a.y + 1}, colonna ${a.x + 1}`}</span></div>
         </div>
         {aperta && a.x !== null && <Posizione x={a.x} y={a.y} w={p.w} h={p.h} presi={presi} />}
-        <p className="muted">Offrire non costa nulla: salvi la carta con Stripe e ti viene addebitata solo se vinci. Se un'offerta arriva negli ultimi 5 minuti, l'asta si allunga di 5 minuti. Prezzi + IVA.</p>
+        <p className="muted">Offrire non costa nulla: salvi carta o PayPal e paghi solo se vinci. Se un'offerta arriva negli ultimi 5 minuti, l'asta si allunga di 5 minuti. Prezzi + IVA.</p>
         <Link href="/aste" className="ghost">Tutte le aste</Link>
       </div>
       {aperta ? <Offerta asta={a.id} w={p.w} h={p.h} min={minimo(a, a.migliore)} /> : <div className="card"><p className="muted">Asta finita.</p></div>}

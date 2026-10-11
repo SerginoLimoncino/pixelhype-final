@@ -33,7 +33,6 @@ export async function POST(req) {
     mode: "setup",
     currency: "eur",
     customer: cliente.id,
-    payment_method_types: ["card"],
     setup_intent_data: { description: `Offerta di ${euro} € per l'asta PixelHype (${PACCHETTI[a.pack].titolo}). Addebito solo se vinci.` },
     metadata: { offerta: String(id), asta: String(a.id) },
     success_url: `${sito}/aste/grazie?session_id={CHECKOUT_SESSION_ID}`,

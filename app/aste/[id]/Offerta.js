@@ -85,13 +85,13 @@ export default function Offerta({ asta, w, h, min }) {
         </div>
         <label className="check">
           <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
-          <span>Confermo che l'immagine è mia o ho il diritto di usarla. Se vinco, accetto l'addebito della mia offerta sulla carta che salvo ora.</span>
+          <span>Confermo che l'immagine è mia o ho il diritto di usarla. Se vinco, accetto l'addebito della mia offerta sul metodo di pagamento che salvo ora.</span>
         </label>
         <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={offri}>
           {stato === "invio" ? "Controllo in corso…" : `Offri ${euro >= min ? eur(euro) : ""}`}
         </button>
         {errore && <p className="hint" style={{ color: "#8a3f2c" }}>{errore}</p>}
-        <p className="muted">Salvi la carta in modo sicuro con Stripe. Non paghi nulla adesso.</p>
+        <p className="muted">Salvi carta o PayPal in modo sicuro. Non paghi nulla adesso.</p>
       </div>
     </div>
   );
