@@ -112,7 +112,7 @@ export default function Mosaico() {
     let dpr = 1, W = 0, H = 0, sel = -1, raf = 0;
 
     const clamp = () => {
-      const ws = N * CELL * view.s, m = 60;
+      const ws = N * CELL * view.s, m = 0;
       view.x = ws < W ? (ws - W) / 2 : Math.max(-m, Math.min(ws - W + m, view.x));
       view.y = ws < H ? (ws - H) / 2 : Math.max(-m, Math.min(ws - H + m, view.y));
     };
