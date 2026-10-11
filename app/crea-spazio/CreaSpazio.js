@@ -27,11 +27,28 @@ function preparaImmagine(file, T) {
       const c = document.createElement("canvas");
       c.width = Math.round(w * k); c.height = Math.round(h * k);
       c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-      resolve({ src: c.toDataURL("image/webp", 0.9), w: c.width, h: c.height, el: c });
+      resolve({ src: c.toDataURL("image/webp", 0.9), w: c.width, h: c.height, el: c, bordo: coloreBordo(c) });
     };
     im.onerror = () => { URL.revokeObjectURL(url); reject(T("Non riesco a leggere questa immagine.", "This image cannot be read.")); };
     im.src = url;
   });
+}
+
+// The average colour along the image's edges: the empty bands of "show whole" get this colour,
+// so a logo on a white or coloured background blends in instead of leaving stripes.
+function coloreBordo(src) {
+  const N = 32, c = document.createElement("canvas");
+  c.width = N; c.height = N;
+  const g = c.getContext("2d");
+  g.drawImage(src, 0, 0, N, N);
+  const d = g.getImageData(0, 0, N, N).data;
+  let r = 0, gr = 0, b = 0, k = 0;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (x > 0 && x < N - 1 && y > 0 && y < N - 1) continue;
+    const i = (y * N + x) * 4, a = d[i + 3] / 255; // transparent edges count as ivory
+    r += d[i] * a + 250 * (1 - a); gr += d[i + 1] * a + 248 * (1 - a); b += d[i + 2] * a + 244 * (1 - a); k++;
+  }
+  return `rgb(${Math.round(r / k)},${Math.round(gr / k)},${Math.round(b / k)})`;
 }
 
 export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = false }) {
@@ -127,7 +144,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     const c = document.createElement("canvas");
     c.width = p.w * PX_FINALE; c.height = p.h * PX_FINALE;
     const g = c.getContext("2d"), r = c.width / PW;
-    g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = img.bordo || "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
     const webp = c.toDataURL("image/webp", 0.9);
     return webp.startsWith("data:image/webp") ? webp : c.toDataURL("image/jpeg", 0.9); // Safari non fa webp
@@ -139,7 +156,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     const c = document.createElement("canvas");
     c.width = Math.round(W * k); c.height = Math.round(H * k);
     const g = c.getContext("2d"), r = c.width / PW;
-    g.fillStyle = "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = img.bordo || "#faf8f4"; g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img.el, (PW / 2 - dw / 2 + o.x) * r, (PH / 2 - dh / 2 + o.y) * r, dw * r, dh * r);
     return c.toDataURL("image/jpeg", 0.85);
   }
@@ -196,6 +213,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             <label className="f">{T("La tua immagine", "Your image")}
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={caricaImmagine} />
               <span className="hint">{T(`JPG, PNG o WebP, massimo ${MAX_MB} MB. Se è molto grande la rimpiccioliamo noi. Una sola immagine per tutto il blocco.`, `JPG, PNG or WebP, ${MAX_MB} MB maximum. If it is very large we shrink it for you. One single image for the whole block.`)}</span>
+              <span className="hint"><b>{T("Formato consigliato", "Recommended size")}: {p.w * 100} × {p.h * 100} px</b> {T("(o più grande, con la stessa forma). Così l'immagine riempie lo spazio senza bande.", "(or larger, same shape). This way the image fills the space with no bands.")}</span>
               {errore && <span className="hint" style={{ color: "#8a3f2c" }}>{errore}</span>}
             </label>
             <label className="f">{T("Adattamento immagine", "Image fit")}
@@ -214,7 +232,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
       <div className="sticky">
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pv-wrap">
-            <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
+            <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH, ...(img && { background: img.bordo }) }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
               {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("La tua immagine", "Your image")}</div>}
               <div className="gr" style={{ gridTemplateColumns: `repeat(${p.w},1fr)`, gridTemplateRows: `repeat(${p.h},1fr)` }}>
                 {Array.from({ length: p.n }, (_, i) => <div key={i} />)}
