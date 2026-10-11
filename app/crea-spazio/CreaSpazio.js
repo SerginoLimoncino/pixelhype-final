@@ -170,7 +170,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
           <span className="step-n">Passo I</span>
           <h3>Scegli il pacchetto</h3>
           <div className="pkpick">
-            {Object.values(PACCHETTI).filter((x) => !cuore || x.n <= 25).map((x) => (
+            {Object.values(PACCHETTI).filter((x) => !x.soloAsta && (!cuore || x.n <= 25)).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{x.titolo}</b>
                 <span className="pr">{eur(prezzoDi(x.n))}</span>

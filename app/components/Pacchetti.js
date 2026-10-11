@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PACCHETTI, prezzoPacchetto, eur, num } from "../../lib/prezzi";
+import { PACCHETTI, IN_VENDITA, prezzoPacchetto, eur, num } from "../../lib/prezzi";
 import { disponibiliPresto } from "../../lib/db";
 
 // The six packs as cards. Each card opens /crea-spazio?pack=X. A size that is sold out shows "Esaurito".
@@ -7,7 +7,7 @@ export default async function Pacchetti({ venduti = 0, calo = 0 }) {
   const d = await disponibiliPresto();
   return (
     <div className="packs-t">
-      {Object.values(PACCHETTI).map((p) => {
+      {IN_VENDITA.map((p) => {
         const tot = prezzoPacchetto(p.n, venduti, calo);
         const restano = d ? d.ok[p.n] : true;
         const presi = d ? d.presi[p.n] || 0 : 0;

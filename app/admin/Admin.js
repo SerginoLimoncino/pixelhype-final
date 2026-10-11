@@ -129,7 +129,7 @@ export default function Admin() {
         <div className="adm-row">
           <label className="f">Misura
             <select value={r.pack} onChange={(e) => setR({ ...r, pack: Number(e.target.value) })}>
-              {Object.values(PACCHETTI).map((p) => <option key={p.n} value={p.n}>{p.nome} · {p.titolo}</option>)}
+              {Object.values(PACCHETTI).filter((p) => !p.soloAsta).map((p) => <option key={p.n} value={p.n}>{p.nome} · {p.titolo}</option>)}
             </select>
           </label>
           <label className="f">Nome<input value={r.nome} onChange={(e) => setR({ ...r, nome: e.target.value })} placeholder="Es. Bar Centrale" /></label>

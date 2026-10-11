@@ -51,13 +51,13 @@ export default async function Aste() {
             </div>
           </div>
         )}
-        {[["cuore", "Nel Cuore"], ["fuori", "Fuori dal Cuore · base 40% più bassa"]].map(([zona, titolo]) => (
+        {[...(gruppo("ultimo").length ? [["ultimo", "L'Ultimo Pezzo · l'ultima asta del mosaico"]] : []), ["cuore", "Nel Cuore"], ["fuori", "Fuori dal Cuore · base 40% più bassa"]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
             {gruppo(zona).length === 0 ? <p className="note">{zona === "cuore" && venduti < CUORE_ASTE ? `Le aste del Cuore partono a ${num(CUORE_ASTE)} pixel venduti: mancano ${num(CUORE_ASTE - venduti)} pixel.` : "Nessuna asta aperta in questo momento."}</p> : (
               <div className="lots">
                 {gruppo(zona).map((a) => (
-                  <Link href={`/aste/${a.id}`} className={zona === "cuore" ? "lot oro" : "lot"} key={a.id} style={{ textDecoration: "none" }}>
+                  <Link href={`/aste/${a.id}`} className={zona === "fuori" ? "lot" : "lot oro"} key={a.id} style={{ textDecoration: "none" }}>
                     <span className="q">{PACCHETTI[a.pack].nome}</span>
                     <span className="s">{PACCHETTI[a.pack].titolo}</span>
                     <span className="b">{a.migliore ? `Offerta più alta ${eur(a.migliore)}` : `Base ${eur(a.base)}`}</span>
