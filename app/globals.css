@@ -76,7 +76,7 @@ h2 em { font-style: italic; color: var(--green); }
 @media (min-width: 720px) { .frame { padding: 20px; } .mat { padding: 26px; } }
 .stage { position: relative; width: 100%; aspect-ratio: 1; background: var(--velvet); overflow: hidden; }
 /* cornice quadrata come il mosaico: niente spazi neri */
-.gallery .frame { width: min(100%, calc(min(72vh, 760px) + 92px)); margin-inline: auto; }
+.gallery .frame, .onair .screen, .onair-h { width: min(100%, calc(min(72vh, 760px) + 92px)); margin-inline: auto; }
 @media (max-width: 600px) { .frame { padding: 10px; } .mat { padding: 8px; } }
 .stage canvas.cv { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .ctl { position: absolute; right: 12px; top: 12px; display: grid; gap: 6px; z-index: 2; }
