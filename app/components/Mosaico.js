@@ -179,6 +179,8 @@ export default function Mosaico() {
         }
         if (b.lucky) { c.strokeStyle = "#d9bf8c"; c.lineWidth = 2 / view.s; c.strokeRect(x + 1, y + 1, w - 2, h - 2); }
         if (big(b)) { c.strokeStyle = goldGrad(c, x, y, w, h); c.lineWidth = Math.max(2.5, 2 / view.s); c.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); }
+        // L'Ultimo Pezzo: a double gold frame, like the Cuore it closes.
+        if (b.w * b.h === 150) { c.lineWidth = Math.max(1.5, 1.2 / view.s); c.strokeRect(x + 6, y + 6, w - 12, h - 12); }
         if (k === sel) { c.strokeStyle = "#f1e2bd"; c.lineWidth = 3 / view.s; c.strokeRect(x, y, w, h); }
       });
       // The Cuore's gold frame is drawn last, on the border line, so it is always visible and never covers an image.
