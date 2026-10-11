@@ -206,7 +206,7 @@ export default function Mosaico() {
       if (gx < 0 || gy < 0 || gx >= N || gy >= N) { tip.hidden = true; sel = -1; return; }
       const id = owner[gy * N + gx];
       if (id >= 0 && id === sel && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
-      if (id >= 0) { const b = blocks[id]; sel = id; showTip(EN ? `<span>${b.w * b.h} pixel${b.w * b.h > 1 ? "s" : ""}${b.lucky ? " · ✦ lucky spot in the Heart" : ""}</span><b>${esc(b.name)}</b>Tap again to open the website` : `<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
+      if (id >= 0) { const b = blocks[id]; sel = id; showTip(EN ? `<span>${b.w * b.h} pixel${b.w * b.h > 1 ? "s" : ""}${b.lucky ? " · ✦ lucky spot in the Heart" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tap again to open the website" : ""}` : `<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tocca di nuovo per aprire il sito" : ""}`, sx, sy); }
       else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip(EN ? "<span>The Heart · Premium auctions</span><b>Reserved for auctions</b>Spaces from 1 to 100 pixels, with a starting price" : "<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
       else { sel = -1; showTip(EN ? `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Free · ${eur(prezzoOra)}</b>Get it before the price goes up` : `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra)}</b>Prendilo prima che salga il prezzo`, sx, sy); }
     };

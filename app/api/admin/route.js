@@ -44,7 +44,7 @@ export async function POST(req) {
       }
       case "regala": {
         const p = PACCHETTI[b.pack];
-        if (!p || !b.nome || !b.link || !b.immagine) return Response.json({ errore: "Compila pacchetto, nome, link e immagine." }, { status: 400 });
+        if (!p || !b.nome || !b.immagine) return Response.json({ errore: "Compila pacchetto, nome e immagine." }, { status: 400 });
         const l = await controllaLink(b.link);
         if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 });
         const link = l.link;

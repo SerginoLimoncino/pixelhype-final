@@ -54,7 +54,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   const p = PACCHETTI[pack];
   const prezzoDi = (n) => (cuore ? prezzoCuore(n, venduti, calo) : prezzoPacchetto(n, venduti, calo));
   const totale = prezzoDi(pack);
-  const linkValido = !!normalizzaLink(link);
+  const linkValido = !link.trim() || !!normalizzaLink(link); // optional, but if written it must be a web address
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const pronto = nome.trim() && emailValida && linkValido && img && ok;
 
@@ -190,7 +190,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             <label className="f">{T("Nome del tuo brand", "Your brand name")}
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
             </label>
-            <label className="f">{T("Il tuo link", "Your link")}
+            <label className="f">{T("Il tuo link (facoltativo)", "Your link (optional)")}
               <input type="text" inputMode="url" autoCapitalize="none" autoComplete="url" name="sito" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
               {link && !linkValido && <span className="hint">{T("Scrivi l'indirizzo del sito, per esempio www.iltuosito.it", "Write the website address, for example www.yoursite.com")}</span>}
             </label>
@@ -254,7 +254,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             </button>
             {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
               !nome.trim() && T("il nome del brand", "the brand name"),
-              !linkValido && T("il link", "the link"),
+              !linkValido && T("un link valido", "a valid link"),
               !img && T("l'immagine", "the image"),
               !emailValida && T("l'email", "the email"),
               !ok && T("la spunta di conferma", "the confirmation tick"),

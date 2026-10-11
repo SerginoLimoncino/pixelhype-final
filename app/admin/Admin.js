@@ -137,7 +137,7 @@ export default function Admin() {
           <label className="f">Immagine<input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) leggiImmagine(f).then((img) => setR((v) => ({ ...v, img }))).catch((x) => setMsg(String(x))); }} /></label>
         </div>
         {r.img && <div style={{ maxWidth: 420 }}><Ritaglio img={r.img} w={PACCHETTI[r.pack].w} h={PACCHETTI[r.pack].h} fatto={(f) => (tagliata.current = f)} /></div>}
-        <button className="cta" disabled={lavoro || !r.nome || !r.link || !r.img}>{lavoro ? "Un attimo…" : "Regala e metti online"}</button>
+        <button className="cta" disabled={lavoro || !r.nome || !r.img}>{lavoro ? "Un attimo…" : "Regala e metti online"}</button>
       </form>
 
       {msg && <p className="adm-msg">{msg}</p>}

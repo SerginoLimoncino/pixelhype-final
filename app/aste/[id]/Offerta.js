@@ -21,7 +21,7 @@ export default function Offerta({ asta, w, h, min }) {
   const { en, T } = useLingua();
 
   const euro = Math.floor(Number(importo));
-  const pronto = euro >= min && nome.trim() && normalizzaLink(link) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && img && ok;
+  const pronto = euro >= min && nome.trim() && (!link.trim() || normalizzaLink(link)) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && img && ok;
 
   function carica(e) {
     const f = e.target.files?.[0];
@@ -76,7 +76,7 @@ export default function Offerta({ asta, w, h, min }) {
           <label className="f">{T("Nome del tuo brand", "Your brand name")}
             <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
           </label>
-          <label className="f">{T("Il tuo link", "Your link")}
+          <label className="f">{T("Il tuo link (facoltativo)", "Your link (optional)")}
             <input type="text" inputMode="url" autoCapitalize="none" autoComplete="url" name="sito" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
           </label>
           <label className="f">{T("La tua immagine", "Your image")}
@@ -97,7 +97,7 @@ export default function Offerta({ asta, w, h, min }) {
         {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
           euro < min && T(`un'offerta di almeno ${eur(min)}`, `a bid of at least ${eur(min)}`),
           !nome.trim() && T("il nome del brand", "the brand name"),
-          !normalizzaLink(link) && T("il link", "the link"),
+          link.trim() && !normalizzaLink(link) && T("un link valido", "a valid link"),
           !img && T("l'immagine", "the image"),
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && T("l'email", "the email"),
           !ok && T("la spunta di conferma", "the confirmation tick"),

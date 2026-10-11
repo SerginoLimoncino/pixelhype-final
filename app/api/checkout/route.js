@@ -13,7 +13,7 @@ async function rispondi(req) {
 
   const { pack, nome, link, email, dubbio, immagine, cuore: nelCuore } = await req.json().catch(() => ({}));
   const p = PACCHETTI[pack];
-  if (!p || p.soloAsta || !nome || !link || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
+  if (!p || p.soloAsta || !nome || !email) return Response.json({ errore: "Dati mancanti." }, { status: 400 });
   const l = await controllaLink(link); // checked again here so nobody can skip the check
   if (!l.ok) return Response.json({ errore: l.motivo }, { status: 400 });
   const href = l.link;
