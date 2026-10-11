@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import Stripe from "stripe";
 import { PACCHETTI, nomePack, misura, eur } from "../../../lib/prezzi";
 import { traduttore } from "../../../lib/lingua";
@@ -28,6 +29,13 @@ export default async function Grazie({ searchParams }) {
     // by the next visit to the mosaic (lib/aste.js, sistemaOrdini).
     const attesa = new Promise((ok) => setTimeout(() => ok(null), 8000));
     spazio = await Promise.race([assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null), attesa]);
+    // Not placed in time: keep trying in the background once the page has been sent (up to 3 tries).
+    if (!spazio) after(async () => {
+      for (let i = 0; i < 3; i++) {
+        if (await assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null)) return;
+        await new Promise((ok) => setTimeout(ok, 5000));
+      }
+    });
   }
 
   return (
