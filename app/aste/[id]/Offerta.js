@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import Ritaglio, { leggiImmagine } from "../../components/Ritaglio";
 import { normalizzaLink } from "../../../lib/controllo";
 import { eur } from "../../../lib/prezzi";
@@ -85,7 +86,7 @@ export default function Offerta({ asta, w, h, min }) {
         </div>
         <label className="check">
           <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
-          <span>Confermo che l'immagine è mia o ho il diritto di usarla. Se vinco, accetto l'addebito della mia offerta sul metodo di pagamento che salvo ora.</span>
+          <span>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Se vinco, accetto l'addebito della mia offerta sul metodo di pagamento che salvo ora, la pubblicazione immediata dello spazio e la perdita del diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</span>
         </label>
         <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={offri}>
           {stato === "invio" ? "Controllo in corso…" : `Offri ${euro >= min ? eur(euro) : ""}`}

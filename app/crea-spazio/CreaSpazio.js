@@ -243,7 +243,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             </div>
             <label className="check">
               <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
-              <span>Confermo che l'immagine è mia o ho il diritto di usarla, e accetto che venga controllata prima di andare online.</span>
+              <span>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Chiedo che lo spazio venga pubblicato subito e so che, una volta pubblicato, perdo il diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</span>
             </label>
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
               {stato === "invio" ? "Controllo in corso…" : `Paga ${eur(totale)}`}

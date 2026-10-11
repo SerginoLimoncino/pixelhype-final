@@ -58,6 +58,7 @@ export default async function RootLayout({ children }) {
               <span>Pixel<i>Hype</i></span>
             </span>
             <span>getpixelhype.com · Contatti: <a href="mailto:info@getpixelhype.com">info@getpixelhype.com</a> · Ogni immagine viene controllata prima di andare online · Prezzi + IVA</span>
+            <span className="legal-links"><Link href="/termini">Termini e condizioni</Link><Link href="/privacy">Privacy</Link><Link href="/cookie">Cookie</Link></span>
           </div>
         </footer>
       </body>
