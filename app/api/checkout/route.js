@@ -1,5 +1,6 @@
 import { traduciRisposte } from "../../../lib/messaggi";
 import Stripe from "stripe";
+import { PRENOTAZIONI } from "../../../lib/modo";
 import { PACCHETTI, prezzoPacchetto, prezzoCuore, cuoreFissoDa } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
 import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, PACK_CUORE_FISSO, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
@@ -8,6 +9,7 @@ import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, PACK_CUOR
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
 // With the database, the order and its image are saved first, waiting for payment.
 async function rispondi(req) {
+  if (PRENOTAZIONI) return Response.json({ errore: "Per ora si può solo prenotare." }, { status: 400 });
   const chiave = process.env.STRIPE_SECRET_KEY;
   if (!chiave) return Response.json({ prova: true });
 

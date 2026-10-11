@@ -4,6 +4,7 @@ import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/ast
 import Timer from "../components/Timer";
 import { SOGLIA_ASTE, CUORE_ASTE, CUORE_PICCOLI, FINALE, cuoreFissoDa, prezzoCuore, nomePack, misura, eur, num } from "../../lib/prezzi";
 import { traduttore } from "../../lib/lingua";
+import { PRENOTAZIONI } from "../../lib/modo";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -21,9 +22,9 @@ export default async function Aste() {
         <div className="sec-h">
           <div className="eyebrow">{T("Aste", "Auctions")}</div>
           <h2>{en ? <>The Heart is <em>waiting</em>.</> : <>Il Cuore ti <em>aspetta</em>.</>}</h2>
-          <p>{T(`Le aste del Cuore partono a ${num(SOGLIA_ASTE)} pixel venduti: mancano ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixel. Ci saranno spazi di tutte le misure, anche da 1 pixel.`, `The Heart auctions start at ${num(SOGLIA_ASTE)} pixels sold: ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixels to go. There will be spaces of every size, even 1 pixel.`)}</p>
+          {PRENOTAZIONI ? <p>{T("Le aste del Cuore si apriranno insieme alla vendita. Ci saranno spazi di tutte le misure, anche da 1 pixel.", "The Heart auctions will open together with sales. There will be spaces of every size, even 1 pixel.")}</p> : <p>{T(`Le aste del Cuore partono a ${num(SOGLIA_ASTE)} pixel venduti: mancano ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixel. Ci saranno spazi di tutte le misure, anche da 1 pixel.`, `The Heart auctions start at ${num(SOGLIA_ASTE)} pixels sold: ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixels to go. There will be spaces of every size, even 1 pixel.`)}</p>}
         </div>
-        <Link href="/compra" className="cta">{T("Intanto prendi il tuo spazio", "Meanwhile, get your space")}</Link>
+        <Link href="/compra" className="cta">{PRENOTAZIONI ? T("Intanto prenota il tuo spazio", "Meanwhile, book your space") : T("Intanto prendi il tuo spazio", "Meanwhile, get your space")}</Link>
       </section>
     );
   }

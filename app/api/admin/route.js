@@ -5,6 +5,7 @@ import { controllaLink } from "../../../lib/controlloLink";
 import { listaAste, aggiornaAste } from "../../../lib/aste";
 import { sql } from "../../../lib/db";
 import { dbAttivo, tuttiGliSpazi, aggiorna, cancella, nuovoOrdine, salvaImmagine, assegnaPosizione } from "../../../lib/db";
+import { listaPrenotazioni } from "../../../lib/prenotazioni";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,20 @@ export async function POST(req) {
         if (!String(process.env.STRIPE_SECRET_KEY || "").startsWith("sk_test")) return Response.json({ errore: "Solo in modalità prova." }, { status: 400 });
         await sql()`update aste set fine = now() - interval '1 second' where id = ${Number(b.id)} and stato = 'aperta'`;
         await aggiornaAste();
+        return Response.json({ ok: true, spazi: await tuttiGliSpazi(), aste: await listaAste().catch(() => null) });
+      }
+      case "prenotazioni":
+        return Response.json({ prenotazioni: await listaPrenotazioni() });
+      case "svuota": {
+        // Launch day (Sergio approved 2026-10-11): removes every test space, auction and bid. Only with test payments, so real data can never be removed.
+        if (!String(process.env.STRIPE_SECRET_KEY || "").startsWith("sk_test")) return Response.json({ errore: "Solo in modalità prova." }, { status: 400 });
+        if (b.parola !== "SVUOTA") return Response.json({ errore: "Conferma mancante." }, { status: 400 });
+        await sql().begin(async (t) => {
+          await t`delete from offerte`;
+          await t`delete from aste`;
+          await t`delete from spazi`;
+          await t`delete from listino`;
+        });
         return Response.json({ ok: true, spazi: await tuttiGliSpazi(), aste: await listaAste().catch(() => null) });
       }
       case "verifica": {

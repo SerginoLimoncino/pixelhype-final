@@ -24,11 +24,12 @@ function ritaglia(file, w, h) {
   });
 }
 
-export default function Admin({ prova = false }) {
+export default function Admin({ prova = false, prenota = false }) {
   const [pw, setPw] = useState("");
   const [entrato, setEntrato] = useState(false);
   const [spazi, setSpazi] = useState([]);
   const [aste, setAste] = useState(null);
+  const [pren, setPren] = useState(null);
   const [msg, setMsg] = useState("");
   const [lavoro, setLavoro] = useState(false);
   const [filtro, setFiltro] = useState("tutti");
@@ -43,6 +44,7 @@ export default function Admin({ prova = false }) {
       if (!res.ok) throw new Error(d.errore || "Errore");
       if (d.spazi) setSpazi(d.spazi);
       if (d.aste !== undefined) setAste(d.aste);
+      if (d.prenotazioni) setPren(d.prenotazioni);
       return true;
     } catch (e) {
       setMsg(e.message); return false;
@@ -93,6 +95,8 @@ export default function Admin({ prova = false }) {
     );
   }
 
+  useEffect(() => { if (entrato && prenota) chiama("prenotazioni"); }, [entrato]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const conta = (st) => spazi.filter((s) => s.stato === st).length;
   const pixel = spazi.filter((s) => s.x !== null).reduce((a, s) => a + s.w * s.h, 0);
   const incasso = spazi.filter((s) => s.x !== null).reduce((a, s) => a + s.prezzo, 0);
@@ -109,6 +113,22 @@ export default function Admin({ prova = false }) {
         <div><b>{conta("in_attesa")}</b><span>in attesa di pagamento</span></div>
       </div>
 
+      {prenota && (
+        <div className="card" style={{ marginBottom: 24 }}>
+          <h3>Prenotazioni {pren && `· ${pren.length}`}</h3>
+          {!pren ? <p className="muted">Carico…</p> : pren.length === 0 ? <p className="muted">Ancora nessuna prenotazione. Arrivano da sole, non devi fare niente.</p> : (
+            <>
+              <p className="muted">{Object.values(PACCHETTI).filter((x) => !x.soloAsta).map((x) => `${x.titolo}: ${pren.filter((q) => q.pack === x.n).length}`).join(" · ")}</p>
+              <p className="muted">Pixel prenotati: {pren.reduce((a, q) => a + q.pack, 0)}</p>
+              <button type="button" className="ghost sm" onClick={() => navigator.clipboard?.writeText([...new Set(pren.map((q) => q.email))].join(", ")).then(() => setMsg("Email copiate."))}>Copia tutte le email</button>
+              <div style={{ maxHeight: 260, overflow: "auto", marginTop: 12 }}>
+                {pren.map((q) => <p key={q.id} className="muted" style={{ margin: "4px 0" }}>{new Date(q.creata).toLocaleDateString("it-IT")} · {q.pack} pixel · {q.nome || "—"} · {q.email}</p>)}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="card" style={{ marginBottom: 24 }}>
         <h3>Aste</h3>
         {!aste || (aste.aperte.length === 0 && aste.prossime === 0 && aste.chiuse === 0) ? (
@@ -123,6 +143,14 @@ export default function Admin({ prova = false }) {
           </>
         )}
       </div>
+
+      {prova && (
+        <div className="card">
+          <h3>Prima del lancio</h3>
+          <p className="muted">Cancella tutti gli spazi, le aste e le offerte di prova. Si usa una volta sola, prima di aprire il sito.</p>
+          <button type="button" className="ghost" disabled={lavoro} onClick={() => prompt("Verranno cancellati TUTTI gli spazi, le aste e le offerte. Scrivi SVUOTA per confermare.") === "SVUOTA" && chiama("svuota", { parola: "SVUOTA" })}>Cancella tutte le prove</button>
+        </div>
+      )}
 
       <form className="card adm-gift" onSubmit={regala}>
         <h3>Regala uno spazio</h3>

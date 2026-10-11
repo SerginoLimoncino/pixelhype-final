@@ -6,6 +6,7 @@ import { SOGLIA_ASTE } from "../lib/prezzi";
 import MenuTelefono from "./components/MenuTelefono";
 import { LinguaProvider, CambiaLingua } from "./components/Lingua";
 import { lingua, traduttore } from "../lib/lingua";
+import { PRENOTAZIONI } from "../lib/modo";
 
 export const revalidate = 30;
 
@@ -52,7 +53,7 @@ export default async function RootLayout({ children }) {
             </nav>
             <CambiaLingua />
             <Link href="/compra" className="cta sm">
-              <span className="solo-pc">{T("Prendi il tuo spazio", "Get your space")}</span><span className="solo-tel">{T("Compra", "Buy")}</span>
+              <span className="solo-pc">{PRENOTAZIONI ? T("Prenota il tuo spazio", "Book your space") : T("Prendi il tuo spazio", "Get your space")}</span><span className="solo-tel">{PRENOTAZIONI ? T("Prenota", "Book") : T("Compra", "Buy")}</span>
             </Link>
             <MenuTelefono asteAperte={asteAperte} />
           </div>

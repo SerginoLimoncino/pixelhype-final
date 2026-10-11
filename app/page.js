@@ -4,6 +4,7 @@ import Pacchetti from "./components/Pacchetti";
 import { FASI, LOTTI_CUORE, CUORE_ASTE, fase, prezzoPixel, restanoInFase, charm, eur, num } from "../lib/prezzi";
 import { pixelVendutiPresto, caloPresto } from "../lib/db";
 import { traduttore } from "../lib/lingua";
+import { PRENOTAZIONI } from "../lib/modo";
 
 export const revalidate = 30; // prezzo e contatore si aggiornano da soli
 
@@ -25,8 +26,9 @@ export default async function Home() {
           <div className="pb-price">{eur(prezzoPixel(v, calo))}<small>{T("+ IVA", "+ VAT")}</small></div>
           <div className="bar"><i style={{ width: Math.max(2, avanzamento) + "%" }} /></div>
           <p className="pb-note">{en ? <><b>{num(restanoInFase(v))} pixels</b> left at this price. Then it goes up to <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "the final auctions"}</b>.</> : <>Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa a <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "le aste finali"}</b>.</>}</p>
+          {PRENOTAZIONI && <p className="pb-note"><b>{T("Prenotazioni aperte.", "Bookings open.")}</b> {T("Scegli la misura e lascia l'email: ora non paghi nulla e quando si apre la vendita ti scriviamo per primi.", "Choose the size and leave your email: you pay nothing now, and when sales open we write to you first.")}</p>}
           <div className="pb-row">
-            <Link href="/compra" className="cta">{T("Prendi il tuo spazio", "Get your space")}</Link>
+            <Link href="/compra" className="cta">{PRENOTAZIONI ? T("Prenota il tuo spazio", "Book your space") : T("Prendi il tuo spazio", "Get your space")}</Link>
             <a href="#galleria" className="ghost">{T("Esplora l'opera", "Explore the artwork")}</a>
           </div>
         </div>

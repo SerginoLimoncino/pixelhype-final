@@ -27,12 +27,14 @@ export default async function Privacy() {
         <li><b>Email</b>: per la ricevuta, per comunicazioni sull&apos;ordine o sull&apos;asta e per contattarti se lo spazio ha un problema.</li>
         <li><b>Dati di pagamento</b>: li gestisce Stripe. Noi riceviamo solo l&apos;esito del pagamento, un codice cliente e, per le aste, un riferimento al metodo di pagamento salvato. Non vediamo il numero della carta.</li>
         <li><b>Offerte alle aste</b>: importo, data e dati dello spazio che vorresti pubblicare.</li>
+        <li><b>Prenotazioni</b>: email, misura scelta e, se lo scrivi, il nome del brand. Li usiamo solo per avvisarti quando si apre la vendita.</li>
         <li><b>Dati tecnici</b>: indirizzo IP e informazioni sul browser registrati automaticamente dai server per sicurezza e funzionamento.</li>
       </ul>
 
       <h2>3. Perché li usiamo (basi giuridiche)</h2>
       <ul>
         <li>Per vendere e pubblicare lo spazio e gestire le aste: esecuzione del contratto (art. 6.1.b GDPR).</li>
+        <li>Per avvisarti quando si apre la vendita, se hai prenotato: il tuo consenso (art. 6.1.a GDPR), che puoi ritirare quando vuoi scrivendoci.</li>
         <li>Per gli obblighi fiscali e contabili: obbligo di legge (art. 6.1.c GDPR).</li>
         <li>Per controllare che immagini e link siano sicuri e leciti e per proteggere il sito da abusi: legittimo interesse (art. 6.1.f GDPR).</li>
       </ul>
@@ -58,6 +60,7 @@ export default async function Privacy() {
       <ul>
         <li>Nome, link e immagine dello spazio: finché lo spazio resta nel mosaico.</li>
         <li>Dati degli ordini e dei pagamenti: 10 anni, come richiesto dalle norme fiscali.</li>
+        <li>Prenotazioni: fino all&apos;apertura della vendita e al massimo 12 mesi, poi le cancelliamo.</li>
         <li>Offerte alle aste non vincenti: fino a 12 mesi dalla fine dell&apos;asta.</li>
         <li>Ordini mai pagati: cancellati automaticamente.</li>
         <li>Registri tecnici dei server: per il tempo previsto dai fornitori, di norma pochi giorni o settimane.</li>
@@ -104,12 +107,14 @@ function English() {
         <li><b>Email</b>: for the receipt, for messages about your order or auction and to contact you if the space has a problem.</li>
         <li><b>Payment data</b>: handled by Stripe. We only receive the payment result, a customer code and, for auctions, a reference to the saved payment method. We never see the card number.</li>
         <li><b>Auction bids</b>: amount, date and the details of the space you would like to publish.</li>
+        <li><b>Bookings</b>: email, chosen size and, if you write it, the brand name. We only use them to tell you when sales open.</li>
         <li><b>Technical data</b>: IP address and browser information recorded automatically by the servers for security and operation.</li>
       </ul>
 
       <h2>3. Why we use them (legal bases)</h2>
       <ul>
         <li>To sell and publish the space and run the auctions: performance of the contract (art. 6.1.b GDPR).</li>
+        <li>To tell you when sales open, if you booked: your consent (art. 6.1.a GDPR), which you can withdraw at any time by writing to us.</li>
         <li>For tax and accounting obligations: legal obligation (art. 6.1.c GDPR).</li>
         <li>To check that images and links are safe and lawful and to protect the site from abuse: legitimate interest (art. 6.1.f GDPR).</li>
       </ul>
@@ -135,6 +140,7 @@ function English() {
       <ul>
         <li>Name, link and image of the space: as long as the space stays in the mosaic.</li>
         <li>Order and payment data: 10 years, as required by tax rules.</li>
+        <li>Bookings: until sales open and for 12 months at most, then we delete them.</li>
         <li>Losing auction bids: up to 12 months after the end of the auction.</li>
         <li>Orders never paid: deleted automatically.</li>
         <li>Server technical logs: for the time set by the providers, usually a few days or weeks.</li>

@@ -35,7 +35,7 @@ function preparaImmagine(file, T) {
   });
 }
 
-export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = false }) {
+export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = false, prenota = false }) {
   const [pack, setPack] = useState(iniziale);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -56,7 +56,8 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   const totale = prezzoDi(pack);
   const linkValido = !link.trim() || !!normalizzaLink(link); // optional, but if written it must be a web address
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const pronto = nome.trim() && emailValida && linkValido && img && ok;
+  const pronto = prenota ? emailValida && ok : nome.trim() && emailValida && linkValido && img && ok;
+  const [gia, setGia] = useState(false);
 
   function caricaImmagine(e) {
     const file = e.target.files?.[0];
@@ -65,6 +66,21 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     preparaImmagine(file, T)
       .then((res) => { setImg(res); setZoom(1); setOff({ x: 0, y: 0 }); })
       .catch((msg) => { setImg(null); setErrore(String(msg)); e.target.value = ""; });
+  }
+
+  // Booking mode: saves email and size, nothing is paid.
+  async function prenotaOra() {
+    if (!pronto) return;
+    setStato("invio"); setErrPaga("");
+    try {
+      const r = await fetch("/api/prenota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack, nome, email, ok }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.errore || "");
+      setGia(!!d.gia); setStato("fatto");
+    } catch (e) {
+      setErrPaga(e.message || T("La prenotazione non è partita. Riprova tra poco.", "The booking did not go through. Please try again shortly."));
+      setStato("modulo");
+    }
   }
 
   async function paga() {
@@ -145,6 +161,22 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     return c.toDataURL("image/jpeg", 0.85);
   }
 
+  if (stato === "fatto" && prenota) {
+    return (
+      <section className="wrap buy" style={{ gridTemplateColumns: "1fr", maxWidth: 720 }}>
+        <div className="card" style={{ display: "grid", gap: 16 }}>
+          <span className="step-n">{T("Prenotazione ricevuta · nessun pagamento", "Booking received · no payment")}</span>
+          <p className="ok-big">{gia ? T("Eri già in lista.", "You were already on the list.") : T("Sei in lista.", "You are on the list.")}</p>
+          <p className="muted">{en ? <>We have booked a space of {misura(pack, true)} for you. When sales open we will write to <b>{email}</b> before anyone else: you will choose then whether to buy it. You pay nothing now.</> : <>Ti abbiamo prenotato uno spazio da {misura(pack)}. Quando si apre la vendita scriviamo a <b>{email}</b> prima che a tutti gli altri: deciderai allora se comprarlo. Ora non paghi nulla.</>}</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link href="/#galleria" className="cta">{T("Torna al mosaico", "Back to the mosaic")}</Link>
+            <Link href="/compra" className="ghost">{T("Prenota un'altra misura", "Book another size")}</Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (stato === "fatto") {
     return (
       <section className="wrap buy" style={{ gridTemplateColumns: "1fr", maxWidth: 720 }}>
@@ -166,7 +198,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
           <div className="eyebrow">{cuore ? T("Gran finale · ultimi spazi del Cuore, cornice d'oro", "Grand finale · last spaces in the Heart, gold frame") : T(`Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} a pixel`, `Phase ${fase(venduti) + 1} of ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} per pixel`)}</div>
-          <h2>{en ? (cuore ? <>Your space <em>in the Heart</em>.</> : <>Create your <em>space</em>.</>) : cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
+          <h2>{prenota ? (en ? <>Book your <em>space</em>.</> : <>Prenota il tuo <em>spazio</em>.</>) : en ? (cuore ? <>Your space <em>in the Heart</em>.</> : <>Create your <em>space</em>.</>) : cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
         </div>
 
         <div className="card">
@@ -185,7 +217,18 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
 
         <div className="card">
           <span className="step-n">{T("Passo II", "Step II")}</span>
-          <h3>{T("Firma la tua opera", "Sign your work")}</h3>
+          <h3>{prenota ? T("Lascia la tua email", "Leave your email") : T("Firma la tua opera", "Sign your work")}</h3>
+          {prenota ? (
+            <div className="fields">
+              <label className="f">{T("La tua email", "Your email")}
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} autoComplete="email" />
+                <span className="hint">{T("Ti scriviamo quando si apre la vendita, prima che a tutti gli altri.", "We write to you when sales open, before anyone else.")}</span>
+              </label>
+              <label className="f">{T("Nome del tuo brand (facoltativo)", "Your brand name (optional)")}
+                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
+              </label>
+            </div>
+          ) : (
           <div className="fields">
             <label className="f">{T("Nome del tuo brand", "Your brand name")}
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
@@ -210,6 +253,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} />
             </label>
           </div>
+          )}
         </div>
       </div>
 
@@ -243,25 +287,31 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               <div><span>{T("Spazio", "Space")}</span><span>{nomePack(pack, en)} · {misura(pack, en)}</span></div>
               <div><span>Brand</span><span>{nome || "—"}</span></div>
               <div><span>{T("Posizione", "Position")}</span><span>{T("a caso, per sempre", "random, forever")}</span></div>
-              <div className="tot"><span>{T("Totale", "Total")}</span><span>{eur(totale)} <small>{T("+ IVA", "+ VAT")}</small></span></div>
+              <div className="tot"><span>{prenota ? T("Prezzo di oggi", "Today's price") : T("Totale", "Total")}</span><span>{eur(totale)} <small>{T("+ IVA", "+ VAT")}</small></span></div>
             </div>
             <label className="check">
               <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
-              <span>{en ? <>I confirm that the image is mine or that I have the right to use it, and I accept the <Link href="/termini" target="_blank">Terms</Link>. I ask for the space to be published right away and I understand that, once it is published, I lose the right of withdrawal. I have read the <Link href="/privacy" target="_blank">Privacy policy</Link>.</> : <>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Chiedo che lo spazio venga pubblicato subito e so che, una volta pubblicato, perdo il diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</>}</span>
+              {prenota ? <span>{en ? <>I want an email when sales open. I have read the <Link href="/privacy" target="_blank">Privacy policy</Link>.</> : <>Voglio ricevere un'email quando si apre la vendita. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</>}</span> : <span>{en ? <>I confirm that the image is mine or that I have the right to use it, and I accept the <Link href="/termini" target="_blank">Terms</Link>. I ask for the space to be published right away and I understand that, once it is published, I lose the right of withdrawal. I have read the <Link href="/privacy" target="_blank">Privacy policy</Link>.</> : <>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Chiedo che lo spazio venga pubblicato subito e so che, una volta pubblicato, perdo il diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</>}</span>}
             </label>
+            {prenota ? (
+              <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={prenotaOra}>{stato === "invio" ? T("Un attimo…", "One moment…") : T("Prenota il tuo spazio", "Book your space")}</button>
+            ) : (
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
               {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Paga", "Pay")} ${eur(totale)}`}
             </button>
+            )}
             {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
-              !nome.trim() && T("il nome del brand", "the brand name"),
-              !linkValido && T("un link valido", "a valid link"),
-              !img && T("l'immagine", "the image"),
+              !prenota && !nome.trim() && T("il nome del brand", "the brand name"),
+              !prenota && !linkValido && T("un link valido", "a valid link"),
+              !prenota && !img && T("l'immagine", "the image"),
               !emailValida && T("l'email", "the email"),
               !ok && T("la spunta di conferma", "the confirmation tick"),
             ].filter(Boolean).join(", ")}.</p>}
-            <div className="pay-methods"><span>{T("Carta", "Card")}</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
             {errPaga && <p className="hint" style={{ color: "#8a3f2c" }}>{errPaga}</p>}
+            {prenota ? <p className="muted">{T("Ora non paghi nulla. Quando si apre la vendita ti scriviamo e scegli tu se comprare.", "You pay nothing now. When sales open we write to you and you choose whether to buy.")}</p> : <>
+            <div className="pay-methods"><span>{T("Carta", "Card")}</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
             <p className="muted">{T("Paghi in modo sicuro con Stripe. I dati della carta non passano mai da PixelHype.", "You pay securely with Stripe. Card details never go through PixelHype.")}</p>
+            </>}
           </div>
         </div>
       </div>

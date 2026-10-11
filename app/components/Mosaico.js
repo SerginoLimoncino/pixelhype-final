@@ -9,7 +9,7 @@ let EN = false; // site language, for the texts drawn on the canvas and the tool
 
 // DEMO = true riempie il mosaico con marchi di esempio, per vedere come sarà.
 // Al lancio metti false: il mosaico mostrerà solo gli spazi venduti davvero.
-const DEMO = true;
+const DEMO = false;
 
 const N = 100, CELL = 24, SELL = N * N - 900;
 const NAMES = ["Maison Aurelia", "Bar Centrale", "Forno Rossi", "Officina 12", "Nova Fitness", "Atelier Blu", "Pizzeria Vesuvio", "Bottega Verde", "Moto Racing", "Gelateria Polo", "Studio Legale Neri", "Pixel Lab", "Viaggi Mare", "Cantina Alta", "Libreria Nord", "Gioielleria Doro", "Ottica Viso", "Sushi Kai", "Hotel Riva", "Caffè Roma", "Yoga Zen", "Gaming Hub", "Fiori Rosa", "Auto Sprint"];
