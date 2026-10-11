@@ -3,6 +3,8 @@ import { dbAttivo, salvaImmagine } from "../../../lib/db";
 import { controllaLink } from "../../../lib/controlloLink";
 import { PRENOTAZIONI } from "../../../lib/modo";
 import { nuovaPrenotazione } from "../../../lib/prenotazioni";
+import { emailPrenotazione, avvisoNuovaPrenotazione } from "../../../lib/email";
+import { after } from "next/server";
 
 // Saves a booking: email, size and (optional) brand name. No payment.
 export async function POST(req) {
@@ -20,5 +22,13 @@ export async function POST(req) {
     img = await salvaImmagine(`prenotazione-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${b.immagine.startsWith("data:image/webp") ? "webp" : "jpg"}`, b.immagine).catch(() => null);
   }
   const r = await nuovaPrenotazione({ email, pack: p.n, nome: String(b.nome || "").trim().slice(0, 40), lingua: en ? "en" : "it", link: l.link, img });
+  if (!r.gia) {
+    // Confirmation to the person and alert to Sergio, sent after the answer so the page never waits.
+    const nome = String(b.nome || "").trim().slice(0, 40);
+    after(async () => {
+      await emailPrenotazione({ email, pack: p.n, nome, en }).catch(() => {});
+      await avvisoNuovaPrenotazione({ email, pack: p.n, nome, link: l.link }).catch(() => {});
+    });
+  }
   return Response.json({ ok: true, gia: !!r.gia });
 }
