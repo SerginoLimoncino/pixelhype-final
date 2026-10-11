@@ -37,6 +37,7 @@ File completi da copiare nel progetto (stessi percorsi):
 
 Variabili su Vercel (Production + Preview):
 - `SIGHTENGINE_USER` e `SIGHTENGINE_SECRET`: controllo delle immagini (nudità, violenza, simboli d'odio). Piano gratuito Sightengine.
+- `RESEND_API_KEY`: email di conferma a chi prenota e avviso a Sergio per ogni prenotazione (lib/email.js). Piano gratuito Resend, dominio getpixelhype.com verificato con i record DNS su Aruba.
 - `URLHAUS_KEY`: lista ufficiale dei link con virus (abuse.ch, gratuita).
 
 Senza queste chiavi il sito funziona lo stesso: salta solo quel controllo.
