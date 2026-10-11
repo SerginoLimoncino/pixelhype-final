@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { PACCHETTI, FASI, fase, prezzoPacchetto, prezzoCuore, prezzoPixel, eur } from "../../lib/prezzi";
+import { PACCHETTI, FASI, fase, inVenditaOra, prezzoPacchetto, prezzoCuore, prezzoPixel, eur } from "../../lib/prezzi";
 import { normalizzaLink } from "../../lib/controllo";
 
 const MAX_MB = 10; // file più grandi vengono rifiutati
@@ -170,7 +170,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
           <span className="step-n">Passo I</span>
           <h3>Scegli il pacchetto</h3>
           <div className="pkpick">
-            {Object.values(PACCHETTI).filter((x) => !x.soloAsta && (!cuore || x.n <= 25)).map((x) => (
+            {Object.values(PACCHETTI).filter((x) => !x.soloAsta && (cuore ? x.n <= 25 : inVenditaOra(x, venduti))).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{x.titolo}</b>
                 <span className="pr">{eur(prezzoDi(x.n))}</span>

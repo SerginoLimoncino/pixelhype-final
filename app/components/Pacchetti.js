@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PACCHETTI, IN_VENDITA, prezzoPacchetto, eur, num } from "../../lib/prezzi";
+import { IN_VENDITA, inVenditaOra, prezzoPacchetto, eur, num } from "../../lib/prezzi";
 import { disponibiliPresto } from "../../lib/db";
 
 // The six packs as cards. Each card opens /crea-spazio?pack=X. A size that is sold out shows "Esaurito".
@@ -9,10 +9,12 @@ export default async function Pacchetti({ venduti = 0, calo = 0 }) {
     <div className="packs-t">
       {IN_VENDITA.map((p) => {
         const tot = prezzoPacchetto(p.n, venduti, calo);
-        const restano = d ? d.ok[p.n] : true;
+        const presto = !inVenditaOra(p, d?.venduti ?? venduti); // big sizes: not on sale yet
+        const restano = d ? d.ok[p.n] : !presto;
         const presi = d ? d.presi[p.n] || 0 : 0;
-        const fineFase = !restano && p.max && presi < p.max; // only this phase's share is gone
-        const stato = restano ? (p.max ? `Solo ${num(p.max)} in tutto${d ? `, ora disponibili ${num(d.limite[p.n] - presi)}` : ""}` : "Disponibile")
+        const lim = d ? d.limite[p.n] : null;
+        const fineFase = !restano && (presto || (lim != null && presi < (p.max ?? Infinity))); // only this phase's share is gone
+        const stato = presto ? "In vendita da 1.000 pixel venduti" : restano ? (lim != null ? `${p.max ? `Solo ${num(p.max)} in tutto, ` : ""}ora disponibili ${num(lim - presi)}` : p.max ? `Solo ${num(p.max)} in tutto` : "Disponibile")
           : fineFase ? "Finiti per questa fase, altri alla prossima" : "Esaurito";
         return (
           <Link href={restano ? `/crea-spazio?pack=${p.n}` : fineFase ? "/compra" : "/aste"} className={"pt" + (p.n === 100 ? " star" : "") + (restano ? "" : " esaurito")} key={p.n}>
