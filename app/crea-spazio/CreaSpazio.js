@@ -56,7 +56,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   const totale = prezzoDi(pack);
   const linkValido = !link.trim() || !!normalizzaLink(link); // optional, but if written it must be a web address
   const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const pronto = prenota ? emailValida && ok : nome.trim() && emailValida && linkValido && img && ok;
+  const pronto = prenota ? emailValida && linkValido && ok : nome.trim() && emailValida && linkValido && img && ok;
   const [gia, setGia] = useState(false);
 
   function caricaImmagine(e) {
@@ -73,7 +73,12 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     if (!pronto) return;
     setStato("invio"); setErrPaga("");
     try {
-      const r = await fetch("/api/prenota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack, nome, email, ok }) });
+      // Image and link are optional; when given they get the same automatic check as a purchase.
+      if (img || link.trim()) {
+        const c = await fetch("/api/controlla", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ link, immagine: img ? immagineControllo() : undefined }) }).then((x) => x.json());
+        if (!c.ok) { setErrPaga(c.motivo); setStato("modulo"); return; }
+      }
+      const r = await fetch("/api/prenota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack, nome, email, link, ok, immagine: img ? immagineFinale() : undefined }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.errore || "");
       setGia(!!d.gia); setStato("fatto");
@@ -217,27 +222,16 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
 
         <div className="card">
           <span className="step-n">{T("Passo II", "Step II")}</span>
-          <h3>{prenota ? T("Lascia la tua email", "Leave your email") : T("Firma la tua opera", "Sign your work")}</h3>
-          {prenota ? (
-            <div className="fields">
-              <label className="f">{T("La tua email", "Your email")}
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} autoComplete="email" />
-                <span className="hint">{T("Ti scriviamo quando si apre la vendita, prima che a tutti gli altri.", "We write to you when sales open, before anyone else.")}</span>
-              </label>
-              <label className="f">{T("Nome del tuo brand (facoltativo)", "Your brand name (optional)")}
-                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
-              </label>
-            </div>
-          ) : (
+          <h3>{T("Firma la tua opera", "Sign your work")}</h3>
           <div className="fields">
-            <label className="f">{T("Nome del tuo brand", "Your brand name")}
+            <label className="f">{prenota ? T("Nome del tuo brand (facoltativo)", "Your brand name (optional)") : T("Nome del tuo brand", "Your brand name")}
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
             </label>
             <label className="f">{T("Il tuo link (facoltativo)", "Your link (optional)")}
               <input type="text" inputMode="url" autoCapitalize="none" autoComplete="url" name="sito" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
               {link && !linkValido && <span className="hint">{T("Scrivi l'indirizzo del sito, per esempio www.iltuosito.it", "Write the website address, for example www.yoursite.com")}</span>}
             </label>
-            <label className="f">{T("La tua immagine", "Your image")}
+            <label className="f">{prenota ? T("La tua immagine (facoltativa)", "Your image (optional)") : T("La tua immagine", "Your image")}
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={caricaImmagine} />
               <span className="hint">{T(`JPG, PNG o WebP, massimo ${MAX_MB} MB. Se è molto grande la rimpiccioliamo noi. Una sola immagine per tutto il blocco.`, `JPG, PNG or WebP, ${MAX_MB} MB maximum. If it is very large we shrink it for you. One single image for the whole block.`)}</span>
               <span className="hint"><b>{T("Formato consigliato", "Recommended size")}: {p.w * 100} × {p.h * 100} px</b> {T("(o più grande, con la stessa forma). Così l'immagine riempie lo spazio senza bande.", "(or larger, same shape). This way the image fills the space with no bands.")}</span>
@@ -249,11 +243,10 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
                 <option value="contain">{T("Mostra l'immagine intera", "Show the whole image")}</option>
               </select>
             </label>
-            <label className="f">{T("La tua email (per la ricevuta)", "Your email (for the receipt)")}
+            <label className="f">{prenota ? T("La tua email (ti scriviamo quando apre la vendita)", "Your email (we write to you when sales open)") : T("La tua email (per la ricevuta)", "Your email (for the receipt)")}
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} />
             </label>
           </div>
-          )}
         </div>
       </div>
 
@@ -261,7 +254,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pv-wrap">
             <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH, ...(img && { background: img.bordo }) }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
-              {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{prenota ? T("Immagine e link li carichi quando compri", "You upload image and link when you buy") : T("La tua immagine", "Your image")}</div>}
+              {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("La tua immagine", "Your image")}</div>}
               <div className="gr" style={{ gridTemplateColumns: `repeat(${p.w},1fr)`, gridTemplateRows: `repeat(${p.h},1fr)` }}>
                 {Array.from({ length: p.n }, (_, i) => <div key={i} />)}
               </div>
@@ -302,7 +295,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             )}
             {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
               !prenota && !nome.trim() && T("il nome del brand", "the brand name"),
-              !prenota && !linkValido && T("un link valido", "a valid link"),
+              !linkValido && T("un link valido", "a valid link"),
               !prenota && !img && T("l'immagine", "the image"),
               !emailValida && T("l'email", "the email"),
               !ok && T("la spunta di conferma", "the confirmation tick"),

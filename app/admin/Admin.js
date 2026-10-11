@@ -122,7 +122,7 @@ export default function Admin({ prova = false, prenota = false }) {
               <p className="muted">Pixel prenotati: {pren.reduce((a, q) => a + q.pack, 0)}</p>
               <button type="button" className="ghost sm" onClick={() => navigator.clipboard?.writeText([...new Set(pren.map((q) => q.email))].join(", ")).then(() => setMsg("Email copiate."))}>Copia tutte le email</button>
               <div style={{ maxHeight: 260, overflow: "auto", marginTop: 12 }}>
-                {pren.map((q) => <p key={q.id} className="muted" style={{ margin: "4px 0" }}>{new Date(q.creata).toLocaleDateString("it-IT")} · {q.pack} pixel · {q.nome || "—"} · {q.email}</p>)}
+                {pren.map((q) => <p key={q.id} className="muted" style={{ margin: "4px 0", display: "flex", alignItems: "center", gap: 8 }}>{q.img && <img src={q.img} alt="" style={{ height: 28, maxWidth: 56, objectFit: "contain" }} />}{new Date(q.creata).toLocaleDateString("it-IT")} · {q.pack} pixel · {q.nome || "—"} · {q.email}{q.link ? ` · ${q.link}` : ""}</p>)}
               </div>
             </>
           )}
