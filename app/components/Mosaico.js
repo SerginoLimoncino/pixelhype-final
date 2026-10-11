@@ -326,7 +326,7 @@ function Schermo({ blocchi, onTrova }) {
   }, [blocchi]);
   if (!b) return null;
   const area = b.w * b.h;
-  const lato = 150, sc = lato / Math.max(b.w, b.h);
+  const lato = 110, sc = lato / Math.max(b.w, b.h);
   return (
     <div className="wrap onair">
       <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo ai 100 pixel</span></div>
