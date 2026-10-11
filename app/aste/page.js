@@ -35,7 +35,7 @@ export default async function Aste() {
         <div className="sec-h">
           <div className="eyebrow">Aste in corso</div>
           <h2>Il centro si conquista <em>all'asta</em>.</h2>
-          <p>{venduti >= FINALE ? "Gran finale: gli ultimi 12 pezzi, 6 nel Cuore e 6 sparsi nel mosaico, con la base del 30% più bassa nel Cuore e del 40% fuori. Ogni asta dura 3 giorni e vince l'offerta più alta." : "Ogni asta dura 7 giorni e vince l'offerta più alta."} Tocca un'asta per vedere sulla mappa il posto esatto che conquisti. Offrire non costa nulla: paghi solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
+          <p>{gruppo("ultimo").length ? "L'ultima asta del mosaico: L'Ultimo Pezzo da 150 pixel, accanto al Cuore. Dura 7 giorni e vince l'offerta più alta." : venduti >= FINALE ? "Gran finale: gli ultimi 12 pezzi, 6 nel Cuore e 6 sparsi nel mosaico, con la base del 30% più bassa nel Cuore e del 40% fuori. Ogni asta dura 3 giorni e vince l'offerta più alta." : "Ogni asta dura 7 giorni e vince l'offerta più alta."} Tocca un'asta per vedere sulla mappa il posto esatto che conquisti. Offrire non costa nulla: paghi solo se vinci. {prossime > 0 && `Altre ${prossime} aste si apriranno nei prossimi giorni.`}</p>
         </div>
         {piccoli && Object.values(piccoli).some((n) => n > 0) && (
           <div style={{ marginBottom: 32 }}>
