@@ -124,7 +124,7 @@ export default function Mosaico() {
       clamp();
     };
     const zoomAt = (f, sx, sy) => {
-      const ns = Math.max(0.12, Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
+      const ns = Math.max(Math.min(W, H) / (N * CELL), Math.min(3, view.s * f)), wx = (view.x + sx) / view.s, wy = (view.y + sy) / view.s;
       view.s = ns; view.x = wx * ns - sx; view.y = wy * ns - sy; clamp();
     };
     const flyTo = (wx, wy) => {
