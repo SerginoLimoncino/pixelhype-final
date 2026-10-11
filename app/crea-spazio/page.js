@@ -1,5 +1,5 @@
 import CreaSpazio from "./CreaSpazio";
-import { PACCHETTI, FINALE } from "../../lib/prezzi";
+import { PACCHETTI, cuoreFissoDa } from "../../lib/prezzi";
 import { pixelVendutiPresto, caloPresto, PACK_CUORE_FISSO } from "../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +11,6 @@ export default async function Page({ searchParams }) {
   const sp = await searchParams;
   const pack = PACCHETTI[sp?.pack] ? Number(sp.pack) : 4;
   const venduti = await pixelVendutiPresto();
-  const cuore = sp?.cuore === "1" && PACK_CUORE_FISSO.includes(pack) && venduti >= FINALE;
+  const cuore = sp?.cuore === "1" && PACK_CUORE_FISSO.includes(pack) && venduti >= cuoreFissoDa(pack);
   return <CreaSpazio iniziale={pack} venduti={venduti} calo={await caloPresto(venduti)} cuore={cuore} />;
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { dbAttivo, pixelVendutiPresto, caloPresto, cuoreLiberi } from "../../lib/db";
 import { asteAperte, aggiornaAstePresto, listaAste, minimo } from "../../lib/aste";
 import Timer from "../components/Timer";
-import { PACCHETTI, SOGLIA_ASTE, FINALE, prezzoCuore, eur, num, quando } from "../../lib/prezzi";
+import { PACCHETTI, SOGLIA_ASTE, CUORE_ASTE, CUORE_PICCOLI, FINALE, cuoreFissoDa, prezzoCuore, eur, num, quando } from "../../lib/prezzi";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Aste · PixelHype" };
@@ -25,7 +25,8 @@ export default async function Aste() {
   await aggiornaAstePresto();
   const { aperte, prossime, finite } = await listaAste().catch(() => ({ aperte: [], prossime: 0, finite: [] }));
   const gruppo = (zona) => aperte.filter((a) => a.zona === zona);
-  const piccoli = venduti >= FINALE ? await cuoreLiberi().catch(() => null) : null;
+  const piccoli = venduti >= CUORE_PICCOLI ? await cuoreLiberi().catch(() => null) : null;
+  if (piccoli) for (const n of Object.keys(piccoli)) if (venduti < cuoreFissoDa(Number(n))) piccoli[n] = 0;
   const calo = piccoli ? await caloPresto(venduti) : 0;
 
   return (
@@ -38,7 +39,7 @@ export default async function Aste() {
         </div>
         {piccoli && Object.values(piccoli).some((n) => n > 0) && (
           <div style={{ marginBottom: 32 }}>
-            <h3 style={{ marginBottom: 12 }}>Gran finale · altri spazi del Cuore a prezzo fisso</h3>
+            <h3 style={{ marginBottom: 12 }}>{venduti >= FINALE ? "Gran finale · altri spazi del Cuore a prezzo fisso" : "Spazi piccoli del Cuore a prezzo fisso"}</h3>
             <div className="lots">
               {Object.keys(piccoli).map(Number).filter((n) => piccoli[n] > 0).map((n) => (
                 <Link href={`/crea-spazio?pack=${n}&cuore=1`} className="lot oro" key={n} style={{ textDecoration: "none" }}>
@@ -50,10 +51,10 @@ export default async function Aste() {
             </div>
           </div>
         )}
-        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE ? "Fuori dal Cuore" : "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
+        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE || venduti < CUORE_ASTE ? "Fuori dal Cuore" : "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
-            {gruppo(zona).length === 0 ? <p className="note">Nessuna asta aperta in questo momento.</p> : (
+            {gruppo(zona).length === 0 ? <p className="note">{zona === "cuore" && venduti < CUORE_ASTE ? `Le aste del Cuore partono a ${num(CUORE_ASTE)} pixel venduti: mancano ${num(CUORE_ASTE - venduti)} pixel.` : "Nessuna asta aperta in questo momento."}</p> : (
               <div className="lots">
                 {gruppo(zona).map((a) => (
                   <Link href={`/aste/${a.id}`} className={zona === "cuore" ? "lot oro" : "lot"} key={a.id} style={{ textDecoration: "none" }}>

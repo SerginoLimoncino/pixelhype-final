@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { PACCHETTI, prezzoPacchetto, prezzoCuore, FINALE } from "../../../lib/prezzi";
+import { PACCHETTI, prezzoPacchetto, prezzoCuore, cuoreFissoDa } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
 import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, PACK_CUORE_FISSO, nuovoOrdine, salvaImmagine, aggiorna } from "../../../lib/db";
 
@@ -22,7 +22,7 @@ export async function POST(req) {
   const cuore = !!nelCuore && PACK_CUORE_FISSO.includes(p.n);
   const venduti = await pixelVenduti();
   if (cuore) {
-    if (!dbAttivo() || venduti < FINALE || !(await cuoreLiberi())[p.n]) return Response.json({ errore: `Non ci sono più spazi da ${p.titolo} nel Cuore.` }, { status: 400 });
+    if (!dbAttivo() || venduti < cuoreFissoDa(p.n) || !(await cuoreLiberi())[p.n]) return Response.json({ errore: `Non ci sono più spazi da ${p.titolo} nel Cuore.` }, { status: 400 });
   } else if (dbAttivo() && !(await disponibili()).ok[p.n]) return Response.json({ errore: `Gli spazi da ${p.titolo} sono esauriti.` }, { status: 400 });
   const calo = await caloPrezzo(venduti);
   const prezzo = cuore ? prezzoCuore(p.n, venduti, calo) : prezzoPacchetto(p.n, venduti, calo);
