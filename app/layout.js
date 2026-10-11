@@ -4,16 +4,21 @@ import "./globals.css";
 import { pixelVendutiPresto } from "../lib/db";
 import { SOGLIA_ASTE } from "../lib/prezzi";
 import MenuTelefono from "./components/MenuTelefono";
+import { LinguaProvider, CambiaLingua } from "./components/Lingua";
+import { lingua, traduttore } from "../lib/lingua";
 
 export const revalidate = 30;
 
 const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"], variable: "--font-display" });
 const body = Manrope({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-body" });
 
-export const metadata = {
-  title: "PixelHype · Un'opera d'arte fatta di marchi",
-  description: "10.000 pixel, per sempre. Prendi il tuo spazio nel mosaico: immagine, link e posizione restano tuoi.",
-};
+export async function generateMetadata() {
+  const { T } = await traduttore();
+  return {
+    title: T("PixelHype · Un'opera d'arte fatta di marchi", "PixelHype · A work of art made of brands"),
+    description: T("10.000 pixel, per sempre. Prendi il tuo spazio nel mosaico: immagine, link e posizione restano tuoi.", "10,000 pixels, forever. Get your space in the mosaic: your image, link and position stay yours."),
+  };
+}
 
 function Marchio({ verde = "#123d30" }) {
   return (
@@ -28,9 +33,10 @@ function Marchio({ verde = "#123d30" }) {
 
 export default async function RootLayout({ children }) {
   const asteAperte = (await pixelVendutiPresto()) >= SOGLIA_ASTE;
+  const lang = await lingua(), T = (it, en) => (lang === "en" ? en : it);
   return (
-    <html lang="it" className={`${display.variable} ${body.variable}`}>
-      <body>
+    <html lang={lang} className={`${display.variable} ${body.variable}`}>
+      <body><LinguaProvider lingua={lang}>
         <header className="site-header">
           <div className="wrap hd">
             <Link href="/" className="logo">
@@ -38,14 +44,15 @@ export default async function RootLayout({ children }) {
               <span>Pixel<i>Hype</i></span>
             </Link>
             <nav className="nav">
-              <Link href="/#galleria">La galleria</Link>
-              <Link href="/compra">Prezzi</Link>
-              {asteAperte && <Link href="/aste" className="nav-aste">Aste</Link>}
-              <Link href="/#aste">Il Cuore</Link>
-              <Link href="/#come">Come funziona</Link>
+              <Link href="/#galleria">{T("La galleria", "The gallery")}</Link>
+              <Link href="/compra">{T("Prezzi", "Prices")}</Link>
+              {asteAperte && <Link href="/aste" className="nav-aste">{T("Aste", "Auctions")}</Link>}
+              <Link href="/#aste">{T("Il Cuore", "The Heart")}</Link>
+              <Link href="/#come">{T("Come funziona", "How it works")}</Link>
             </nav>
+            <CambiaLingua />
             <Link href="/compra" className="cta sm">
-              <span className="solo-pc">Prendi il tuo spazio</span><span className="solo-tel">Compra</span>
+              <span className="solo-pc">{T("Prendi il tuo spazio", "Get your space")}</span><span className="solo-tel">{T("Compra", "Buy")}</span>
             </Link>
             <MenuTelefono asteAperte={asteAperte} />
           </div>
@@ -57,11 +64,11 @@ export default async function RootLayout({ children }) {
               <Marchio verde="#1d5a47" />
               <span>Pixel<i>Hype</i></span>
             </span>
-            <span>getpixelhype.com · Contatti: <a href="mailto:info@getpixelhype.com">info@getpixelhype.com</a> · Ogni immagine viene controllata prima di andare online · Prezzi + IVA</span>
-            <span className="legal-links"><Link href="/termini">Termini e condizioni</Link><Link href="/privacy">Privacy</Link><Link href="/cookie">Cookie</Link></span>
+            <span>getpixelhype.com · {T("Contatti", "Contact")}: <a href="mailto:info@getpixelhype.com">info@getpixelhype.com</a> · {T("Ogni immagine viene controllata prima di andare online · Prezzi + IVA", "Every image is checked before it goes online · Prices + VAT")}</span>
+            <span className="legal-links"><Link href="/termini">{T("Termini e condizioni", "Terms and conditions")}</Link><Link href="/privacy">Privacy</Link><Link href="/cookie">Cookie</Link></span>
           </div>
         </footer>
-      </body>
+      </LinguaProvider></body>
     </html>
   );
 }

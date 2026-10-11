@@ -1,3 +1,4 @@
+import { traduciRisposte } from "../../../lib/messaggi";
 import { controllaLink } from "../../../lib/controlloLink";
 
 // Checks link and image before payment.
@@ -9,7 +10,7 @@ const CATEGORIE_IMMAGINE = ["sexual", "sexual/minors", "violence/graphic", "hate
 const SOGLIA_NO = 0.7; // sopra: rifiutata subito
 const SOGLIA_DUBBIO = 0.3; // tra le due: accettata, ma la controlla Sergio prima che vada online
 
-export async function POST(req) {
+async function rispondi(req) {
   const { link, immagine } = await req.json().catch(() => ({}));
 
   const l = await controllaLink(link);
@@ -52,3 +53,5 @@ async function rischioImmagine(dataUrl) {
   }
   return 0;
 }
+
+export const POST = traduciRisposte(rispondi);

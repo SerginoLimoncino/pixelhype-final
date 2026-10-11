@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Legale from "../components/Legale";
-import { TITOLARE, AGGIORNATO, dato } from "../../lib/legale";
+import { TITOLARE, AGGIORNATO, AGGIORNATO_EN, dato } from "../../lib/legale";
+import { traduttore } from "../../lib/lingua";
 
 export const metadata = { title: "Privacy policy · PixelHype" };
 
-export default function Privacy() {
+export default async function Privacy() {
+  const { en } = await traduttore();
+  if (en) return <English />;
   return (
     <Legale titolo="Privacy policy" aggiornato={AGGIORNATO}>
       <p>
@@ -77,6 +80,84 @@ export default function Privacy() {
 
       <h2>9. Cookie</h2>
       <p>Le informazioni sui cookie sono nella <Link href="/cookie">Cookie policy</Link>.</p>
+    </Legale>
+  );
+}
+
+function English() {
+  return (
+    <Legale titolo="Privacy policy" aggiornato={AGGIORNATO_EN}>
+      <p>
+        This page explains which personal data PixelHype collects, why and for how long, as required by the European Regulation
+        2016/679 (&quot;GDPR&quot;) and the Italian Privacy Code.
+      </p>
+
+      <h2>1. Data controller</h2>
+      <p>
+        {dato(TITOLARE.nome, true)}, {dato(TITOLARE.indirizzo, true)}, VAT number / tax code {dato(TITOLARE.piva, true)}. For any request about your data
+        write to <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
+      </p>
+
+      <h2>2. What data we collect</h2>
+      <ul>
+        <li><b>Space data</b>: brand name, link and image. These data are public: anyone visiting the site sees them in the mosaic.</li>
+        <li><b>Email</b>: for the receipt, for messages about your order or auction and to contact you if the space has a problem.</li>
+        <li><b>Payment data</b>: handled by Stripe. We only receive the payment result, a customer code and, for auctions, a reference to the saved payment method. We never see the card number.</li>
+        <li><b>Auction bids</b>: amount, date and the details of the space you would like to publish.</li>
+        <li><b>Technical data</b>: IP address and browser information recorded automatically by the servers for security and operation.</li>
+      </ul>
+
+      <h2>3. Why we use them (legal bases)</h2>
+      <ul>
+        <li>To sell and publish the space and run the auctions: performance of the contract (art. 6.1.b GDPR).</li>
+        <li>For tax and accounting obligations: legal obligation (art. 6.1.c GDPR).</li>
+        <li>To check that images and links are safe and lawful and to protect the site from abuse: legitimate interest (art. 6.1.f GDPR).</li>
+      </ul>
+      <p>We do not use your data for advertising, we do not sell it and we do not do profiling.</p>
+
+      <h2>4. Who we share them with</h2>
+      <p>The data are processed by providers that help us run the site, appointed as data processors:</p>
+      <ul>
+        <li><b>Vercel Inc.</b> (USA): hosts the site.</li>
+        <li><b>Supabase</b>: database and image storage, on servers in Frankfurt (EU).</li>
+        <li><b>Stripe</b> (Ireland and USA): payments, including PayPal if chosen.</li>
+        <li><b>Sightengine</b> (France) and, if active, <b>OpenAI</b> (USA): automatic check of images before publication.</li>
+        <li><b>abuse.ch URLhaus</b> (Switzerland) and, if active, <b>Google Safe Browsing</b>: security check of links (they only receive the link).</li>
+        <li><b>ImprovMX</b> and <b>Google</b> (Gmail): receiving the emails sent to {TITOLARE.email}.</li>
+      </ul>
+      <p>
+        Some providers are outside the European Union. In these cases the transfer takes place with the safeguards provided by the
+        GDPR (EU-US &quot;Data Privacy Framework&quot; adequacy decision or the European Commission&apos;s standard contractual clauses).
+        Data may be disclosed to the authorities when the law requires it.
+      </p>
+
+      <h2>5. For how long</h2>
+      <ul>
+        <li>Name, link and image of the space: as long as the space stays in the mosaic.</li>
+        <li>Order and payment data: 10 years, as required by tax rules.</li>
+        <li>Losing auction bids: up to 12 months after the end of the auction.</li>
+        <li>Orders never paid: deleted automatically.</li>
+        <li>Server technical logs: for the time set by the providers, usually a few days or weeks.</li>
+      </ul>
+
+      <h2>6. Your rights</h2>
+      <p>
+        You can ask us at any time to access your data, correct it, delete it, restrict its use, receive it in a readable format or
+        object to processing based on legitimate interest (arts. 15-22 GDPR), by writing to <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
+        Deleting a space that has already been paid for means removing it from the mosaic, while tax data must be kept by law.
+        If you think your data are processed unfairly you can lodge a complaint with the Italian Data Protection Authority
+        (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer">garanteprivacy.it</a>) or with the authority of your country.
+      </p>
+
+      <h2>7. Required data</h2>
+      <p>Name, link, image and email are needed to buy a space or place a bid: without these data we cannot provide the service.</p>
+
+      <h2>8. Minors</h2>
+      <p>The service is for adults and businesses. We do not knowingly collect data from people under 18.</p>
+
+      <h2>9. Cookies</h2>
+      <p>Information about cookies is in the <Link href="/cookie">Cookie policy</Link>.</p>
+      <p className="muted">This is a translation for convenience: the Italian version prevails.</p>
     </Legale>
   );
 }

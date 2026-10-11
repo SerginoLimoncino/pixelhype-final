@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLingua } from "./Lingua";
 
 const PX_FINALE = 100; // pixel reali per ogni pixel del mosaico nell'immagine finale
 
@@ -25,6 +26,7 @@ export function leggiImmagine(file) {
 export default function Ritaglio({ img, w, h, fatto }) {
   const [zoom, setZoom] = useState(1);
   const [off, setOff] = useState({ x: 0, y: 0 });
+  const { T } = useLingua();
   const [fit, setFit] = useState("cover");
   const drag = useRef(null);
 
@@ -67,7 +69,7 @@ export default function Ritaglio({ img, w, h, fatto }) {
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
       <div className="pv-wrap">
         <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH }} onPointerDown={inizio} onPointerMove={muovi} onPointerUp={() => (drag.current = null)} onPointerCancel={() => (drag.current = null)}>
-          {img ? <img src={img.src} alt="Anteprima" draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">L'immagine</div>}
+          {img ? <img src={img.src} alt={T("Anteprima", "Preview")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("L'immagine", "The image")}</div>}
           <div className="gr" style={{ gridTemplateColumns: `repeat(${w},1fr)`, gridTemplateRows: `repeat(${h},1fr)` }}>
             {Array.from({ length: w * h }, (_, i) => <div key={i} />)}
           </div>
@@ -75,14 +77,14 @@ export default function Ritaglio({ img, w, h, fatto }) {
       </div>
       {img && (
         <div className="editor" style={{ borderBottom: 0 }}>
-          <p className="muted">Trascina l'immagine per spostarla e usa lo zoom per ingrandirla.</p>
+          <p className="muted">{T("Trascina l'immagine per spostarla e usa lo zoom per ingrandirla.", "Drag the image to move it and use the zoom to enlarge it.")}</p>
           <label className="zoom">
             <span>Zoom</span>
-            <input type="range" min="1" max="4" step="0.05" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label="Zoom immagine" />
+            <input type="range" min="1" max="4" step="0.05" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label={T("Zoom immagine", "Image zoom")} />
           </label>
           <div className="ed-row">
-            <button type="button" className="ghost sm" onClick={() => { setZoom(1); setOff({ x: 0, y: 0 }); }}>Centra</button>
-            <button type="button" className="ghost sm" onClick={() => setFit(fit === "cover" ? "contain" : "cover")}>{fit === "cover" ? "Mostra intera" : "Riempi lo spazio"}</button>
+            <button type="button" className="ghost sm" onClick={() => { setZoom(1); setOff({ x: 0, y: 0 }); }}>{T("Centra", "Centre")}</button>
+            <button type="button" className="ghost sm" onClick={() => setFit(fit === "cover" ? "contain" : "cover")}>{fit === "cover" ? T("Mostra intera", "Show whole") : T("Riempi lo spazio", "Fill the space")}</button>
           </div>
         </div>
       )}

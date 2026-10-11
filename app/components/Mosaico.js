@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { prezzoPixel, eur, num } from "../../lib/prezzi";
+import { prezzoPixel, nomePack, eur, num } from "../../lib/prezzi";
+import { useLingua } from "./Lingua";
 
 let prezzoOra = prezzoPixel(); // price per pixel now, from /api/spazi
+let EN = false; // site language, for the texts drawn on the canvas and the tooltips (set on each render)
 
 // DEMO = true riempie il mosaico con marchi di esempio, per vedere come sarà.
 // Al lancio metti false: il mosaico mostrerà solo gli spazi venduti davvero.
@@ -15,7 +17,6 @@ const PAL = [["#123d30", "#1d5a47"], ["#1f5c5a", "#2f7a72"], ["#4a2233", "#6b324
 const SHAPES = [[1, 1], [2, 1], [2, 2], [5, 2], [5, 5], [10, 10]], WEIGHTS = [31, 23, 21, 15, 7, 2];
 const CAP = { 25: 40, 100: 10 };
 const big = (b) => b.w * b.h >= 25;
-const NOMI_PACCHETTO = { 1: "Il Pixel", 2: "Il Doppio", 4: "Il Quadro", 10: "La Striscia", 25: "La Vetrina", 50: "Il Murale", 100: "Il Capolavoro", 150: "L'Ultimo Pezzo" };
 const SECONDI_SCHERMO = 10; // ogni quanti secondi cambia il marchio sullo schermo
 const inHeart = (x, y, w, h) => x + w > 35 && x < 65 && y + h > 35 && y < 65;
 
@@ -97,6 +98,8 @@ export default function Mosaico() {
   const [res, setRes] = useState(null);
   const [freeCount, setFreeCount] = useState(SELL);
   const [demo, setDemo] = useState(false);
+  const { en, T } = useLingua();
+  EN = en;
 
   useEffect(() => {
     let vivo = true, stop = () => {};
@@ -157,7 +160,7 @@ export default function Mosaico() {
       // How much of the Cuore is already taken: the title fades and the inner line goes as spaces arrive.
       const pieno = blocks.reduce((t, b) => t + (b.lucky ? b.w * b.h : 0), 0) / 900, titolo = Math.max(0, 1 - pieno * 4);
       if (pieno === 0) { c.strokeStyle = goldGrad(c, A, A, S, S); c.lineWidth = 1 / view.s; c.strokeRect(A + 8, A + 8, S - 16, S - 16); }
-      if (cs > 5 && titolo > 0) { c.globalAlpha = titolo; c.fillStyle = goldGrad(c, A, A + S * 0.35, S, S * 0.3); c.textAlign = "center"; c.textBaseline = "middle"; c.font = "italic 700 120px " + getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif"; c.fillText("Il Cuore", 50 * CELL, 48 * CELL); c.font = "700 20px sans-serif"; c.fillText("A S T E   P R E M I U M", 50 * CELL, 54 * CELL); c.globalAlpha = 1; }
+      if (cs > 5 && titolo > 0) { c.globalAlpha = titolo; c.fillStyle = goldGrad(c, A, A + S * 0.35, S, S * 0.3); c.textAlign = "center"; c.textBaseline = "middle"; c.font = "italic 700 120px " + getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif"; c.fillText(EN ? "The Heart" : "Il Cuore", 50 * CELL, 48 * CELL); c.font = "700 20px sans-serif"; c.fillText(EN ? "P R E M I U M   A U C T I O N S" : "A S T E   P R E M I U M", 50 * CELL, 54 * CELL); c.globalAlpha = 1; }
       if (cs > 3) { c.strokeStyle = `rgba(241,226,189,${cs > 7 ? 0.14 : 0.08})`; c.lineWidth = 1 / view.s; c.beginPath(); for (let i = 0; i <= N; i++) { c.moveTo(i * CELL, 0); c.lineTo(i * CELL, N * CELL); c.moveTo(0, i * CELL); c.lineTo(N * CELL, i * CELL); } c.stroke(); }
       const sweep = reduce ? -1e9 : ((now / 10) % (N * CELL * 2.6)) - N * CELL * 0.4;
       const serif = getComputedStyle(document.body).getPropertyValue("--font-display") + ", Georgia, serif";
@@ -203,9 +206,9 @@ export default function Mosaico() {
       if (gx < 0 || gy < 0 || gx >= N || gy >= N) { tip.hidden = true; sel = -1; return; }
       const id = owner[gy * N + gx];
       if (id >= 0 && id === sel && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
-      if (id >= 0) { const b = blocks[id]; sel = id; showTip(`<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
-      else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip("<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
-      else { sel = -1; showTip(`<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra)}</b>Prendilo prima che salga il prezzo`, sx, sy); }
+      if (id >= 0) { const b = blocks[id]; sel = id; showTip(EN ? `<span>${b.w * b.h} pixel${b.w * b.h > 1 ? "s" : ""}${b.lucky ? " · ✦ lucky spot in the Heart" : ""}</span><b>${esc(b.name)}</b>Tap again to open the website` : `<span>${b.w * b.h} pixel${b.lucky ? " · ✦ posto fortunato nel Cuore" : ""}</span><b>${esc(b.name)}</b>Tocca di nuovo per aprire il sito`, sx, sy); }
+      else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip(EN ? "<span>The Heart · Premium auctions</span><b>Reserved for auctions</b>Spaces from 1 to 100 pixels, with a starting price" : "<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
+      else { sel = -1; showTip(EN ? `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Free · ${eur(prezzoOra)}</b>Get it before the price goes up` : `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra)}</b>Prendilo prima che salga il prezzo`, sx, sy); }
     };
     const down = (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; hideHelp(); if (pts.size === 2) { const a = [...pts.values()]; pinch = { d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; } };
     const move = (e) => {
@@ -260,13 +263,13 @@ export default function Mosaico() {
     <>
       {feat.length > 0 && (
         <div className="wrap feat">
-          <div className="feat-h"><span className="eyebrow">In evidenza</span><span className="feat-n">I marchi dei blocchi più grandi</span></div>
+          <div className="feat-h"><span className="eyebrow">{T("In evidenza", "Featured")}</span><span className="feat-n">{T("I marchi dei blocchi più grandi", "The brands of the biggest blocks")}</span></div>
           <div className="feat-row">
             {feat.map((b) => (
               <button type="button" className="fc" key={b.id} onClick={() => goTo(b)}>
                 <div className="sw" style={{ background: sfondo(b) }} />
                 <b>{b.name}</b>
-                <span>{NOMI_PACCHETTO[b.w * b.h]} · {b.w * b.h} pixel</span>
+                <span>{nomePack(b.w * b.h, en)} · {b.w * b.h} pixel{en ? "s" : ""}</span>
               </button>
             ))}
           </div>
@@ -276,32 +279,32 @@ export default function Mosaico() {
       <div className="wrap gallery" id="galleria">
         <div className="toolbar">
           <div className="search">
-            <input type="search" placeholder="Cerca un marchio" autoComplete="off" aria-label="Cerca un marchio" value={q} onChange={(e) => onSearch(e.target.value)} />
+            <input type="search" placeholder={T("Cerca un marchio", "Search for a brand")} autoComplete="off" aria-label={T("Cerca un marchio", "Search for a brand")} value={q} onChange={(e) => onSearch(e.target.value)} />
             {res && (
               <div className="results">
                 {res.length ? res.map((b) => (
-                  <button type="button" key={b.id} onClick={() => goTo(b)}>{b.name}<span>riga {b.y + 1} · col. {b.x + 1} · {b.w * b.h} px</span></button>
-                )) : <div className="none">Nessun marchio trovato</div>}
+                  <button type="button" key={b.id} onClick={() => goTo(b)}>{b.name}<span>{T("riga", "row")} {b.y + 1} · col. {b.x + 1} · {b.w * b.h} px</span></button>
+                )) : <div className="none">{T("Nessun marchio trovato", "No brand found")}</div>}
               </div>
             )}
           </div>
-          <div className="legend"><span><i style={{ background: "var(--goldgrad)" }} />Il Cuore, all'asta</span><span><i style={{ background: "#1d1c18", border: "1px solid #6f6a5e" }} />Libero</span><span><i style={{ background: "var(--green2)" }} />Già preso</span></div>
+          <div className="legend"><span><i style={{ background: "var(--goldgrad)" }} />{T("Il Cuore, all'asta", "The Heart, at auction")}</span><span><i style={{ background: "#1d1c18", border: "1px solid #6f6a5e" }} />{T("Libero", "Free")}</span><span><i style={{ background: "var(--green2)" }} />{T("Già preso", "Taken")}</span></div>
         </div>
         <div className="frame"><div className="mat">
           <div className="stage" ref={stageRef}>
-            <canvas className="cv" ref={cvRef} aria-label="Il mosaico di 10.000 pixel. Trascina per esplorare, usa più e meno per lo zoom." />
+            <canvas className="cv" ref={cvRef} aria-label={T("Il mosaico di 10.000 pixel. Trascina per esplorare, usa più e meno per lo zoom.", "The 10,000-pixel mosaic. Drag to explore, use plus and minus to zoom.")} />
             <div className="ctl">
-              <button type="button" aria-label="Avvicina" onClick={() => api.current.zoomIn()}>+</button>
-              <button type="button" aria-label="Allontana" onClick={() => api.current.zoomOut()}>−</button>
-              <button type="button" aria-label="Guarda l'opera intera" title="Guarda l'opera intera" onClick={() => api.current.reveal()}>✦</button>
+              <button type="button" aria-label={T("Avvicina", "Zoom in")} onClick={() => api.current.zoomIn()}>+</button>
+              <button type="button" aria-label={T("Allontana", "Zoom out")} onClick={() => api.current.zoomOut()}>−</button>
+              <button type="button" aria-label={T("Guarda l'opera intera", "See the whole artwork")} title={T("Guarda l'opera intera", "See the whole artwork")} onClick={() => api.current.reveal()}>✦</button>
             </div>
-            <canvas className="mini" ref={miniRef} aria-label="Mini-mappa: tocca per spostarti" />
+            <canvas className="mini" ref={miniRef} aria-label={T("Mini-mappa: tocca per spostarti", "Mini map: tap to move")} />
             <div className="tip" ref={tipRef} hidden />
           </div>
         </div></div>
         <div className="label">
-          <div className="cartel"><b>PixelHype, 2026</b>Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, {num(freeCount)} pixel ancora disponibili.</div>
-          {demo && <div className="demo-note">Anteprima con marchi di esempio</div>}
+          <div className="cartel"><b>PixelHype, 2026</b>{en ? `Collective web artwork, 10,000 pixels. Every space is signed by its owner. Open collection, ${num(freeCount)} pixels still available.` : `Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, ${num(freeCount)} pixel ancora disponibili.`}</div>
+          {demo && <div className="demo-note">{T("Anteprima con marchi di esempio", "Preview with sample brands")}</div>}
         </div>
       </div>
     </>
@@ -324,20 +327,21 @@ function Schermo({ blocchi, onTrova }) {
     const t = setInterval(cambia, SECONDI_SCHERMO * 1000);
     return () => clearInterval(t);
   }, [blocchi]);
+  const { en, T } = useLingua();
   if (!b) return null;
   const area = b.w * b.h;
   const lato = 130, sc = lato / Math.max(b.w, b.h);
   return (
     <div className="wrap onair">
-      <div className="onair-h"><span className="eyebrow">In onda</span><span className="feat-n">Ogni {SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo ai 100 pixel</span></div>
+      <div className="onair-h"><span className="eyebrow">{T("In onda", "On air")}</span><span className="feat-n">{en ? `Every ${SECONDI_SCHERMO} seconds a random brand, from a single pixel to 100 pixels` : `Ogni ${SECONDI_SCHERMO} secondi un marchio a caso, dal pixel singolo ai 100 pixel`}</span></div>
       <div className="screen">
         <div className="screen-in" key={giro}>
           <div className="screen-art" style={{ width: b.w * sc, height: b.h * sc, background: sfondo(b), boxShadow: big(b) ? "0 0 0 3px #d9bf8c" : "0 0 0 1px rgba(217,191,140,.35)" }} />
           <div className="screen-txt">
-            <span className="screen-size">{NOMI_PACCHETTO[area] || area + " pixel"} · {area} pixel</span>
+            <span className="screen-size">{nomePack(area, en) || area + " pixel"} · {area} pixel{en && area > 1 ? "s" : ""}</span>
             <b>{b.name}</b>
-            <span className="screen-pos">riga {b.y + 1} · colonna {b.x + 1}</span>
-            <button type="button" className="ghost sm" onClick={() => onTrova(b)}>Trovalo nel mosaico</button>
+            <span className="screen-pos">{T("riga", "row")} {b.y + 1} · {T("colonna", "column")} {b.x + 1}</span>
+            <button type="button" className="ghost sm" onClick={() => onTrova(b)}>{T("Trovalo nel mosaico", "Find it in the mosaic")}</button>
           </div>
         </div>
         <i className="screen-bar" key={"bar" + giro} style={{ animationDuration: SECONDI_SCHERMO + "s" }} />

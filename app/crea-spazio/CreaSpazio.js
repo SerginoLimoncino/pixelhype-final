@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { PACCHETTI, FASI, fase, inVenditaOra, prezzoPacchetto, prezzoCuore, prezzoPixel, eur } from "../../lib/prezzi";
+import { PACCHETTI, FASI, fase, inVenditaOra, prezzoPacchetto, prezzoCuore, prezzoPixel, nomePack, misura, eur } from "../../lib/prezzi";
+import { useLingua } from "../components/Lingua";
 import { normalizzaLink } from "../../lib/controllo";
 
 const MAX_MB = 10; // file più grandi vengono rifiutati
@@ -11,24 +12,24 @@ const MIN_LATO = 100; // immagini più piccole sarebbero sgranate
 const PX_FINALE = 100; // pixel reali per ogni pixel del mosaico nell'immagine finale
 
 // Reads the file, rejects images that are too big or too small, and shrinks the rest.
-function preparaImmagine(file) {
+function preparaImmagine(file, T) {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith("image/")) return reject("Il file deve essere un'immagine (JPG, PNG o WebP).");
-    if (file.size > MAX_MB * 1024 * 1024) return reject(`L'immagine è troppo grande: massimo ${MAX_MB} MB.`);
+    if (!file.type.startsWith("image/")) return reject(T("Il file deve essere un'immagine (JPG, PNG o WebP).", "The file must be an image (JPG, PNG or WebP)."));
+    if (file.size > MAX_MB * 1024 * 1024) return reject(T(`L'immagine è troppo grande: massimo ${MAX_MB} MB.`, `The image is too big: ${MAX_MB} MB maximum.`));
     const url = URL.createObjectURL(file);
     const im = new Image();
     im.onload = () => {
       URL.revokeObjectURL(url);
       const w = im.naturalWidth, h = im.naturalHeight;
-      if (w * h > 40e6) return reject("L'immagine ha troppi pixel (oltre 40 megapixel). Usane una più piccola.");
-      if (Math.min(w, h) < MIN_LATO) return reject(`L'immagine è troppo piccola: almeno ${MIN_LATO} pixel per lato.`);
+      if (w * h > 40e6) return reject(T("L'immagine ha troppi pixel (oltre 40 megapixel). Usane una più piccola.", "The image has too many pixels (over 40 megapixels). Use a smaller one."));
+      if (Math.min(w, h) < MIN_LATO) return reject(T(`L'immagine è troppo piccola: almeno ${MIN_LATO} pixel per lato.`, `The image is too small: at least ${MIN_LATO} pixels per side.`));
       const k = Math.min(1, MAX_LATO / Math.max(w, h));
       const c = document.createElement("canvas");
       c.width = Math.round(w * k); c.height = Math.round(h * k);
       c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
       resolve({ src: c.toDataURL("image/webp", 0.9), w: c.width, h: c.height, el: c });
     };
-    im.onerror = () => { URL.revokeObjectURL(url); reject("Non riesco a leggere questa immagine."); };
+    im.onerror = () => { URL.revokeObjectURL(url); reject(T("Non riesco a leggere questa immagine.", "This image cannot be read.")); };
     im.src = url;
   });
 }
@@ -47,6 +48,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   const [errore, setErrore] = useState("");
   const [stato, setStato] = useState("modulo"); // modulo | invio | fatto
   const [errPaga, setErrPaga] = useState("");
+  const { en, T } = useLingua();
 
   const p = PACCHETTI[pack];
   const prezzoDi = (n) => (cuore ? prezzoCuore(n, venduti, calo) : prezzoPacchetto(n, venduti, calo));
@@ -59,7 +61,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     const file = e.target.files?.[0];
     setErrore("");
     if (!file) return;
-    preparaImmagine(file)
+    preparaImmagine(file, T)
       .then((res) => { setImg(res); setZoom(1); setOff({ x: 0, y: 0 }); })
       .catch((msg) => { setImg(null); setErrore(String(msg)); e.target.value = ""; });
   }
@@ -88,7 +90,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
       if (d.prova) { setTimeout(() => setStato("fatto"), 800); return; }
       throw new Error(d.errore || "");
     } catch (e) {
-      setErrPaga(e.message || "Il pagamento non è partito. Riprova tra poco.");
+      setErrPaga(e.message || T("Il pagamento non è partito. Riprova tra poco.", "The payment did not start. Please try again shortly."));
       setStato("modulo");
     }
   }
@@ -146,12 +148,12 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     return (
       <section className="wrap buy" style={{ gridTemplateColumns: "1fr", maxWidth: 720 }}>
         <div className="card" style={{ display: "grid", gap: 16 }}>
-          <span className="step-n">Prova completata · nessun addebito</span>
-          <p className="ok-big">Sei nell'opera. Per sempre.</p>
-          <p className="muted">Il tuo spazio "{p.nome}" ({p.titolo}) per <b>{nome}</b> verrà messo nel mosaico in una posizione scelta a caso, dopo il controllo dell'immagine. Riceverai la ricevuta a {email}.</p>
+          <span className="step-n">{T("Prova completata · nessun addebito", "Test completed · nothing charged")}</span>
+          <p className="ok-big">{T("Sei nell'opera. Per sempre.", "You are in the artwork. Forever.")}</p>
+          <p className="muted">{en ? <>Your space &quot;{nomePack(pack, true)}&quot; ({misura(pack, true)}) for <b>{nome}</b> will be placed in the mosaic at a random position, after the image check. You will get the receipt at {email}.</> : <>Il tuo spazio &quot;{p.nome}&quot; ({p.titolo}) per <b>{nome}</b> verrà messo nel mosaico in una posizione scelta a caso, dopo il controllo dell'immagine. Riceverai la ricevuta a {email}.</>}</p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link href="/#galleria" className="cta">Torna al mosaico</Link>
-            <Link href="/compra" className="ghost">Prendi un altro spazio</Link>
+            <Link href="/#galleria" className="cta">{T("Torna al mosaico", "Back to the mosaic")}</Link>
+            <Link href="/compra" className="ghost">{T("Prendi un altro spazio", "Get another space")}</Link>
           </div>
         </div>
       </section>
@@ -162,48 +164,48 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     <section className="wrap buy">
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
-          <div className="eyebrow">{cuore ? "Gran finale · ultimi spazi del Cuore, cornice d'oro" : `Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} a pixel`}</div>
-          <h2>{cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
+          <div className="eyebrow">{cuore ? T("Gran finale · ultimi spazi del Cuore, cornice d'oro", "Grand finale · last spaces in the Heart, gold frame") : T(`Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} a pixel`, `Phase ${fase(venduti) + 1} of ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} per pixel`)}</div>
+          <h2>{en ? (cuore ? <>Your space <em>in the Heart</em>.</> : <>Create your <em>space</em>.</>) : cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
         </div>
 
         <div className="card">
-          <span className="step-n">Passo I</span>
-          <h3>Scegli il pacchetto</h3>
+          <span className="step-n">{T("Passo I", "Step I")}</span>
+          <h3>{T("Scegli il pacchetto", "Choose the pack")}</h3>
           <div className="pkpick">
             {Object.values(PACCHETTI).filter((x) => !x.soloAsta && (cuore ? x.n <= 25 : inVenditaOra(x, venduti))).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
-                <b>{x.titolo}</b>
+                <b>{misura(x.n, en)}</b>
                 <span className="pr">{eur(prezzoDi(x.n))}</span>
-                <small>{x.titolo}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
+                <small>{nomePack(x.n, en)}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
               </button>
             ))}
           </div>
         </div>
 
         <div className="card">
-          <span className="step-n">Passo II</span>
-          <h3>Firma la tua opera</h3>
+          <span className="step-n">{T("Passo II", "Step II")}</span>
+          <h3>{T("Firma la tua opera", "Sign your work")}</h3>
           <div className="fields">
-            <label className="f">Nome del tuo brand
-              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Es. Bar Centrale" maxLength={40} />
+            <label className="f">{T("Nome del tuo brand", "Your brand name")}
+              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
             </label>
-            <label className="f">Il tuo link
-              <input type="text" inputMode="url" autoCapitalize="none" value={link} onChange={(e) => setLink(e.target.value)} placeholder="www.iltuosito.it" />
-              {link && !linkValido && <span className="hint">Scrivi l'indirizzo del sito, per esempio www.iltuosito.it</span>}
+            <label className="f">{T("Il tuo link", "Your link")}
+              <input type="text" inputMode="url" autoCapitalize="none" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
+              {link && !linkValido && <span className="hint">{T("Scrivi l'indirizzo del sito, per esempio www.iltuosito.it", "Write the website address, for example www.yoursite.com")}</span>}
             </label>
-            <label className="f">La tua immagine
+            <label className="f">{T("La tua immagine", "Your image")}
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={caricaImmagine} />
-              <span className="hint">JPG, PNG o WebP, massimo {MAX_MB} MB. Se è molto grande la rimpiccioliamo noi. Una sola immagine per tutto il blocco.</span>
+              <span className="hint">{T(`JPG, PNG o WebP, massimo ${MAX_MB} MB. Se è molto grande la rimpiccioliamo noi. Una sola immagine per tutto il blocco.`, `JPG, PNG or WebP, ${MAX_MB} MB maximum. If it is very large we shrink it for you. One single image for the whole block.`)}</span>
               {errore && <span className="hint" style={{ color: "#8a3f2c" }}>{errore}</span>}
             </label>
-            <label className="f">Adattamento immagine
+            <label className="f">{T("Adattamento immagine", "Image fit")}
               <select value={fit} onChange={(e) => setFit(e.target.value)}>
-                <option value="cover">Riempi tutto lo spazio</option>
-                <option value="contain">Mostra l'immagine intera</option>
+                <option value="cover">{T("Riempi tutto lo spazio", "Fill the whole space")}</option>
+                <option value="contain">{T("Mostra l'immagine intera", "Show the whole image")}</option>
               </select>
             </label>
-            <label className="f">La tua email (per la ricevuta)
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nome@esempio.it" />
+            <label className="f">{T("La tua email (per la ricevuta)", "Your email (for the receipt)")}
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={T("nome@esempio.it", "name@example.com")} />
             </label>
           </div>
         </div>
@@ -213,7 +215,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pv-wrap">
             <div className={"pv" + (img ? " edit" : "")} style={{ width: PW, height: PH }} onPointerDown={inizioTrascina} onPointerMove={trascina} onPointerUp={fineTrascina} onPointerCancel={fineTrascina}>
-              {img ? <img src={img.src} alt="Anteprima del tuo spazio" draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">La tua immagine</div>}
+              {img ? <img src={img.src} alt={T("Anteprima del tuo spazio", "Preview of your space")} draggable={false} style={{ position: "absolute", width: dw, height: dh, maxWidth: "none", left: PW / 2 - dw / 2 + o.x, top: PH / 2 - dh / 2 + o.y }} /> : <div className="empty">{T("La tua immagine", "Your image")}</div>}
               <div className="gr" style={{ gridTemplateColumns: `repeat(${p.w},1fr)`, gridTemplateRows: `repeat(${p.h},1fr)` }}>
                 {Array.from({ length: p.n }, (_, i) => <div key={i} />)}
               </div>
@@ -221,36 +223,36 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
           </div>
           {img && (
             <div className="editor">
-              <span className="step-n">Ritaglia</span>
-              <p className="muted">Trascina l'immagine per spostarla e usa lo zoom per ingrandirla.</p>
+              <span className="step-n">{T("Ritaglia", "Crop")}</span>
+              <p className="muted">{T("Trascina l'immagine per spostarla e usa lo zoom per ingrandirla.", "Drag the image to move it and use the zoom to enlarge it.")}</p>
               <label className="zoom">
                 <span>Zoom</span>
-                <input type="range" min="1" max="4" step="0.05" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label="Zoom immagine" />
+                <input type="range" min="1" max="4" step="0.05" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label={T("Zoom immagine", "Image zoom")} />
               </label>
               <div className="ed-row">
-                <button type="button" className="ghost sm" onClick={() => { setZoom(1); setOff({ x: 0, y: 0 }); }}>Centra</button>
-                <button type="button" className="ghost sm" onClick={() => setFit(fit === "cover" ? "contain" : "cover")}>{fit === "cover" ? "Mostra intera" : "Riempi lo spazio"}</button>
+                <button type="button" className="ghost sm" onClick={() => { setZoom(1); setOff({ x: 0, y: 0 }); }}>{T("Centra", "Centre")}</button>
+                <button type="button" className="ghost sm" onClick={() => setFit(fit === "cover" ? "contain" : "cover")}>{fit === "cover" ? T("Mostra intera", "Show whole") : T("Riempi lo spazio", "Fill the space")}</button>
               </div>
             </div>
           )}
           <div style={{ padding: 24, display: "grid", gap: 16 }}>
-            <span className="step-n">Passo III · Riepilogo</span>
+            <span className="step-n">{T("Passo III · Riepilogo", "Step III · Summary")}</span>
             <div className="sum">
-              <div><span>Spazio</span><span>{p.nome} · {p.titolo}</span></div>
+              <div><span>{T("Spazio", "Space")}</span><span>{nomePack(pack, en)} · {misura(pack, en)}</span></div>
               <div><span>Brand</span><span>{nome || "—"}</span></div>
-              <div><span>Posizione</span><span>a caso, per sempre</span></div>
-              <div className="tot"><span>Totale</span><span>{eur(totale)} <small>+ IVA</small></span></div>
+              <div><span>{T("Posizione", "Position")}</span><span>{T("a caso, per sempre", "random, forever")}</span></div>
+              <div className="tot"><span>{T("Totale", "Total")}</span><span>{eur(totale)} <small>{T("+ IVA", "+ VAT")}</small></span></div>
             </div>
             <label className="check">
               <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
-              <span>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Chiedo che lo spazio venga pubblicato subito e so che, una volta pubblicato, perdo il diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</span>
+              <span>{en ? <>I confirm that the image is mine or that I have the right to use it, and I accept the <Link href="/termini" target="_blank">Terms</Link>. I ask for the space to be published right away and I understand that, once it is published, I lose the right of withdrawal. I have read the <Link href="/privacy" target="_blank">Privacy policy</Link>.</> : <>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Chiedo che lo spazio venga pubblicato subito e so che, una volta pubblicato, perdo il diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</>}</span>
             </label>
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
-              {stato === "invio" ? "Controllo in corso…" : `Paga ${eur(totale)}`}
+              {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Paga", "Pay")} ${eur(totale)}`}
             </button>
-            <div className="pay-methods"><span>Carta</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
+            <div className="pay-methods"><span>{T("Carta", "Card")}</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
             {errPaga && <p className="hint" style={{ color: "#8a3f2c" }}>{errPaga}</p>}
-            <p className="muted">Paghi in modo sicuro con Stripe. I dati della carta non passano mai da PixelHype.</p>
+            <p className="muted">{T("Paghi in modo sicuro con Stripe. I dati della carta non passano mai da PixelHype.", "You pay securely with Stripe. Card details never go through PixelHype.")}</p>
           </div>
         </div>
       </div>

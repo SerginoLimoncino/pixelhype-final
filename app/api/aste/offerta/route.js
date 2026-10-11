@@ -1,3 +1,4 @@
+import { traduciRisposte } from "../../../../lib/messaggi";
 import Stripe from "stripe";
 import { controllaLink } from "../../../../lib/controlloLink";
 import { dbAttivo, pixelVenduti, salvaImmagine, sql } from "../../../../lib/db";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 // A new bid. Nothing is charged now: the bidder only saves the card with Stripe,
 // and is charged at the end only if they win.
-export async function POST(req) {
+async function rispondi(req) {
   if (!dbAttivo() || !asteAperte(await pixelVenduti())) return Response.json({ errore: "Le aste non sono ancora aperte." }, { status: 400 });
   const { asta, importo, nome, link, email, dubbio, immagine } = await req.json().catch(() => ({}));
   const a = await unaAsta(Number(asta));
@@ -41,3 +42,5 @@ export async function POST(req) {
   await sql()`update offerte set stripe_session = ${s.id}, cliente = ${cliente.id} where id = ${id}`;
   return Response.json({ url: s.url });
 }
+
+export const POST = traduciRisposte(rispondi);

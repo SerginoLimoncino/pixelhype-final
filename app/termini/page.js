@@ -1,10 +1,16 @@
 import Link from "next/link";
 import Legale from "../components/Legale";
-import { TITOLARE, AGGIORNATO, dato } from "../../lib/legale";
+import { TITOLARE, AGGIORNATO, AGGIORNATO_EN, dato } from "../../lib/legale";
+import { traduttore } from "../../lib/lingua";
 
-export const metadata = { title: "Termini e condizioni · PixelHype" };
+export async function generateMetadata() {
+  const { T } = await traduttore();
+  return { title: T("Termini e condizioni · PixelHype", "Terms and conditions · PixelHype") };
+}
 
-export default function Termini() {
+export default async function Termini() {
+  const { en } = await traduttore();
+  if (en) return <English />;
   return (
     <Legale titolo="Termini e condizioni" aggiornato={AGGIORNATO}>
       <h2>1. Chi siamo</h2>
@@ -76,9 +82,10 @@ export default function Termini() {
 
       <h2>9. Rivendita</h2>
       <p>
-        Uno spazio non può essere venduto o ceduto fuori da PixelHype. Quando il mosaico sarà completo potrà essere attivata una
-        funzione di rivendita tramite il sito, con regole che verranno pubblicate in quel momento. Gli spazi non sono un investimento
-        e non danno diritto a guadagni.
+        Uno spazio non può essere venduto o ceduto fuori da PixelHype. Un mese dopo il completamento del mosaico verrà attivata la
+        rivendita tramite il sito: chi possiede uno spazio potrà metterlo in vendita a un prezzo non inferiore alla metà di quanto lo
+        ha pagato. Su ogni rivendita PixelHype trattiene una commissione del 7% del prezzo di vendita. Gli spazi non sono un
+        investimento: nessuno garantisce che uno spazio venga rivenduto, né a quale prezzo, e non danno diritto a guadagni.
       </p>
 
       <h2>10. Dati personali</h2>
@@ -92,6 +99,98 @@ export default function Termini() {
         Questi termini sono regolati dalla legge italiana. Per i consumatori è competente il giudice del luogo in cui il consumatore
         risiede. Se qualcosa non va, scrivici prima a <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>: proveremo a risolvere subito.
       </p>
+    </Legale>
+  );
+}
+
+function English() {
+  return (
+    <Legale titolo="Terms and conditions" aggiornato={AGGIORNATO_EN}>
+      <h2>1. Who we are</h2>
+      <p>
+        The website getpixelhype.com (&quot;PixelHype&quot;) is run by {dato(TITOLARE.nome, true)}, based in {dato(TITOLARE.indirizzo, true)},
+        VAT number / tax code {dato(TITOLARE.piva, true)}{TITOLARE.pec ? `, PEC ${TITOLARE.pec}` : ""}. Contact: <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>.
+      </p>
+
+      <h2>2. What PixelHype sells</h2>
+      <p>
+        PixelHype is a digital mosaic of 10,000 pixels. A buyer gets the right to show in the mosaic an image with a name and a link to
+        their own website, in a space of the chosen size (from 1 to 100 pixels, or the space won at auction). It is a digital advertising
+        visibility service: you do not buy ownership of any part of the site, the domain or the software.
+      </p>
+
+      <h2>3. Position and duration</h2>
+      <ul>
+        <li>The position in the mosaic is assigned at random by the system at the time of purchase and cannot be chosen or moved. For auction spaces the position is the one shown on the auction page.</li>
+        <li>The space stays in the mosaic for the whole life of the PixelHype site. &quot;Forever&quot; means for as long as the site stays online.</li>
+        <li>If the site has to close for reasons beyond our control (for example technical providers shutting down or a legal obligation), no refund is due.</li>
+      </ul>
+
+      <h2>4. Prices and payment</h2>
+      <ul>
+        <li>Prices are shown on the site at the time of the order and change automatically with the number of pixels sold. The price you pay is the one shown in the summary before payment.</li>
+        <li>Payment goes through Stripe (card or other available methods, such as PayPal). PixelHype never sees or stores your card details.</li>
+        <li>The contract is concluded when the payment is confirmed: you see it on the final page and receive the payment receipt by email.</li>
+      </ul>
+
+      <h2>5. Auctions</h2>
+      <ul>
+        <li>Some spaces are sold at auction. Each auction has a starting price and an end date shown on its page. If a bid arrives in the last 5 minutes, the auction is extended by 5 minutes.</li>
+        <li>To bid you save a payment method through Stripe. You pay nothing right away.</li>
+        <li>A bid is binding: if it is the highest at the end, the amount is charged automatically to the saved payment method and the space is assigned.</li>
+        <li>If the charge fails, the space goes to the next highest bid. If nobody bids, the auction may restart later with a different starting price.</li>
+      </ul>
+
+      <h2>6. What you can publish</h2>
+      <p>By publishing an image, a name and a link you declare that you have the right to do so and you take responsibility for their content. The following are not allowed:</p>
+      <ul>
+        <li>adult, violent, offensive, discriminatory or illegal content;</li>
+        <li>other people&apos;s images, trademarks or names without permission;</li>
+        <li>links to dangerous sites, scams, viruses, automatic downloads or adult content;</li>
+        <li>advertising of activities forbidden by law.</li>
+      </ul>
+      <p>
+        Images and links are checked automatically before publication. We may refuse, hide or remove at any time a space that breaks
+        these rules, even if the link changes content after the purchase. In these cases no refund is due. You can ask us to change
+        the image or link by writing to <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>; the change is checked like the first publication.
+      </p>
+
+      <h2>7. Right of withdrawal</h2>
+      <p>
+        If you buy as a consumer (a private person acting for purposes outside their business), the law usually gives 14 days to
+        withdraw. Since this is a digital service published right away, at the time of purchase we ask you to expressly agree that the
+        service starts immediately and to acknowledge that, once the space is published, you lose the right of withdrawal (art. 59,
+        paragraph 1, letters a) and o) of the Italian Consumer Code, art. 16 of Directive 2011/83/EU). Until publication you can write
+        to us to cancel the order. If you buy for your business (company or professional), withdrawal does not apply.
+      </p>
+
+      <h2>8. Guarantees and liability</h2>
+      <ul>
+        <li>We do our best to keep the site always reachable, but there may be interruptions for maintenance or problems with technical providers.</li>
+        <li>PixelHype does not guarantee any number of visits or clicks to your website.</li>
+        <li>The rights the law gives consumers remain unaffected, including the legal guarantee of conformity for digital services.</li>
+      </ul>
+
+      <h2>9. Resale</h2>
+      <p>
+        A space cannot be sold or transferred outside PixelHype. One month after the mosaic is complete, resale through the site will be
+        switched on: the owner of a space will be able to put it up for sale at a price no lower than half of what they paid for it.
+        On every resale PixelHype keeps a 7% fee on the sale price. Spaces are not an investment: nobody guarantees that a space will
+        be resold, or at what price, and they give no right to any profit.
+      </p>
+
+      <h2>10. Personal data</h2>
+      <p>How we handle data is described in the <Link href="/privacy">Privacy policy</Link> and the <Link href="/cookie">Cookie policy</Link>.</p>
+
+      <h2>11. Changes</h2>
+      <p>We may update these terms. Purchases already made are governed by the terms in force at the time of purchase.</p>
+
+      <h2>12. Applicable law and disputes</h2>
+      <p>
+        These terms are governed by Italian law. Consumers keep the protection of the mandatory rules of the country where they live,
+        and the competent court is the one where the consumer lives. If something goes wrong, write to us first at <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>: we will try to sort it out right away.
+      </p>
+      <p className="muted">This is a translation for convenience: the Italian version prevails.</p>
     </Legale>
   );
 }

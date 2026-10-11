@@ -1,10 +1,14 @@
 import CreaSpazio from "./CreaSpazio";
+import { traduttore } from "../../lib/lingua";
 import { PACCHETTI, cuoreFissoDa, inVenditaOra } from "../../lib/prezzi";
 import { pixelVendutiPresto, caloPresto, PACK_CUORE_FISSO } from "../../lib/db";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Crea il tuo spazio · PixelHype" };
+export async function generateMetadata() {
+  const { T } = await traduttore();
+  return { title: T("Crea il tuo spazio · PixelHype", "Create your space · PixelHype") };
+}
 
 // /crea-spazio?pack=X  (X = 1, 2, 4, 10, 25, 50, 100)
 export default async function Page({ searchParams }) {

@@ -1,3 +1,4 @@
+import { traduciRisposte } from "../../../lib/messaggi";
 import Stripe from "stripe";
 import { PACCHETTI, prezzoPacchetto, prezzoCuore, cuoreFissoDa } from "../../../lib/prezzi";
 import { controllaLink } from "../../../lib/controlloLink";
@@ -6,7 +7,7 @@ import { dbAttivo, pixelVenduti, caloPrezzo, disponibili, cuoreLiberi, PACK_CUOR
 // Creates the Stripe payment page for a pack. The price is always computed here,
 // never taken from the browser. Without STRIPE_SECRET_KEY (set on Vercel) the site stays in test mode.
 // With the database, the order and its image are saved first, waiting for payment.
-export async function POST(req) {
+async function rispondi(req) {
   const chiave = process.env.STRIPE_SECRET_KEY;
   if (!chiave) return Response.json({ prova: true });
 
@@ -55,3 +56,5 @@ export async function POST(req) {
   if (ordine) await aggiorna(ordine, { stripe_session: session.id });
   return Response.json({ url: session.url });
 }
+
+export const POST = traduciRisposte(rispondi);
