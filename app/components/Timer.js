@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLingua } from "./Lingua";
 
-// Live countdown to an auction's end, like on auction sites: days and hours, then minutes and seconds in the last hour.
+// Live countdown to an auction's end, like on auction sites: always down to the seconds.
 export default function Timer({ fine }) {
   const [ora, setOra] = useState(null);
   const { en, T } = useLingua();
@@ -16,6 +16,6 @@ export default function Timer({ fine }) {
   if (s <= 0) return <span className="timer">{T("Asta finita", "Auction ended")}</span>;
   const g = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
   const due = (n) => String(n).padStart(2, "0");
-  const testo = g > 0 ? `${g}${en ? "d" : "g"} ${h}h ${due(m)}m` : h > 0 ? `${h}h ${due(m)}m ${due(x)}s` : `${due(m)}:${due(x)}`;
+  const testo = g > 0 ? `${g}${en ? "d" : "g"} ${h}h ${due(m)}m ${due(x)}s` : h > 0 ? `${h}h ${due(m)}m ${due(x)}s` : `${due(m)}m ${due(x)}s`;
   return <span className={s < 3600 ? "timer ultima" : "timer"}>{testo}</span>;
 }
