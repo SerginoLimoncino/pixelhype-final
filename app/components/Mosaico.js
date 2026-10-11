@@ -15,7 +15,7 @@ const PAL = [["#123d30", "#1d5a47"], ["#1f5c5a", "#2f7a72"], ["#4a2233", "#6b324
 const SHAPES = [[1, 1], [2, 1], [2, 2], [5, 2], [5, 5], [10, 10]], WEIGHTS = [31, 23, 21, 15, 7, 2];
 const CAP = { 25: 40, 100: 10 };
 const big = (b) => b.w * b.h >= 25;
-const NOMI_PACCHETTO = { 1: "Il Pixel", 2: "Il Doppio", 4: "Il Quadro", 10: "La Striscia", 25: "La Vetrina", 100: "Il Capolavoro" };
+const NOMI_PACCHETTO = { 1: "Il Pixel", 2: "Il Doppio", 4: "Il Quadro", 10: "La Striscia", 25: "La Vetrina", 50: "Il Murale", 100: "Il Capolavoro" };
 const SECONDI_SCHERMO = 10; // ogni quanti secondi cambia il marchio sullo schermo
 const inHeart = (x, y, w, h) => x + w > 35 && x < 65 && y + h > 35 && y < 65;
 
@@ -264,7 +264,7 @@ export default function Mosaico() {
               <button type="button" className="fc" key={b.id} onClick={() => goTo(b)}>
                 <div className="sw" style={{ background: sfondo(b) }} />
                 <b>{b.name}</b>
-                <span>{b.w * b.h === 100 ? "Il Capolavoro · 100 pixel" : "La Vetrina · 25 pixel"}</span>
+                <span>{NOMI_PACCHETTO[b.w * b.h]} · {b.w * b.h} pixel</span>
               </button>
             ))}
           </div>

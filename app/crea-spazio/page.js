@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Crea il tuo spazio · PixelHype" };
 
-// /crea-spazio?pack=X  (X = 1, 2, 4, 10, 25, 100)
+// /crea-spazio?pack=X  (X = 1, 2, 4, 10, 25, 50, 100)
 export default async function Page({ searchParams }) {
   const sp = await searchParams;
   const pack = PACCHETTI[sp?.pack] ? Number(sp.pack) : 4;
