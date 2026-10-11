@@ -9,7 +9,7 @@ export const metadata = { title: "Offerta · PixelHype" };
 // Stripe sends the bidder here after saving the card. We check with Stripe, then the bid becomes valid.
 export default async function Grazie({ searchParams }) {
   const sp = await searchParams;
-  let esito = { ok: false, motivo: "Non risulta nessuna carta salvata. L'offerta non è stata registrata." };
+  let esito = { ok: false, motivo: "Non risulta nessun metodo di pagamento salvato. L'offerta non è stata registrata." };
   if (process.env.STRIPE_SECRET_KEY && sp?.session_id) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const s = await stripe.checkout.sessions.retrieve(sp.session_id, { expand: ["setup_intent"] }).catch(() => null);
