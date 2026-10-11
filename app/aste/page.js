@@ -51,7 +51,7 @@ export default async function Aste() {
             </div>
           </div>
         )}
-        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE || venduti < CUORE_ASTE ? "Fuori dal Cuore" : "Fuori dal Cuore · base 30% più bassa"]].map(([zona, titolo]) => (
+        {[["cuore", "Nel Cuore"], ["fuori", venduti >= FINALE ? "Fuori dal Cuore" : "Fuori dal Cuore · base 40% più bassa"]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
             {gruppo(zona).length === 0 ? <p className="note">{zona === "cuore" && venduti < CUORE_ASTE ? `Le aste del Cuore partono a ${num(CUORE_ASTE)} pixel venduti: mancano ${num(CUORE_ASTE - venduti)} pixel.` : "Nessuna asta aperta in questo momento."}</p> : (
