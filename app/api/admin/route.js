@@ -5,7 +5,7 @@ import { controllaLink } from "../../../lib/controlloLink";
 import { listaAste, aggiornaAste } from "../../../lib/aste";
 import { sql } from "../../../lib/db";
 import { dbAttivo, tuttiGliSpazi, aggiorna, cancella, nuovoOrdine, salvaImmagine, assegnaPosizione } from "../../../lib/db";
-import { listaPrenotazioni } from "../../../lib/prenotazioni";
+import { listaPrenotazioni, cancellaPrenotazione } from "../../../lib/prenotazioni";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +63,9 @@ export async function POST(req) {
         await aggiornaAste();
         return Response.json({ ok: true, spazi: await tuttiGliSpazi(), aste: await listaAste().catch(() => null) });
       }
+      case "cancellaPrenotazione":
+        await cancellaPrenotazione(Number(b.id));
+        return Response.json({ prenotazioni: await listaPrenotazioni() });
       case "prenotazioni":
         return Response.json({ prenotazioni: await listaPrenotazioni() });
       case "svuota": {
