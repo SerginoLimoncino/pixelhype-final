@@ -24,7 +24,10 @@ export default async function Grazie({ searchParams }) {
 
   let spazio = null;
   if (pagato && dbAttivo() && s.metadata?.ordine) {
-    spazio = await assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null);
+    // Never keep the buyer waiting: after 8 seconds the page shows anyway, and the space is placed within minutes
+    // by the next visit to the mosaic (lib/aste.js, sistemaOrdini).
+    const attesa = new Promise((ok) => setTimeout(() => ok(null), 8000));
+    spazio = await Promise.race([assegnaPosizione(Number(s.metadata.ordine), dubbio ? "da_controllare" : "online").catch(() => null), attesa]);
   }
 
   return (
@@ -41,7 +44,7 @@ export default async function Grazie({ searchParams }) {
                   {spazio.stato === "online" ? "It is already online." : "It will go online as soon as the image is checked."} The receipt is on its way to {s.customer_details?.email}.
                 </p>
               ) : (
-                <p className="muted">Your space {p ? `"${nomePack(p.n, true)}" (${misura(p.n, true)})` : ""} for <b>{s.metadata?.nome}</b> will be placed in the mosaic at a random position, after the image check. The receipt is on its way to {s.customer_details?.email}.</p>
+                <p className="muted">Done. Your space {p ? `"${nomePack(p.n, true)}" (${misura(p.n, true)})` : ""} for <b>{s.metadata?.nome}</b> will appear in the mosaic within 10 minutes, at a random position. The receipt is on its way to {s.customer_details?.email}.</p>
               )
             ) : spazio?.x != null ? (
               <p className="muted">
@@ -49,7 +52,7 @@ export default async function Grazie({ searchParams }) {
                 {spazio.stato === "online" ? "È già online." : "Andrà online appena controllata l'immagine."} La ricevuta arriva a {s.customer_details?.email}.
               </p>
             ) : (
-              <p className="muted">Il tuo spazio {p ? `"${p.nome}" (${p.titolo})` : ""} per <b>{s.metadata?.nome}</b> verrà messo nel mosaico in una posizione scelta a caso, dopo il controllo dell'immagine. La ricevuta arriva a {s.customer_details?.email}.</p>
+              <p className="muted">Operazione conclusa. Il tuo spazio {p ? `"${p.nome}" (${p.titolo})` : ""} per <b>{s.metadata?.nome}</b> comparirà nel mosaico entro 10 minuti, in una posizione scelta a caso. La ricevuta arriva a {s.customer_details?.email}.</p>
             )}
           </>
         ) : (
