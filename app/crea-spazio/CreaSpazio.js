@@ -191,7 +191,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
             </label>
             <label className="f">{T("Il tuo link", "Your link")}
-              <input type="text" inputMode="url" autoCapitalize="none" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
+              <input type="text" inputMode="url" autoCapitalize="none" autoComplete="url" name="sito" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
               {link && !linkValido && <span className="hint">{T("Scrivi l'indirizzo del sito, per esempio www.iltuosito.it", "Write the website address, for example www.yoursite.com")}</span>}
             </label>
             <label className="f">{T("La tua immagine", "Your image")}
@@ -252,6 +252,13 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
               {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Paga", "Pay")} ${eur(totale)}`}
             </button>
+            {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
+              !nome.trim() && T("il nome del brand", "the brand name"),
+              !linkValido && T("il link", "the link"),
+              !img && T("l'immagine", "the image"),
+              !emailValida && T("l'email", "the email"),
+              !ok && T("la spunta di conferma", "the confirmation tick"),
+            ].filter(Boolean).join(", ")}.</p>}
             <div className="pay-methods"><span>{T("Carta", "Card")}</span><span>Apple Pay</span><span>Google Pay</span><span>PayPal</span></div>
             {errPaga && <p className="hint" style={{ color: "#8a3f2c" }}>{errPaga}</p>}
             <p className="muted">{T("Paghi in modo sicuro con Stripe. I dati della carta non passano mai da PixelHype.", "You pay securely with Stripe. Card details never go through PixelHype.")}</p>

@@ -77,7 +77,7 @@ export default function Offerta({ asta, w, h, min }) {
             <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
           </label>
           <label className="f">{T("Il tuo link", "Your link")}
-            <input type="text" inputMode="url" autoCapitalize="none" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
+            <input type="text" inputMode="url" autoCapitalize="none" autoComplete="url" name="sito" value={link} onChange={(e) => setLink(e.target.value)} placeholder={T("www.iltuosito.it", "www.yoursite.com")} />
           </label>
           <label className="f">{T("La tua immagine", "Your image")}
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={carica} />
@@ -94,6 +94,14 @@ export default function Offerta({ asta, w, h, min }) {
         <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={offri}>
           {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Offri", "Bid")} ${euro >= min ? eur(euro) : ""}`}
         </button>
+        {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
+          euro < min && T(`un'offerta di almeno ${eur(min)}`, `a bid of at least ${eur(min)}`),
+          !nome.trim() && T("il nome del brand", "the brand name"),
+          !normalizzaLink(link) && T("il link", "the link"),
+          !img && T("l'immagine", "the image"),
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && T("l'email", "the email"),
+          !ok && T("la spunta di conferma", "the confirmation tick"),
+        ].filter(Boolean).join(", ")}.</p>}
         {errore && <p className="hint" style={{ color: "#8a3f2c" }}>{errore}</p>}
         <p className="muted">{T("Salvi carta o PayPal in modo sicuro. Non paghi nulla adesso.", "You save a card or PayPal securely. You pay nothing now.")}</p>
       </div>
