@@ -209,7 +209,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     <section className="wrap buy">
       <div style={{ display: "grid", gap: 16 }}>
         <div className="sec-h" style={{ marginBottom: 8 }}>
-          <div className="eyebrow">{cuore ? T("Gran finale · ultimi spazi del Cuore, cornice d'oro", "Grand finale · last spaces in the Heart, gold frame") : T(`Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} a pixel`, `Phase ${fase(venduti) + 1} of ${FASI.length} · ${eur(prezzoPixel(venduti, calo))} per pixel`)}</div>
+          <div className="eyebrow">{cuore ? T("Gran finale · ultimi spazi del Cuore, cornice d'oro", "Grand finale · last spaces in the Heart, gold frame") : T(`Fase ${fase(venduti) + 1} di ${FASI.length} · ${eur(prezzoPixel(venduti, calo), en)} a pixel`, `Phase ${fase(venduti) + 1} of ${FASI.length} · ${eur(prezzoPixel(venduti, calo), en)} per pixel`)}</div>
           <h2>{prenota ? (en ? <>Book your <em>space</em>.</> : <>Prenota il tuo <em>spazio</em>.</>) : en ? (cuore ? <>Your space <em>in the Heart</em>.</> : <>Create your <em>space</em>.</>) : cuore ? <>Il tuo spazio <em>nel Cuore</em>.</> : <>Crea il tuo <em>spazio</em>.</>}</h2>
         </div>
 
@@ -220,7 +220,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
             {Object.values(PACCHETTI).filter((x) => !x.soloAsta && (cuore ? x.n <= 25 : inVenditaOra(x, venduti))).map((x) => (
               <button type="button" key={x.n} aria-pressed={x.n === pack} onClick={() => setPack(x.n)}>
                 <b>{misura(x.n, en)}</b>
-                <span className="pr">{eur(prezzoDi(x.n))}</span>
+                <span className="pr">{eur(prezzoDi(x.n), en)}</span>
                 <small>{nomePack(x.n, en)}{x.sconto ? ` · -${Math.round(x.sconto * 100)}%` : ""}</small>
               </button>
             ))}
@@ -288,7 +288,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               <div><span>{T("Spazio", "Space")}</span><span>{nomePack(pack, en)} · {misura(pack, en)}</span></div>
               <div><span>Brand</span><span>{nome || "—"}</span></div>
               <div><span>{T("Posizione", "Position")}</span><span>{T("a caso, per sempre", "random, forever")}</span></div>
-              <div className="tot"><span>{prenota ? T("Prezzo di oggi", "Today's price") : T("Totale", "Total")}</span><span>{eur(totale)} <small>{T("+ IVA", "+ VAT")}</small></span></div>
+              <div className="tot"><span>{prenota ? T("Prezzo di oggi", "Today's price") : T("Totale", "Total")}</span><span>{eur(totale, en)} <small>{T("+ IVA", "+ VAT")}</small></span></div>
             </div>
             <label className="check">
               <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
@@ -298,7 +298,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={prenotaOra}>{stato === "invio" ? T("Un attimo…", "One moment…") : T("Prenota il tuo spazio", "Book your space")}</button>
             ) : (
             <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={paga}>
-              {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Paga", "Pay")} ${eur(totale)}`}
+              {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Paga", "Pay")} ${eur(totale, en)}`}
             </button>
             )}
             {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[

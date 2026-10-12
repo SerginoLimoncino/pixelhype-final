@@ -18,14 +18,14 @@ export default async function Aste() {
   const { en, T } = await traduttore();
   if (!dbAttivo() || !asteAperte(venduti)) {
     return (
-      <section className="wrap blk">
+      <section className="blk"><div className="wrap">
         <div className="sec-h">
           <div className="eyebrow">{T("Aste", "Auctions")}</div>
           <h2>{en ? <>The Heart is <em>waiting</em>.</> : <>Il Cuore ti <em>aspetta</em>.</>}</h2>
-          {PRENOTAZIONI ? <p>{T("Quando si apre la vendita partono le prime aste, fuori dal Cuore. Quelle del Cuore iniziano a 1.000 pixel venduti. Ci saranno spazi di tutte le misure, anche da 1 pixel.", "When sales open, the first auctions start, outside the Heart. The Heart auctions begin at 1,000 pixels sold. There will be spaces of every size, even 1 pixel.")}</p> : <p>{T(`Le aste del Cuore partono a ${num(SOGLIA_ASTE)} pixel venduti: mancano ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixel. Ci saranno spazi di tutte le misure, anche da 1 pixel.`, `The Heart auctions start at ${num(SOGLIA_ASTE)} pixels sold: ${num(Math.max(0, SOGLIA_ASTE - venduti))} pixels to go. There will be spaces of every size, even 1 pixel.`)}</p>}
+          {PRENOTAZIONI ? <p>{T("Quando si apre la vendita partono le prime aste, fuori dal Cuore. Quelle del Cuore iniziano a 1.000 pixel venduti. Ci saranno spazi di tutte le misure, anche da 1 pixel.", "When sales open, the first auctions start, outside the Heart. The Heart auctions begin at 1,000 pixels sold. There will be spaces of every size, even 1 pixel.")}</p> : <p>{T(`Le aste del Cuore partono a ${num(SOGLIA_ASTE, en)} pixel venduti: mancano ${num(Math.max(0, SOGLIA_ASTE - venduti), en)} pixel. Ci saranno spazi di tutte le misure, anche da 1 pixel.`, `The Heart auctions start at ${num(SOGLIA_ASTE, en)} pixels sold: ${num(Math.max(0, SOGLIA_ASTE - venduti), en)} pixels to go. There will be spaces of every size, even 1 pixel.`)}</p>}
         </div>
         <Link href="/compra" className="cta">{PRENOTAZIONI ? T("Intanto prenota il tuo spazio", "Meanwhile, book your space") : T("Intanto prendi il tuo spazio", "Meanwhile, get your space")}</Link>
-      </section>
+      </div></section>
     );
   }
   await aggiornaAstePresto();
@@ -51,7 +51,7 @@ export default async function Aste() {
                 <Link href={`/crea-spazio?pack=${n}&cuore=1`} className="lot oro" key={n} style={{ textDecoration: "none" }}>
                   <span className="q">{T("Senza asta · cornice d'oro", "No auction · gold frame")}</span>
                   <span className="s">{misura(n, en)}</span>
-                  <span className="b">{eur(prezzoCuore(n, venduti, calo))} · {T("restano", "left")} {num(piccoli[n])}</span>
+                  <span className="b">{eur(prezzoCuore(n, venduti, calo), en)} · {T("restano", "left")} {num(piccoli[n], en)}</span>
                 </Link>
               ))}
             </div>
@@ -60,14 +60,14 @@ export default async function Aste() {
         {[...(gruppo("ultimo").length ? [["ultimo", T("L'Ultimo Pezzo · l'ultima asta del mosaico", "The Last Piece · the mosaic's last auction")]] : []), ["cuore", T("Nel Cuore", "In the Heart")], ["fuori", T("Fuori dal Cuore · base 40% più bassa", "Outside the Heart · starting price 40% lower")]].map(([zona, titolo]) => (
           <div key={zona} style={{ marginBottom: 32 }}>
             <h3 style={{ marginBottom: 12 }}>{titolo}</h3>
-            {gruppo(zona).length === 0 ? <p className="note">{zona === "cuore" && venduti < CUORE_ASTE ? T(`Le aste del Cuore partono a ${num(CUORE_ASTE)} pixel venduti: mancano ${num(CUORE_ASTE - venduti)} pixel.`, `The Heart auctions start at ${num(CUORE_ASTE)} pixels sold: ${num(CUORE_ASTE - venduti)} pixels to go.`) : T("Nessuna asta aperta in questo momento.", "No auctions open right now.")}</p> : (
+            {gruppo(zona).length === 0 ? <p className="note">{zona === "cuore" && venduti < CUORE_ASTE ? T(`Le aste del Cuore partono a ${num(CUORE_ASTE, en)} pixel venduti: mancano ${num(CUORE_ASTE - venduti, en)} pixel.`, `The Heart auctions start at ${num(CUORE_ASTE, en)} pixels sold: ${num(CUORE_ASTE - venduti, en)} pixels to go.`) : T("Nessuna asta aperta in questo momento.", "No auctions open right now.")}</p> : (
               <div className="lots">
                 {gruppo(zona).map((a) => (
                   <Link href={`/aste/${a.id}`} className={zona === "fuori" ? "lot" : "lot oro"} key={a.id} style={{ textDecoration: "none" }}>
                     <span className="q">{nomePack(a.pack, en)}</span>
                     <span className="s">{misura(a.pack, en)}</span>
-                    <span className="b">{a.migliore ? `${T("Offerta più alta", "Highest bid")} ${eur(a.migliore)}` : `${T("Base", "Starting price")} ${eur(a.base)}`}</span>
-                    <span className="b">{T("Offri da", "Bid from")} {eur(minimo(a, a.migliore))}</span>
+                    <span className="b">{a.migliore ? `${T("Offerta più alta", "Highest bid")} ${eur(a.migliore, en)}` : `${T("Base", "Starting price")} ${eur(a.base, en)}`}</span>
+                    <span className="b">{T("Offri da", "Bid from")} {eur(minimo(a, a.migliore), en)}</span>
                     <span className="b">{T("Finisce tra", "Ends in")} <Timer fine={a.fine} /></span>
                   </Link>
                 ))}
@@ -83,7 +83,7 @@ export default async function Aste() {
                 <div className={a.zona === "cuore" ? "lot oro finita" : "lot finita"} key={a.id}>
                   <span className="q">{T("Asta finita", "Auction ended")}</span>
                   <span className="s">{misura(a.pack, en)}</span>
-                  <span className="b">{a.zona === "cuore" ? T("Nel Cuore", "In the Heart") : T("Fuori dal Cuore", "Outside the Heart")}{a.vinta ? ` · ${T("chiusa a", "closed at")} ${eur(a.vinta)}` : ""}</span>
+                  <span className="b">{a.zona === "cuore" ? T("Nel Cuore", "In the Heart") : T("Fuori dal Cuore", "Outside the Heart")}{a.vinta ? ` · ${T("chiusa a", "closed at")} ${eur(a.vinta, en)}` : ""}</span>
                 </div>
               ))}
             </div>

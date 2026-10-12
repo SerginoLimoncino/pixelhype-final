@@ -31,8 +31,8 @@ export default async function UnaAsta({ params }) {
         <span className="step-n">{a.zona === "cuore" ? T("Asta nel Cuore", "Auction in the Heart") : T("Asta fuori dal Cuore", "Auction outside the Heart")}</span>
         <h2>{nomePack(a.pack, en)} · <em>{misura(a.pack, en)}</em></h2>
         <div className="sum">
-          <div><span>{T("Base d'asta", "Starting price")}</span><span>{eur(a.base)}</span></div>
-          <div><span>{T("Offerta più alta", "Highest bid")}</span><span>{a.migliore ? eur(a.migliore) : T("nessuna", "none")}</span></div>
+          <div><span>{T("Base d'asta", "Starting price")}</span><span>{eur(a.base, en)}</span></div>
+          <div><span>{T("Offerta più alta", "Highest bid")}</span><span>{a.migliore ? eur(a.migliore, en) : T("nessuna", "none")}</span></div>
           <div><span>{T("Offerte", "Bids")}</span><span>{a.offerte}</span></div>
           {aperta && <div><span>{T("Tempo rimasto", "Time left")}</span><span><Timer fine={a.fine} /></span></div>}
           <div><span>{aperta ? T("Finisce il", "Ends on") : T("Finita il", "Ended on")}</span><span>{quando(a.fine, en)}</span></div>

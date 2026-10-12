@@ -120,9 +120,13 @@ export default function Admin({ prova = false, prenota = false }) {
             <>
               <p className="muted">{Object.values(PACCHETTI).filter((x) => !x.soloAsta).map((x) => `${x.titolo}: ${pren.filter((q) => q.pack === x.n).length}`).join(" · ")}</p>
               <p className="muted">Pixel prenotati: {pren.reduce((a, q) => a + q.pack, 0)}</p>
-              <button type="button" className="ghost sm" onClick={() => navigator.clipboard?.writeText([...new Set(pren.map((q) => q.email))].join(", ")).then(() => setMsg("Email copiate."))}>Copia tutte le email</button>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[["Copia tutte le email", null], ["Solo italiano", "it"], ["Solo inglese", "en"]].map(([t, l]) => (
+                  <button key={t} type="button" className="ghost sm" onClick={() => navigator.clipboard?.writeText([...new Set(pren.filter((q) => !l || (q.lingua || "it") === l).map((q) => q.email.trim().toLowerCase()))].join(", ")).then(() => setMsg("Email copiate."))}>{t}</button>
+                ))}
+              </div>
               <div style={{ maxHeight: 260, overflow: "auto", marginTop: 12 }}>
-                {pren.map((q) => <p key={q.id} className="muted" style={{ margin: "4px 0", display: "flex", alignItems: "center", gap: 8 }}>{q.img && <img src={q.img} alt="" style={{ height: 28, maxWidth: 56, objectFit: "contain" }} />}{new Date(q.creata).toLocaleDateString("it-IT")} · {q.pack} pixel · {q.nome || "—"} · {q.email}{q.link ? ` · ${q.link}` : ""} <button type="button" className="ghost sm" disabled={lavoro} onClick={() => confirm(`Eliminare la prenotazione di ${q.email}?`) && chiama("cancellaPrenotazione", { id: q.id })}>Elimina</button></p>)}
+                {pren.map((q) => <p key={q.id} className="muted" style={{ margin: "4px 0", display: "flex", alignItems: "center", gap: 8 }}>{q.img && <img src={q.img} alt="" style={{ height: 28, maxWidth: 56, objectFit: "contain" }} />}{new Date(q.creata).toLocaleDateString("it-IT")} · {(q.lingua || "it").toUpperCase()} · {q.pack} pixel · {q.nome || "—"} · {q.email}{q.link ? ` · ${q.link}` : ""} <button type="button" className="ghost sm" disabled={lavoro} onClick={() => confirm(`Eliminare la prenotazione di ${q.email}?`) && chiama("cancellaPrenotazione", { id: q.id })}>Elimina</button></p>)}
               </div>
             </>
           )}

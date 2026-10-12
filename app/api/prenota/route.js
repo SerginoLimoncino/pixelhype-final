@@ -12,6 +12,14 @@ import { inglese } from "../../../lib/messaggi";
 // so the "new booking" alert to Sergio stops after the first 20 bookings of the day (the panel has them all).
 const AVVISI_AL_GIORNO = 20;
 
+// The file really is a WebP or JPEG (the first bytes), not something else renamed.
+function veraImmagine(dataUrl) {
+  const x = Buffer.from(dataUrl.slice(dataUrl.indexOf(",") + 1, dataUrl.indexOf(",") + 25), "base64");
+  const webp = x.toString("latin1", 0, 4) === "RIFF" && x.toString("latin1", 8, 12) === "WEBP";
+  const jpeg = x[0] === 0xff && x[1] === 0xd8 && x[2] === 0xff;
+  return webp || jpeg;
+}
+
 // Saves a booking: email, size and (optional) brand name. No payment.
 export async function POST(req) {
   const en = (await lingua()) === "en"; // the visitor's choice, or the browser language (same rule as the pages)
@@ -26,10 +34,11 @@ export async function POST(req) {
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
   if (await troppePrenotazioni(ip)) return Response.json({ errore: T("Troppe prenotazioni da questa connessione. Riprova tra un'ora.", "Too many bookings from this connection. Please try again in an hour.") }, { status: 429 });
   let img = null;
-  if (typeof b.immagine === "string" && /^data:image\/(webp|jpeg);base64,/.test(b.immagine) && b.immagine.length < 8e6) {
+  if (typeof b.immagine === "string" && /^data:image\/(webp|jpeg);base64,/.test(b.immagine) && b.immagine.length < 8e6 && veraImmagine(b.immagine)) {
     img = await salvaImmagine(`prenotazione-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${b.immagine.startsWith("data:image/webp") ? "webp" : "jpg"}`, b.immagine).catch(() => null);
   }
   const r = await nuovaPrenotazione({ email, pack: p.n, nome: String(b.nome || "").trim().slice(0, 40), lingua: en ? "en" : "it", link: l.link, img, ip });
+  if (r.troppe) return Response.json({ errore: T("Troppe prenotazioni da questa connessione. Riprova tra un'ora.", "Too many bookings from this connection. Please try again in an hour.") }, { status: 429 });
   if (!r.gia) {
     // Confirmation to the person and alert to Sergio, sent after the answer so the page never waits.
     const nome = String(b.nome || "").trim().slice(0, 40);

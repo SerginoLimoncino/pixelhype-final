@@ -23,9 +23,9 @@ export default async function Home() {
         </div>
         <div className="phasebox">
           <div className="pb-top"><span>{T("Fase", "Phase")} {f + 1} {T("di", "of")} {FASI.length}</span><span>{T("prezzo a pixel", "price per pixel")}</span></div>
-          <div className="pb-price">{eur(prezzoPixel(v, calo))}<small>{T("+ IVA", "+ VAT")}</small></div>
+          <div className="pb-price">{eur(prezzoPixel(v, calo), en)}<small>{T("+ IVA", "+ VAT")}</small></div>
           <div className="bar"><i style={{ width: Math.max(2, avanzamento) + "%" }} /></div>
-          <p className="pb-note">{en ? <><b>{num(restanoInFase(v))} pixels</b> left at this price. Then it goes up to <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "the final auctions"}</b>.</> : <>Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa {f < FASI.length - 1 ? <>a <b>{eur(FASI[f + 1])}</b></> : <><b>alle aste finali</b></>}.</>}</p>
+          <p className="pb-note">{en ? <><b>{num(restanoInFase(v), en)} pixels</b> left at this price. Then it goes up to <b>{f < FASI.length - 1 ? eur(FASI[f + 1], en) : "the final auctions"}</b>.</> : <>Restano <b>{num(restanoInFase(v), en)} pixel</b> a questo prezzo. Poi si passa {f < FASI.length - 1 ? <>a <b>{eur(FASI[f + 1], en)}</b></> : <><b>alle aste finali</b></>}.</>}</p>
           {PRENOTAZIONI && <p className="pb-note"><b>{T("Prenotazioni aperte.", "Bookings open.")}</b> {T("Scegli la misura e lascia l'email: ora non paghi nulla e quando si apre la vendita ti scriviamo per primi.", "Choose the size and leave your email: you pay nothing now, and when sales open we write to you first.")}</p>}
           <div className="pb-row">
             <Link href="/compra" className="cta">{PRENOTAZIONI ? T("Prenota il tuo spazio", "Book your space") : T("Prendi il tuo spazio", "Get your space")}</Link>
@@ -48,7 +48,7 @@ export default async function Home() {
               <div className={"ph" + (i === f ? " now" : "")} key={i}>
                 <span className="n">{T("Fase", "Phase")} {i + 1}</span>
                 <span className="p">{v} €<small> / pixel</small></span>
-                <span className="x">{T("100 pixel", "100 pixels")}: {eur(charm(v * 100 * 0.75))}</span>
+                <span className="x">{T("100 pixel", "100 pixels")}: {eur(charm(v * 100 * 0.75), en)}</span>
               </div>
             ))}
           </div>
@@ -77,7 +77,7 @@ export default async function Home() {
               </div>
             ))}
           </div>
-          {v < CUORE_ASTE && <p className="note">{en ? <>The Heart auctions start at <b>1,000 pixels sold</b>: {num(Math.max(0, CUORE_ASTE - v))} pixels to go.</> : <>Le aste del Cuore partono a <b>{num(CUORE_ASTE)} pixel venduti</b>: mancano {num(Math.max(0, CUORE_ASTE - v))} pixel.</>}</p>}
+          {v < CUORE_ASTE && <p className="note">{en ? <>The Heart auctions start at <b>1,000 pixels sold</b>: {num(Math.max(0, CUORE_ASTE - v), en)} pixels to go.</> : <>Le aste del Cuore partono a <b>{num(CUORE_ASTE, en)} pixel venduti</b>: mancano {num(Math.max(0, CUORE_ASTE - v), en)} pixel.</>}</p>}
           <p className="note"><Link href="/aste" className="cta sm">{PRENOTAZIONI ? T("Come funzionano le aste", "How the auctions work") : T("Vedi le aste in corso", "See the live auctions")}</Link></p>
         </div>
       </section>

@@ -42,7 +42,7 @@ export default async function Grazie({ searchParams }) {
       <div className="card" style={{ display: "grid", gap: 16 }}>
         {pagato ? (
           <>
-            <span className="step-n">{T("Pagamento riuscito", "Payment successful")} · {eur(s.amount_total / 100)}</span>
+            <span className="step-n">{T("Pagamento riuscito", "Payment successful")} · {eur(s.amount_total / 100, en)}</span>
             <p className="ok-big">{T("Sei nell'opera. Per sempre.", "You are in the artwork. Forever.")}</p>
             {en ? (
               spazio?.x != null ? (

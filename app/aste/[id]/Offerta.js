@@ -95,8 +95,8 @@ export default function Offerta({ asta, w, h, min }) {
     return (
       <div className="card" style={{ display: "grid", gap: 14 }}>
         <span className="step-n">{T("Sei in gara", "You are in the race")}</span>
-        <p className="muted">{T("Offri come", "Bidding as")} <b>{mia.nome}</b>. {T("La tua offerta", "Your bid")}: <b>{eur(mia.importo)}</b>.</p>
-        <p className="ok-big" style={{ fontSize: 26 }}>{mia.inTesta ? T("✓ Sei in testa.", "✓ You are in the lead.") : `${T("Qualcuno ha offerto di più", "Someone bid more")}: ${eur(mia.migliore)}.`}</p>
+        <p className="muted">{T("Offri come", "Bidding as")} <b>{mia.nome}</b>. {T("La tua offerta", "Your bid")}: <b>{eur(mia.importo, en)}</b>.</p>
+        <p className="ok-big" style={{ fontSize: 26 }}>{mia.inTesta ? T("✓ Sei in testa.", "✓ You are in the lead.") : `${T("Qualcuno ha offerto di più", "Someone bid more")}: ${eur(mia.migliore, en)}.`}</p>
         {conferma ? (
           <div className="card" style={{ display: "grid", gap: 12, background: "var(--paper)" }}>
             {conferma === "rilancia" ? (
@@ -105,7 +105,7 @@ export default function Offerta({ asta, w, h, min }) {
                   {mia.img && <img src={mia.img} alt="" style={{ width: 64, height: 64, objectFit: "cover", border: "1px solid var(--line)" }} />}
                   <div><b>{mia.nome}</b><br /><span className="muted">{mia.link || T("nessun link", "no link")}</span></div>
                 </div>
-                <p>{en ? <>Do you confirm a bid of <b>{eur(r)} + VAT</b> for this space, with this image and this link? If you win, it is charged to the payment method you saved.</> : <>Confermi di offrire <b>{eur(r)} + IVA</b> per questo spazio, con questa immagine e questo link? Se vinci, viene addebitata sul metodo di pagamento che hai salvato.</>}</p>
+                <p>{en ? <>Do you confirm a bid of <b>{eur(r, en)} + VAT</b> for this space, with this image and this link? If you win, it is charged to the payment method you saved.</> : <>Confermi di offrire <b>{eur(r, en)} + IVA</b> per questo spazio, con questa immagine e questo link? Se vinci, viene addebitata sul metodo di pagamento che hai salvato.</>}</p>
               </>
             ) : (
               <p>{T("Vuoi davvero ritirarti? Le tue offerte in questa asta vengono annullate e non ti verrà addebitato nulla.", "Do you really want to withdraw? Your bids in this auction are cancelled and nothing will be charged.")}</p>
@@ -119,9 +119,9 @@ export default function Offerta({ asta, w, h, min }) {
           <>
             <label className="f">{T("Nuova offerta (€, + IVA)", "New bid (€, + VAT)")}
               <input type="number" inputMode="numeric" min={mia.min} step="1" value={rilancio} onChange={(e) => setRilancio(e.target.value)} />
-              <span className="hint">{T("Minimo", "Minimum")} {eur(mia.min)}</span>
+              <span className="hint">{T("Minimo", "Minimum")} {eur(mia.min, en)}</span>
             </label>
-            <button type="button" className="cta" disabled={!(r >= mia.min)} onClick={() => setConferma("rilancia")}>{T("Rilancia a", "Raise to")} {r >= mia.min ? eur(r) : ""}</button>
+            <button type="button" className="cta" disabled={!(r >= mia.min)} onClick={() => setConferma("rilancia")}>{T("Rilancia a", "Raise to")} {r >= mia.min ? eur(r, en) : ""}</button>
             {mia.inTesta
               ? <p className="hint">{T("Chi è in testa non può ritirarsi.", "The bidder in the lead cannot withdraw.")}</p>
               : <button type="button" className="ghost" onClick={() => setConferma("ritira")}>{T("Ritirati dall'asta", "Withdraw from the auction")}</button>}
@@ -142,7 +142,7 @@ export default function Offerta({ asta, w, h, min }) {
         <div className="fields">
           <label className="f">{T("Quanto offri (€, + IVA)", "Your bid (€, + VAT)")}
             <input type="number" min={min} step="10" value={importo} onChange={(e) => setImporto(e.target.value)} />
-            <span className="hint">{T("Minimo", "Minimum")} {eur(min)}</span>
+            <span className="hint">{T("Minimo", "Minimum")} {eur(min, en)}</span>
           </label>
           <label className="f">{T("Nome del tuo brand", "Your brand name")}
             <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder={T("Es. Bar Centrale", "E.g. Central Café")} maxLength={40} />
@@ -163,10 +163,10 @@ export default function Offerta({ asta, w, h, min }) {
           <span>{en ? <>I confirm that the image is mine or that I have the right to use it, and I accept the <Link href="/termini" target="_blank">Terms</Link>. If I win, I accept that my bid is charged to the payment method I save now, that the space is published right away and that I lose the right of withdrawal. I have read the <Link href="/privacy" target="_blank">Privacy policy</Link>.</> : <>Confermo che l'immagine è mia o ho il diritto di usarla e accetto i <Link href="/termini" target="_blank">Termini</Link>. Se vinco, accetto l'addebito della mia offerta sul metodo di pagamento che salvo ora, la pubblicazione immediata dello spazio e la perdita del diritto di recesso. Ho letto la <Link href="/privacy" target="_blank">Privacy policy</Link>.</>}</span>
         </label>
         <button type="button" className="cta" disabled={!pronto || stato === "invio"} onClick={offri}>
-          {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Offri", "Bid")} ${euro >= min ? eur(euro) : ""}`}
+          {stato === "invio" ? T("Controllo in corso…", "Checking…") : `${T("Offri", "Bid")} ${euro >= min ? eur(euro, en) : ""}`}
         </button>
         {!pronto && stato !== "invio" && <p className="hint">{T("Per continuare manca: ", "To continue, add: ")}{[
-          euro < min && T(`un'offerta di almeno ${eur(min)}`, `a bid of at least ${eur(min)}`),
+          euro < min && T(`un'offerta di almeno ${eur(min, en)}`, `a bid of at least ${eur(min, en)}`),
           !nome.trim() && T("il nome del brand", "the brand name"),
           link.trim() && !normalizzaLink(link) && T("un link valido", "a valid link"),
           !img && T("l'immagine", "the image"),

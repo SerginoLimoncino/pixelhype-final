@@ -6,6 +6,7 @@ import { useLingua } from "./Lingua";
 
 let prezzoOra = prezzoPixel(); // price per pixel now, from /api/spazi
 let EN = false; // site language, for the texts drawn on the canvas and the tooltips (set on each render)
+let PRENOTA = false; // booking mode (from /api/spazi): free cells invite to book, not to buy
 
 // DEMO = true riempie il mosaico con marchi di esempio, per vedere come sarà.
 // Al lancio metti false: il mosaico mostrerà solo gli spazi venduti davvero.
@@ -199,17 +200,18 @@ export default function Mosaico() {
     }
 
     // pointer: drag to pan, pinch to zoom, tap for info
-    const pts = new Map(); let pinch = null, moved = 0;
+    const pts = new Map(); let pinch = null, moved = 0, selTap = false;
     const showTip = (html, sx, sy) => { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.min(sx + 12, W - 240) + "px"; tip.style.top = Math.min(sy + 12, H - 100) + "px"; };
     const tap = (e) => {
       const r = cv.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
       const gx = Math.floor((view.x + sx) / view.s / CELL), gy = Math.floor((view.y + sy) / view.s / CELL);
       if (gx < 0 || gy < 0 || gx >= N || gy >= N) { tip.hidden = true; sel = -1; return; }
       const id = owner[gy * N + gx];
-      if (id >= 0 && id === sel && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
-      if (id >= 0) { const b = blocks[id]; sel = id; showTip(EN ? `<span>${b.w * b.h} pixel${b.w * b.h > 1 ? "s" : ""}${b.lucky ? " · ✦ in the Heart" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tap again to open the website" : ""}` : `<span>${b.w * b.h} pixel${b.lucky ? " · ✦ nel Cuore" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tocca di nuovo per aprire il sito" : ""}`, sx, sy); }
+      // The website opens only on a second tap on the same block (not right after the search flew there).
+      if (id >= 0 && id === sel && selTap && blocks[id].link) { window.open(blocks[id].link, "_blank", "noopener"); return; }
+      if (id >= 0) { const b = blocks[id]; sel = id; selTap = true; showTip(EN ? `<span>${b.w * b.h} pixel${b.w * b.h > 1 ? "s" : ""}${b.lucky ? " · ✦ in the Heart" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tap again to open the website" : ""}` : `<span>${b.w * b.h} pixel${b.lucky ? " · ✦ nel Cuore" : ""}</span><b>${esc(b.name)}</b>${b.link ? "Tocca di nuovo per aprire il sito" : ""}`, sx, sy); }
       else if (inHeart(gx, gy, 1, 1)) { sel = -1; showTip(EN ? "<span>The Heart · Premium auctions</span><b>Reserved for auctions</b>Spaces from 1 to 100 pixels, with a starting price" : "<span>Il Cuore · Aste Premium</span><b>Riservato all'asta</b>Spazi da 1 a 100 pixel, con base d'asta", sx, sy); }
-      else { sel = -1; showTip(EN ? `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Free · ${eur(prezzoOra)}</b>Get it before the price goes up` : `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra)}</b>Prendilo prima che salga il prezzo`, sx, sy); }
+      else { sel = -1; showTip(EN ? `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Free · ${eur(prezzoOra, EN)} + VAT</b>${PRENOTA ? "Book it now, without paying" : "Get it before the price goes up"}` : `<span>Pixel ${gx + 1}, ${gy + 1}</span><b>Libero · ${eur(prezzoOra, EN)} + IVA</b>${PRENOTA ? "Prenotalo ora, senza pagare" : "Prendilo prima che salga il prezzo"}`, sx, sy); }
     };
     const down = (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; hideHelp(); if (pts.size === 2) { const a = [...pts.values()]; pinch = { d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; } };
     const move = (e) => {
@@ -231,7 +233,7 @@ export default function Mosaico() {
       zoomIn: () => zoomAt(1.3, W / 2, H / 2),
       zoomOut: () => zoomAt(1 / 1.3, W / 2, H / 2),
       reveal: () => { const t0 = performance.now(), s0 = view.s, s1 = (Math.min(W, H) / (N * CELL)) * 0.95; const st = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); zoomAt((s0 + (s1 - s0) * e) / view.s, W / 2, H / 2); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); hideHelp(); },
-      goTo: (b) => { sel = b.id; if (view.s < 0.6) zoomAt(0.7 / view.s, W / 2, H / 2); flyTo((b.x + b.w / 2) * CELL, (b.y + b.h / 2) * CELL); hideHelp(); },
+      goTo: (b) => { sel = b.id; selTap = false; if (view.s < 0.6) zoomAt(0.7 / view.s, W / 2, H / 2); flyTo((b.x + b.w / 2) * CELL, (b.y + b.h / 2) * CELL); hideHelp(); },
       search: (t) => blocks.filter((b) => b.name.toLowerCase().includes(t)).sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 8),
     };
     resize(); raf = requestAnimationFrame(draw);
@@ -246,7 +248,7 @@ export default function Mosaico() {
     const parti = (model) => { stop(); try { stop = avvia(model); } catch (e) { console.error(e); stop = () => {}; } };
     parti(modelloReale([], 0));
     fetch("/api/spazi", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})).then(({ spazi = [], venduti = 0, prezzo, errore, prenotati: pr }) => {
-      if (pr) setPrenotati(pr);
+      if (pr) { setPrenotati(pr); PRENOTA = true; }
       if (!vivo) return;
       if (prezzo) prezzoOra = prezzo;
       if (errore) console.error("Spazi non caricati:", errore);
@@ -305,11 +307,11 @@ export default function Mosaico() {
           </div>
         </div></div>
         <div className="label">
-          <div className="cartel"><b>PixelHype, 2026</b>{en ? `Collective web artwork, 10,000 pixels. Every space is signed by its owner. Open collection, ${num(freeCount)} pixels still available.` : `Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, ${num(freeCount)} pixel ancora disponibili.`}</div>
+          <div className="cartel"><b>PixelHype, 2026</b>{en ? `Collective web artwork, 10,000 pixels. Every space is signed by its owner. Open collection, ${num(freeCount, en)} pixels still available.` : `Opera collettiva su web, 10.000 pixel. Ogni spazio è firmato da chi lo possiede. Collezione aperta, ${num(freeCount, en)} pixel ancora disponibili.`}</div>
           {prenotati && (
             <div className="cartel conta">
               {prenotati.spazi > 0
-                ? <><b>{num(prenotati.spazi)} {prenotati.spazi === 1 ? T("spazio prenotato", "space booked") : T("spazi prenotati", "spaces booked")}</b>{en ? `${num(prenotati.pixel)} ${prenotati.pixel === 1 ? "pixel" : "pixels"} already reserved. Bookings are open.` : `${num(prenotati.pixel)} pixel già riservati. Prenotazioni aperte.`}</>
+                ? <><b>{num(prenotati.spazi, en)} {prenotati.spazi === 1 ? T("spazio prenotato", "space booked") : T("spazi prenotati", "spaces booked")}</b>{en ? `${num(prenotati.pixel, en)} ${prenotati.pixel === 1 ? "pixel" : "pixels"} already reserved. Bookings are open.` : `${num(prenotati.pixel, en)} pixel già ${prenotati.pixel === 1 ? "riservato" : "riservati"}. Prenotazioni aperte.`}</>
                 : <><b>{T("Prenotazioni aperte", "Bookings open")}</b>{T("Riserva ora il tuo spazio nell'opera, senza pagare nulla.", "Reserve your space in the artwork now, without paying anything.")}</>}
             </div>
           )}
