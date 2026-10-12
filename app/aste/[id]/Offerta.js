@@ -8,7 +8,7 @@ import { eur } from "../../../lib/prezzi";
 import { useLingua } from "../../components/Lingua";
 
 // Bid form: brand, link, image (with crop preview), email and amount. The card is saved with Stripe.
-export default function Offerta({ asta, w, h, min }) {
+export default function Offerta({ asta, w, h, min, migliore }) {
   const [importo, setImporto] = useState(String(min));
   const [nome, setNome] = useState("");
   const [link, setLink] = useState("");
@@ -26,18 +26,28 @@ export default function Offerta({ asta, w, h, min }) {
   const [mia, setMia] = useState(null);
   const [rilancio, setRilancio] = useState("");
   const [conferma, setConferma] = useState(null); // null | "rilancia" | "ritira"
+  const confermaOra = useRef(null);
+  confermaOra.current = conferma;
   const [altro, setAltro] = useState(false); // bid with another brand: show the full form
   const [lavoro, setLavoro] = useState(false);
   const leggiLS = () => { try { return localStorage.getItem(LS); } catch { return null; } };
   const scriviLS = (v) => { try { v ? localStorage.setItem(LS, v) : localStorage.removeItem(LS); } catch {} };
   const chiedi = (corpo) => fetch("/api/aste/mia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ asta, chiave, ...corpo }) }).then((x) => x.json());
+  // Asked again whenever the highest bid changes (the page refreshes itself), so "you are in the lead" is always current.
   useEffect(() => {
     const k = leggiLS();
     if (!k) return;
     setChiave(k);
     fetch("/api/aste/mia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ asta, chiave: k }) })
-      .then((x) => x.json()).then((d) => { if (d.mia) { setMia(d.mia); setRilancio(String(d.mia.min)); } else scriviLS(null); }).catch(() => {});
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      .then((x) => x.json()).then((d) => {
+        if (!("mia" in d)) return; // a temporary error: keep the key
+        if (!d.mia) { scriviLS(null); setMia(null); return; }
+        setMia(d.mia);
+        // A raise still below the new minimum moves up to it, but never while the visitor is confirming an amount.
+        if (!confermaOra.current) setRilancio((v) => (Number(v) >= d.mia.min ? v : String(d.mia.min)));
+        window.dispatchEvent(new CustomEvent("pixelhype-mia", { detail: { asta, inTesta: d.mia.inTesta, migliore: d.mia.migliore } }));
+      }).catch(() => {});
+  }, [migliore]); // eslint-disable-line react-hooks/exhaustive-deps
   async function confermato() {
     setLavoro(true); setErrore("");
     const d = await chiedi(conferma === "rilancia" ? { azione: "rilancia", importo: Math.floor(Number(rilancio)) } : { azione: "ritira" }).catch(() => ({ errore: T("Qualcosa non ha funzionato. Riprova tra poco.", "Something went wrong. Please try again shortly.") }));
@@ -96,7 +106,8 @@ export default function Offerta({ asta, w, h, min }) {
       <div className="card" style={{ display: "grid", gap: 14 }}>
         <span className="step-n">{T("Sei in gara", "You are in the race")}</span>
         <p className="muted">{T("Offri come", "Bidding as")} <b>{mia.nome}</b>. {T("La tua offerta", "Your bid")}: <b>{eur(mia.importo, en)}</b>.</p>
-        <p className="ok-big" style={{ fontSize: 26 }}>{mia.inTesta ? T("✓ Sei in testa.", "✓ You are in the lead.") : `${T("Qualcuno ha offerto di più", "Someone bid more")}: ${eur(mia.migliore, en)}.`}</p>
+        <p className="ok-big" style={{ fontSize: 26, color: mia.inTesta ? "var(--green)" : "#8a3f2c" }}>{mia.inTesta ? T("✓ Sei in testa: l'offerta più alta è la tua.", "✓ You are in the lead: the highest bid is yours.") : `${T("Qualcuno ha offerto di più", "Someone bid more")}: ${eur(mia.migliore, en)}.`}</p>
+        <p className="hint">{T("La pagina si aggiorna da sola: se qualcuno offre di più, lo vedi qui.", "This page updates by itself: if someone bids more, you see it here.")}</p>
         {conferma ? (
           <div className="card" style={{ display: "grid", gap: 12, background: "var(--paper)" }}>
             {conferma === "rilancia" ? (
