@@ -3,6 +3,9 @@ import { IN_VENDITA, inVenditaOra, prezzoPacchetto, nomePack, misura, eur, num }
 import { traduttore } from "../../lib/lingua";
 import { disponibiliPresto } from "../../lib/db";
 
+// Price per pixel with its cents (19,50 €), never rounded down.
+const aPixel = (v) => (Number.isInteger(v) ? eur(v) : num(Math.floor(v)) + "," + String(Math.round((v % 1) * 100)).padStart(2, "0") + " €");
+
 // The six packs as cards. Each card opens /crea-spazio?pack=X. A size that is sold out shows "Esaurito".
 export default async function Pacchetti({ venduti = 0, calo = 0 }) {
   const d = await disponibiliPresto();
@@ -29,7 +32,7 @@ export default async function Pacchetti({ venduti = 0, calo = 0 }) {
             <span className="nm">{nomePack(p.n, en)}</span>
             <span className="sz">{misura(p.n, en)}</span>
             <span className="v">{eur(tot)}<small>{T("+ IVA", "+ VAT")}</small></span>
-            <span className="pp">{p.sconto ? <><b>-{Math.round(p.sconto * 100)}%</b> · </> : null}{eur(Math.floor(tot / p.n))} {T("a pixel", "per pixel")}</span>
+            <span className="pp">{p.sconto ? <><b>-{Math.round(p.sconto * 100)}%</b> · </> : null}{aPixel(tot / p.n)} {T("a pixel", "per pixel")}</span>
             <div className="left"><span>{stato}</span><span className="go">{restano ? T("Scegli", "Choose") : fineFase ? "" : T("Vedi le aste", "See auctions")}</span></div>
           </Link>
         );

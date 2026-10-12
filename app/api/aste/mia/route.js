@@ -1,5 +1,6 @@
 import { traduciRisposte } from "../../../../lib/messaggi";
 import { dbAttivo } from "../../../../lib/db";
+import { PRENOTAZIONI } from "../../../../lib/modo";
 import { unaAsta, minimo, laMiaOfferta, rilancia, ritirati } from "../../../../lib/aste";
 
 export const dynamic = "force-dynamic";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 // A bidder who already saved their card: see their bid, raise with one click, or withdraw.
 // They are recognised by the secret key their browser received with the first bid.
 async function rispondi(req) {
-  if (!dbAttivo()) return Response.json({ errore: "Le aste non sono ancora aperte." }, { status: 400 });
+  if (!dbAttivo() || PRENOTAZIONI) return Response.json({ errore: "Le aste non sono ancora aperte." }, { status: 400 });
   const { asta, chiave, azione, importo } = await req.json().catch(() => ({}));
   const id = Number(asta);
   if (azione === "rilancia") {

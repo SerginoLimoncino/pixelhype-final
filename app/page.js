@@ -25,7 +25,7 @@ export default async function Home() {
           <div className="pb-top"><span>{T("Fase", "Phase")} {f + 1} {T("di", "of")} {FASI.length}</span><span>{T("prezzo a pixel", "price per pixel")}</span></div>
           <div className="pb-price">{eur(prezzoPixel(v, calo))}<small>{T("+ IVA", "+ VAT")}</small></div>
           <div className="bar"><i style={{ width: Math.max(2, avanzamento) + "%" }} /></div>
-          <p className="pb-note">{en ? <><b>{num(restanoInFase(v))} pixels</b> left at this price. Then it goes up to <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "the final auctions"}</b>.</> : <>Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa a <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "le aste finali"}</b>.</>}</p>
+          <p className="pb-note">{en ? <><b>{num(restanoInFase(v))} pixels</b> left at this price. Then it goes up to <b>{f < FASI.length - 1 ? eur(FASI[f + 1]) : "the final auctions"}</b>.</> : <>Restano <b>{num(restanoInFase(v))} pixel</b> a questo prezzo. Poi si passa {f < FASI.length - 1 ? <>a <b>{eur(FASI[f + 1])}</b></> : <><b>alle aste finali</b></>}.</>}</p>
           {PRENOTAZIONI && <p className="pb-note"><b>{T("Prenotazioni aperte.", "Bookings open.")}</b> {T("Scegli la misura e lascia l'email: ora non paghi nulla e quando si apre la vendita ti scriviamo per primi.", "Choose the size and leave your email: you pay nothing now, and when sales open we write to you first.")}</p>}
           <div className="pb-row">
             <Link href="/compra" className="cta">{PRENOTAZIONI ? T("Prenota il tuo spazio", "Book your space") : T("Prendi il tuo spazio", "Get your space")}</Link>
@@ -55,7 +55,7 @@ export default async function Home() {
           <div className="sec-h" style={{ marginTop: 64 }}>
             <div className="eyebrow">{T("I pacchetti", "The packs")}</div>
             <h2>{en ? <>Choose your <em>space</em>.</> : <>Scegli il tuo <em>spazio</em>.</>}</h2>
-            <p>{T("Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25 e da 100 pixel hanno la cornice d'oro e finiscono in evidenza.", "Each pack is a single space with one image. The 25 and 100-pixel blocks get a gold frame and are featured.")}</p>
+            <p>{T("Ogni pacchetto è un unico spazio con una sola immagine. I blocchi da 25, 50 e 100 pixel hanno la cornice d'oro e finiscono in evidenza.", "Each pack is a single space with one image. The 25, 50 and 100-pixel blocks get a gold frame and are featured.")}</p>
           </div>
           <Pacchetti venduti={v} calo={calo} />
         </div>
@@ -78,8 +78,7 @@ export default async function Home() {
             ))}
           </div>
           {v < CUORE_ASTE && <p className="note">{en ? <>The Heart auctions start at <b>1,000 pixels sold</b>: {num(Math.max(0, CUORE_ASTE - v))} pixels to go.</> : <>Le aste del Cuore partono a <b>{num(CUORE_ASTE)} pixel venduti</b>: mancano {num(Math.max(0, CUORE_ASTE - v))} pixel.</>}</p>}
-          <p className="note"><Link href="/aste" className="cta sm">{T("Vedi le aste in corso", "See the live auctions")}</Link></p>
-          <p className="note">{T("Tre piccoli posti fortunati nel Cuore escono a caso a chi compra nella griglia normale.", "Three small lucky spots in the Heart go at random to people buying in the normal grid.")}</p>
+          <p className="note"><Link href="/aste" className="cta sm">{PRENOTAZIONI ? T("Come funzionano le aste", "How the auctions work") : T("Vedi le aste in corso", "See the live auctions")}</Link></p>
         </div>
       </section>
 
@@ -89,11 +88,11 @@ export default async function Home() {
           <div className="steps">
             <div className="st"><div className="k">I</div><h3>{T("Scegli lo spazio", "Choose the space")}</h3><p>{T("Da 1 a 100 pixel. La posizione viene assegnata a caso nel mosaico e non cambia più.", "From 1 to 100 pixels. The position in the mosaic is assigned at random and never changes.")}</p></div>
             <div className="st"><div className="k">II</div><h3>{T("Firma la tua opera", "Sign your work")}</h3><p>{T("Carica il tuo logo o la tua immagine, aggiungi il link, guarda l'anteprima.", "Upload your logo or image, add your link, check the preview.")}</p></div>
-            <div className="st"><div className="k">III</div><h3>{T("Entra nella collezione", "Join the collection")}</h3><p>{T("Paghi in sicurezza e sei online subito. Chiunque ti trova con la ricerca.", "Pay securely and you are online right away. Anyone can find you with the search.")}</p></div>
+            <div className="st"><div className="k">III</div><h3>{T("Entra nella collezione", "Join the collection")}</h3><p>{PRENOTAZIONI ? T("Oggi prenoti senza pagare. Quando si apre la vendita ti scriviamo per primi: paghi in sicurezza e sei online subito.", "Today you book without paying. When sales open we write to you first: you pay securely and you are online right away.") : T("Paghi in sicurezza e sei online subito. Chiunque ti trova con la ricerca.", "Pay securely and you are online right away. Anyone can find you with the search.")}</p></div>
           </div>
           <p className="note" style={{ marginTop: 28 }}>{T("Quando il mosaico sarà completo, potrai anche rivendere il tuo spazio, solo tramite PixelHype: la rivendita apre 30 giorni dopo l'ultimo pixel venduto, a un prezzo non inferiore alla metà di quanto l'hai pagato. Lo spazio non è un investimento e nessuno garantisce che venga rivenduto.", "Once the mosaic is complete, you will also be able to resell your space, only through PixelHype: resale opens 30 days after the last pixel is sold, at a price no lower than half of what you paid. The space is not an investment and nobody guarantees it will be resold.")} <Link href="/termini">{T("Leggi i Termini", "Read the Terms")}</Link></p>
           <div className="secret">
-            <div><h3>{T("Il mosaico nasconde un segreto.", "The mosaic hides a secret.")}</h3><p>{T("Più la griglia si riempie, più si capisce che i pixel stanno formando qualcosa. Lo scopriremo tutti insieme, alla fine.", "The more the grid fills up, the clearer it gets that the pixels are forming something. We will all find out together, at the end.")}</p></div>
+            <div><h3>{T("Il mosaico nasconde un segreto.", "The mosaic hides a secret.")}</h3><p>{T("Quando l'ultimo pixel sarà venduto, il mosaico svelerà una sorpresa. La scopriremo tutti insieme, alla fine.", "When the last pixel is sold, the mosaic will reveal a surprise. We will all discover it together, at the end.")}</p></div>
             <Link href="/compra" className="ghost">{T("Fanne parte", "Be part of it")}</Link>
           </div>
         </div>

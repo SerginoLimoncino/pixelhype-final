@@ -96,7 +96,8 @@ export default async function Termini() {
 
       <h2>12. Legge applicabile e controversie</h2>
       <p>
-        Questi termini sono regolati dalla legge italiana. Per i consumatori è competente il giudice del luogo in cui il consumatore
+        Questi termini sono regolati dalla legge italiana. Restano salve le norme inderogabili a tutela dei consumatori del Paese in cui
+        risiedono. Per i consumatori è competente il giudice del luogo in cui il consumatore
         risiede. Se qualcosa non va, scrivici prima a <a href={`mailto:${TITOLARE.email}`}>{TITOLARE.email}</a>: proveremo a risolvere subito.
       </p>
     </Legale>

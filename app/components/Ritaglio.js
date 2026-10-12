@@ -46,8 +46,15 @@ export default function Ritaglio({ img, w, h, fatto }) {
   const { T } = useLingua();
   const [fit, setFit] = useState("cover");
   const drag = useRef(null);
+  // Preview width: about 320px, smaller on narrow phones so the whole block stays visible.
+  const [largo, setLargo] = useState(320);
+  useEffect(() => {
+    const misura = () => setLargo(Math.max(200, Math.min(320, window.innerWidth - 80)));
+    misura(); window.addEventListener("resize", misura);
+    return () => window.removeEventListener("resize", misura);
+  }, []);
 
-  const cell = Math.min(160, Math.floor(320 / w));
+  const cell = Math.min(160, Math.floor(largo / w));
   const PW = w * cell, PH = h * cell;
   const base = img ? (fit === "cover" ? Math.max(PW / img.w, PH / img.h) : Math.min(PW / img.w, PH / img.h)) : 1;
   const dw = img ? img.w * base * zoom : 0, dh = img ? img.h * base * zoom : 0;

@@ -33,7 +33,7 @@ function Marchio({ verde = "#123d30" }) {
 }
 
 export default async function RootLayout({ children }) {
-  const asteAperte = (await pixelVendutiPresto()) >= SOGLIA_ASTE;
+  const asteAperte = !PRENOTAZIONI && (await pixelVendutiPresto()) >= SOGLIA_ASTE; // booking mode: no auctions yet
   const lang = await lingua(), T = (it, en) => (lang === "en" ? en : it);
   return (
     <html lang={lang} className={`${display.variable} ${body.variable}`}>

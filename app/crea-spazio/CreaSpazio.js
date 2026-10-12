@@ -45,6 +45,13 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
   const [off, setOff] = useState({ x: 0, y: 0 });
   const drag = useRef(null);
   const [fit, setFit] = useState("cover");
+  // Preview width: about 320px, smaller on narrow phones so the whole block stays visible.
+  const [largo, setLargo] = useState(320);
+  useEffect(() => {
+    const misura = () => setLargo(Math.max(200, Math.min(320, window.innerWidth - 80)));
+    misura(); window.addEventListener("resize", misura);
+    return () => window.removeEventListener("resize", misura);
+  }, []);
   const [ok, setOk] = useState(false);
   const [errore, setErrore] = useState("");
   const [stato, setStato] = useState("modulo"); // modulo | invio | fatto
@@ -75,15 +82,15 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
     try {
       // Image and link are optional; when given they get the same automatic check as a purchase.
       if (img || link.trim()) {
-        const c = await fetch("/api/controlla", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ link, immagine: img ? immagineControllo() : undefined }) }).then((x) => x.json());
-        if (!c.ok) { setErrPaga(c.motivo); setStato("modulo"); return; }
+        const c = await fetch("/api/controlla", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ link, immagine: img ? immagineControllo() : undefined }) }).then((x) => x.json()).catch(() => ({}));
+        if (!c.ok) { setErrPaga(c.motivo || T("Il controllo non è riuscito. Riprova tra poco.", "The check did not work. Please try again shortly.")); setStato("modulo"); return; }
       }
       const r = await fetch("/api/prenota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack, nome, email, link, ok, immagine: img ? immagineFinale() : undefined }) });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.errore || "");
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) throw Object.assign(new Error(d.errore || ""), { nostro: true });
       setGia(!!d.gia); setStato("fatto");
     } catch (e) {
-      setErrPaga(e.message || T("La prenotazione non è partita. Riprova tra poco.", "The booking did not go through. Please try again shortly."));
+      setErrPaga((e.nostro && e.message) || T("La prenotazione non è partita. Riprova tra poco.", "The booking did not go through. Please try again shortly."));
       setStato("modulo");
     }
   }
@@ -99,26 +106,26 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ link, immagine: immagineControllo() }),
-      }).then((x) => x.json());
-      if (!c.ok) { setErrPaga(c.motivo); setStato("modulo"); return; }
+      }).then((x) => x.json()).catch(() => ({}));
+      if (!c.ok) { setErrPaga(c.motivo || T("Il controllo non è riuscito. Riprova tra poco.", "The check did not work. Please try again shortly.")); setStato("modulo"); return; }
       const r = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pack, nome, link, email, dubbio: c.dubbio, immagine: finale, cuore }),
       });
-      const d = await r.json();
+      const d = await r.json().catch(() => ({}));
       if (d.url) { window.location.href = d.url; return; }
       // Without the Stripe key on Vercel the payment is only a test: nothing is charged.
       if (d.prova) { setTimeout(() => setStato("fatto"), 800); return; }
-      throw new Error(d.errore || "");
+      throw Object.assign(new Error(d.errore || ""), { nostro: true });
     } catch (e) {
-      setErrPaga(e.message || T("Il pagamento non è partito. Riprova tra poco.", "The payment did not start. Please try again shortly."));
+      setErrPaga((e.nostro && e.message) || T("Il pagamento non è partito. Riprova tra poco.", "The payment did not start. Please try again shortly."));
       setStato("modulo");
     }
   }
 
-  // Preview size: the block keeps its shape and fits in about 320px.
-  const cell = Math.min(160, Math.floor(320 / p.w));
+  // Preview size: the block keeps its shape and fits in the preview width.
+  const cell = Math.min(160, Math.floor(largo / p.w));
   const PW = p.w * cell, PH = p.h * cell;
   // Image size inside the preview: "cover" fills the block, "contain" shows it whole; zoom enlarges it.
   const base = img ? (fit === "cover" ? Math.max(PW / img.w, PH / img.h) : Math.min(PW / img.w, PH / img.h)) : 1;
@@ -218,7 +225,7 @@ export default function CreaSpazio({ iniziale, venduti = 0, calo = 0, cuore = fa
               </button>
             ))}
           </div>
-          {prenota && pack >= 50 && <p className="hint" style={{ marginTop: 12 }}>{T("Pochi spazi di questa misura all'apertura: la prenotazione ti dà la precedenza, non la garanzia. Vince chi conferma per primo.", "Few spaces of this size at launch: booking gives you priority, not a guarantee. Whoever confirms first wins.")}</p>}
+          {prenota && pack >= 50 && <p className="hint" style={{ marginTop: 12 }}>{T("Pochi spazi di questa misura all'apertura: la prenotazione ti dà la precedenza, non la garanzia. Vince chi conferma prima.", "Few spaces of this size at launch: booking gives you priority, not a guarantee. Whoever confirms first wins.")}</p>}
         </div>
 
         <div className="card">

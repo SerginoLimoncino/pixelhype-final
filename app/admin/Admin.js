@@ -132,7 +132,7 @@ export default function Admin({ prova = false, prenota = false }) {
       <div className="card" style={{ marginBottom: 24 }}>
         <h3>Aste</h3>
         {!aste || (aste.aperte.length === 0 && aste.prossime === 0 && aste.chiuse === 0) ? (
-          <p className="muted">{prenota ? "Chiuse finché il sito raccoglie prenotazioni. Partono da sole quando apri la vendita." : "Partono da sole dopo i primi 1.000 pixel venduti. Non devi fare niente."}</p>
+          <p className="muted">{prenota ? "Chiuse finché il sito raccoglie prenotazioni. Partono da sole quando apri la vendita." : "Le prime 4 aste, fuori dal Cuore, partono da sole all'apertura della vendita; quelle del Cuore dopo 1.000 pixel venduti. Non devi fare niente."}</p>
         ) : (
           <>
             <p className="muted">{aste.aperte.length} in corso · {aste.prossime} in arrivo · {aste.chiuse} vinte e pagate. Tutto automatico.</p>

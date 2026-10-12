@@ -27,7 +27,7 @@ export default async function Privacy() {
         <li><b>Email</b>: per la ricevuta, per comunicazioni sull&apos;ordine o sull&apos;asta e per contattarti se lo spazio ha un problema.</li>
         <li><b>Dati di pagamento</b>: li gestisce Stripe. Noi riceviamo solo l&apos;esito del pagamento, un codice cliente e, per le aste, un riferimento al metodo di pagamento salvato. Non vediamo il numero della carta.</li>
         <li><b>Offerte alle aste</b>: importo, data e dati dello spazio che vorresti pubblicare.</li>
-        <li><b>Prenotazioni</b>: email, misura scelta e, se li dai, nome del brand, link e immagine. Li usiamo solo per avvisarti quando si apre la vendita e per preparare il tuo spazio.</li>
+        <li><b>Prenotazioni</b>: email, misura scelta e, se li dai, nome del brand, link e immagine. Li usiamo solo per avvisarti quando si apre la vendita e per preparare il tuo spazio. Per bloccare gli abusi teniamo anche un breve codice ricavato dal tuo indirizzo IP (non l&apos;indirizzo stesso).</li>
         <li><b>Dati tecnici</b>: indirizzo IP e informazioni sul browser registrati automaticamente dai server per sicurezza e funzionamento.</li>
       </ul>
 
@@ -49,6 +49,7 @@ export default async function Privacy() {
         <li><b>Sightengine</b> (Francia) e, se attivo, <b>OpenAI</b> (USA): controllo automatico delle immagini prima della pubblicazione.</li>
         <li><b>abuse.ch URLhaus</b> (Svizzera) e, se attivo, <b>Google Safe Browsing</b>: controllo di sicurezza dei link (ricevono solo il link).</li>
         <li><b>ImprovMX</b> e <b>Google</b> (Gmail): ricezione delle email inviate a {TITOLARE.email}.</li>
+        <li><b>Resend</b> (USA, server in Irlanda): invio delle email del sito, come la conferma della prenotazione (riceve email, nome del brand e misura).</li>
       </ul>
       <p>
         Alcuni fornitori si trovano fuori dall&apos;Unione Europea. In questi casi il trasferimento avviene con le garanzie previste dal
@@ -76,7 +77,7 @@ export default async function Privacy() {
       </p>
 
       <h2>7. Dati obbligatori</h2>
-      <p>Nome, link, immagine ed email sono necessari per acquistare uno spazio o fare un&apos;offerta: senza questi dati non possiamo fornire il servizio.</p>
+      <p>Nome, immagine ed email sono necessari per acquistare uno spazio o fare un&apos;offerta: senza questi dati non possiamo fornire il servizio. Il link è facoltativo. Per prenotare basta l&apos;email.</p>
 
       <h2>8. Minori</h2>
       <p>Il servizio è rivolto a persone maggiorenni e ad aziende. Non raccogliamo consapevolmente dati di minori di 18 anni.</p>
@@ -107,7 +108,7 @@ function English() {
         <li><b>Email</b>: for the receipt, for messages about your order or auction and to contact you if the space has a problem.</li>
         <li><b>Payment data</b>: handled by Stripe. We only receive the payment result, a customer code and, for auctions, a reference to the saved payment method. We never see the card number.</li>
         <li><b>Auction bids</b>: amount, date and the details of the space you would like to publish.</li>
-        <li><b>Bookings</b>: email, chosen size and, if you give them, brand name, link and image. We only use them to tell you when sales open and to prepare your space.</li>
+        <li><b>Bookings</b>: email, chosen size and, if you give them, brand name, link and image. We only use them to tell you when sales open and to prepare your space. To stop abuse we also keep a short code derived from your IP address (not the address itself).</li>
         <li><b>Technical data</b>: IP address and browser information recorded automatically by the servers for security and operation.</li>
       </ul>
 
@@ -129,6 +130,7 @@ function English() {
         <li><b>Sightengine</b> (France) and, if active, <b>OpenAI</b> (USA): automatic check of images before publication.</li>
         <li><b>abuse.ch URLhaus</b> (Switzerland) and, if active, <b>Google Safe Browsing</b>: security check of links (they only receive the link).</li>
         <li><b>ImprovMX</b> and <b>Google</b> (Gmail): receiving the emails sent to {TITOLARE.email}.</li>
+        <li><b>Resend</b> (USA, servers in Ireland): sending the site&apos;s emails, such as the booking confirmation (it receives the email, brand name and size).</li>
       </ul>
       <p>
         Some providers are outside the European Union. In these cases the transfer takes place with the safeguards provided by the
@@ -156,7 +158,7 @@ function English() {
       </p>
 
       <h2>7. Required data</h2>
-      <p>Name, link, image and email are needed to buy a space or place a bid: without these data we cannot provide the service.</p>
+      <p>Name, image and email are needed to buy a space or place a bid: without these data we cannot provide the service. The link is optional. To book, the email is enough.</p>
 
       <h2>8. Minors</h2>
       <p>The service is for adults and businesses. We do not knowingly collect data from people under 18.</p>

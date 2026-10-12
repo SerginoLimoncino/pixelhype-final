@@ -17,6 +17,11 @@ export default async function Cookie() {
         consenso con un banner: la legge lo richiede solo per i cookie non tecnici (art. 122 del Codice Privacy e Linee guida del
         Garante del 10 giugno 2021).
       </p>
+      <p>Il sito salva solo due cose tecniche sul tuo dispositivo:</p>
+      <ul>
+        <li><b>lingua</b> (cookie, 12 mesi): ricorda se hai scelto l&apos;italiano o l&apos;inglese.</li>
+        <li><b>pixelhype-asta-…</b> (memoria del browser, finché non la cancelli): se fai un&apos;offerta a un&apos;asta, permette di rilanciare con un tocco da questo dispositivo.</li>
+      </ul>
 
       <h2>2. Pagamenti</h2>
       <p>
@@ -47,6 +52,11 @@ function English() {
         your consent with a banner: the law only requires it for non-technical cookies (art. 122 of the Italian Privacy Code and the
         Italian Data Protection Authority guidelines of 10 June 2021).
       </p>
+      <p>The site only stores two technical items on your device:</p>
+      <ul>
+        <li><b>lingua</b> (cookie, 12 months): remembers whether you chose Italian or English.</li>
+        <li><b>pixelhype-asta-…</b> (browser storage, until you delete it): if you bid in an auction, it lets you raise with one tap from this device.</li>
+      </ul>
 
       <h2>2. Payments</h2>
       <p>
